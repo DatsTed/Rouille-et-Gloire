@@ -1,0 +1,64 @@
+name: Construire l'appli
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Décompresser le projet
+        run: |
+          unzip -q projet.zip -d src
+          mkdir -p src/android/app/src/main/assets/www
+          cp src/game/index.html src/android/app/src/main/assets/www/index.html
+
+      - name: Compiler l'APK signé
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          REPO="${GITHUB_REPOSITORY#*/}"
+          gradle -p src/android assembleRelease -PupdateUrl="https://${OWNER}.github.io/${REPO}/" -Pvcode="${GITHUB_RUN_NUMBER}"
+
+      - name: Préparer le site
+        run: |
+          mkdir -p site
+          cp src/game/* site/
+          cp src/game/index.html site/game.html
+          cp src/android/app/build/outputs/apk/release/app-release.apk site/RouilleEtGloire.apk
+          echo "{\"v\":${GITHUB_RUN_NUMBER}}" > site/version.json
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
