@@ -9111,7 +9111,24 @@ function cb3dSync(){ if(!CB3.on||!CBV) return; const B=CBV.B;
     if(CB3.g[s]){ CB3.sc.remove(CB3.g[s].g); CB3.g[s]=null; }
     try{ const c=s===0&&f.uid?car(f.uid):null, q=buildCar(M[f.mid]||M.epave,s?'#FF2BD6':'#00E5FF',c?carLook(c):{}); q.g.rotation.order='YXZ'; CB3.sc.add(q.g); CB3.g[s]=q; }catch(e){ console.warn('cb3d car',e); }
     const T=CB_TYPES[f.ty[0]]; if(CB3.rings[s]) CB3.rings[s].material.color.set(T.c); if(CB3.lights[s]) CB3.lights[s].color.set(T.c); }); }
+/* cadrage automatique : quelle que soit la taille de l'écran, ta voiture tombe en bas à gauche et le rival en haut à droite
+   (on déplace la caméra dans son plan et on avance/recule jusqu'à ce que les deux voitures arrivent sur leurs cibles) */
+const CB3_TGT=[[.25,.74],[.75,.43]];
+function cb3dFit(W,H){ const cam=CB3.cam; if(!cam||!W||!H) return; cam.aspect=W/H; cam.fov=W/H>1.15?30:W/H>.85?33:36; cam.updateProjectionMatrix();
+  /* 4 réglages : rotation autour de l'arène, distance, point visé (x, z) ; hauteur de caméra fixe en proportion (vue en plongée) */
+  const look0={x:.4,y:.2,z:-1}, pts=CB3_P.map(p=>new THREE.Vector3(p.x,.75,p.z)), tmp=new THREE.Vector3();
+  const place=q=>{ const a=clamp(q[0],-.5,.95), dist=clamp(17+q[1],9,30), lx=look0.x+q[2], lz=look0.z+q[3];
+    cam.position.set(lx+Math.sin(a)*dist*.84,look0.y+dist*.5,lz+Math.cos(a)*dist*.84); cam.lookAt(lx,look0.y,lz); cam.updateMatrixWorld(); };
+  const res=q=>{ place(q); const r=[]; pts.forEach((p,s)=>{ tmp.copy(p).project(cam); r.push((tmp.x*.5+.5)-CB3_TGT[s][0],(-tmp.y*.5+.5)-CB3_TGT[s][1]); }); return r; };
+  const solve=(A,b)=>{ const n=b.length, M=A.map((row,i)=>row.concat([b[i]])); for(let c=0;c<n;c++){ let p=c; for(let r=c+1;r<n;r++) if(Math.abs(M[r][c])>Math.abs(M[p][c])) p=r; [M[c],M[p]]=[M[p],M[c]]; if(Math.abs(M[c][c])<1e-12) return null;
+      for(let r=0;r<n;r++){ if(r===c) continue; const f=M[r][c]/M[c][c]; for(let k=c;k<=n;k++) M[r][k]-=f*M[c][k]; } } return M.map((row,i)=>row[n]/row[i]); };
+  let q=[.2,0,0,0];
+  for(let it=0;it<20;it++){ const r0=res(q), J=[0,1,2,3].map(k=>{ const h=k===0?.01:.05, q2=q.slice(); q2[k]+=h; const r1=res(q2); return r1.map((v,i)=>(v-r0[i])/h); });
+    const A=[0,1,2,3].map(a=>[0,1,2,3].map(b=>J[a].reduce((s,v,i)=>s+v*J[b][i],0)+(a===b?1e-4:0))), g=[0,1,2,3].map(a=>-J[a].reduce((s,v,i)=>s+v*r0[i],0)), d=solve(A,g); if(!d) break;
+    q=q.map((v,k)=>v+clamp(d[k],k===0?-.3:-4,k===0?.3:4)); if(Math.hypot(...d)<1e-4) break; }
+  res(q); CB3.W=W; CB3.H=H; CB3.fitQ=q; }
 function cb3dTick(dt){ if(!CB3.on||!CBV) return; CB3.t+=dt; const t=CB3.t, ar=$('cbAr'); if(!ar) return; const W=ar.clientWidth, H=ar.clientHeight;
+  if(W!==CB3.W||H!==CB3.H) cb3dFit(W,H);
   [0,1].forEach(s=>{ const q=CB3.g[s], A=CB3.A[s], P=CB3_P[s], yaw=cb3dYaw(s); if(!q) return; const g=q.g, dx0=CB3_P[1-s].x-P.x, dz0=CB3_P[1-s].z-P.z, dl0=Math.hypot(dx0,dz0)||1, to={x:dx0/dl0,z:dz0/dl0};
     let x=P.x, y=.2+Math.sin(t*2.2+s)*.035, z=P.z, sc=1, rz=0, ry=yaw+Math.sin(t*.7+s)*.05, fl=0, gl=.6;
     const u=k=>A[k]==null?2:(t-A[k]);
@@ -9132,7 +9149,7 @@ function cb3dTick(dt){ if(!CB3.on||!CBV) return; CB3.t+=dt; const t=CB3.t, ar=$(
     ar.style.setProperty('--p'+s+'x',(px/W*100).toFixed(1)+'%'); ar.style.setProperty('--p'+s+'y',(py/H*100).toFixed(1)+'%'); }); }
 async function cb3dStart(){ if(CB3.on||!CBV) return; if(!glEnsure()) return; try{ await ensureModels(); }catch(_){} if(!CBV||CB3.on) return;
   const ar=$('cbAr'); if(!ar) return; const d=document.createElement('div'); d.id='cb3d'; d.className='cb-3d'; ar.insertBefore(d,ar.firstChild);
-  const S3=cb3dScene(); CB3.sc=S3.sc; CB3.cam=S3.cam; CB3.g=[null,null]; CB3.key=['','']; CB3.A=[{},{}]; CB3.t=0; CB3.on=true; ar.classList.add('is3d');
+  const S3=cb3dScene(); CB3.sc=S3.sc; CB3.cam=S3.cam; CB3.W=CB3.H=0; CB3.g=[null,null]; CB3.key=['','']; CB3.A=[{},{}]; CB3.t=0; CB3.on=true; ar.classList.add('is3d');
   [0,1].forEach(s=>{ const a=$('cbC'+s); if(a){ a.innerHTML=''; a.dataset.k='3d'; } });
   cb3dSync(); glAttach('cb3d'); glRun(CB3.sc,CB3.cam,cb3dTick,'viewer'); CB3.A[0].in=0; CB3.A[1].in=0; }
 function cb3dStop(){ if(!CB3.on) return; CB3.on=false; try{ glStop(); disposeScene(CB3.sc); }catch(_){} CB3.sc=null; CB3.g=[null,null]; }
