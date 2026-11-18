@@ -65,3 +65,45 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - new23: saucers repositioned (scan), closed hole = pass-through, speed gate, ramp mouths at walls.
 - new48: pcar tok:50, openCarPack pays tokens when k==='tok' (sheet.k kept for "Encore un").
 - new49: pad49() wraps vRace (spa + circuit non-drag): DRIFT big (pHnd), GAZ big, NITRO small above FREIN. bindRace wrapper binds pHnd for circuit races. CSS in extra5.css (.pad49).
+
+## v1.6 : Rue Néon et badges (new59)
+- Arène › sous-onglets `rue` (par défaut), `badges`, `cups`, `team`, `shop` (`vArena` enveloppée : les 3 derniers reprennent l'ancienne page).
+- `RUE_PIL` : 12 pilotes de rue (niv. 3 à 40, `bd` = badges requis), `RUE_CH` : 8 champions (1 par type, niv. 8 à 42, à battre dans l'ordre, badge `bn`, météo `wx`, récompense `rw`). Sauvegarde `S.rue={w:{id:victoires},bdg:{type:date}}`.
+- `rueFight(id)` → `cbStartDuel` ; gains : rue `rueCr` (25 % en revanche), champion `cbGive(rw)` (30 % en revanche) + badge.
+- 3D : `rueBuild` (rue, trottoir, immeubles néon, arènes des champions, lampadaires, voiture de chaque pilote), `rueHuman` (pilote humanoïde en combinaison, casque sur la tête / à la main / sans), étiquettes `rueLabel`, glisser pour se déplacer, toucher = fiche (`rueBind`, mode GL `rue`). Relancée après chaque `render()` de l'onglet Rue.
+- Test : `t_rue.py`.
+
+## v1.7 : Région Néon et récaps (new60, new61)
+- `new60` : `addCarXP` enveloppé (journal `CXL60` pendant `finalize` et `cbFinish`) → `R.result.cx` / `CBV.res.cx` ; `xpBars60` (barre animée en CSS via `--w0/--w1`) ; récap `.rc60` dans `vResult` et `cbEndHTML` (réécrit) ; vitesse max lue sur `#hSpd` toutes les 100 ms (`VMX60`, `row.vmx`, affichée dans `showOver` et le récap). Métro : `DEST.street` + `ACT.wtravel` + `growEnter('street')` → Arène › Rue (l'ancienne ruelle 3D n'est plus accessible). Badges sur la carte pilote (`.pbdg60`). Garage : sol et mur remplacés dans `buildGarage` (`garTex60`).
+- `new61` : Région Néon en surimpression `#wov` (z-index 19, sous les fenêtres), mode GL `world`. `W_TOWNS` (9 villes, `ch` = champion), routes Catmull-Rom échantillonnées tous les 2,5 m (`W.routes[k].P`, grille `W.grid`, `wNear`), demi-largeur `W_HW`. Rubans fusionnés : bitume, lignes, vibreurs dans les courbes, murs bas + murs d'énergie (comme `trkGen`). Barrière `gate` sur la route k ≥ 1 tant que le badge du champion k−1 manque. 3 voitures sauvages par route (cantonnées entre `iA` et `iB`, poursuite < 45 m), contact → `wEncounter` → duel, défaite = retour à `S.rue.town`. Personnages : `rueHuman` ×1,45 ; « Parler » ouvre la fiche `rue`. `render()` relance la carte (`wResume`) ; `rueStart` ne fait rien quand la carte est ouverte.
+- Tests : `t_monde.py` (conduite, sauvage, barrière, champion), `t_rue.py`.
+- Région : pavé `.padS.pad49.wpad` (volant `wSteer`, gaz dosable, frein, drift `W.in.hand` = adhérence réduite via `P.va`, nitro `wNitro` gratuite 2,5 s / 12 s). Duel perdu = 0 XP (`new54` : `win?1:0`).
+
+## v1.8 : histoire, équipes de 4, voies doubles et stations
+- Histoire : `rueOpen` = `rueOpenB` (badges) ET (carte ouverte `W.on` OU pilote déjà battu). La Rue Néon ne sert qu'aux revanches ; `rueLock` indique la ville (`rueTownOf`).
+- Équipes : 4 voitures max (`cbTeam`, `cbteampick`, `cbTeamDefault`) ; adversaires `rueN` jusqu'à 4 ; coupes c4/c5 en équipes de 4, boss +1.
+- Équilibrage (`tests/t_bal4.py`, équipe de 4 aléatoire, IA niveau 2) : IV adverses `min(17, 8 + 0,25 × niv)` ; au niveau 34+, voitures d'accompagnement à −2, −4, −6 ; Victor niv. 39. Résultat à niveau égal : champions 50–97 % (Nyx ~60 %), pilotes 55–100 %.
+- Carte : `W.paths` = voie principale + voie double (`R.alt`) qui se sépare à 20 %, passe sur un pont (`y` jusqu'à 8,5 m, piliers instanciés) au-dessus de la principale à 52 %, et la rejoint à 80 %. `wNear(x,z,y)` pénalise l'écart de hauteur ; les murs s'ouvrent là où une autre voie les traverse. Stations (`W.stations`, `R.st` = 36 %) : `ACT.wfuel`. PV persistants `S.rue.hp` (ratio par voiture) via une enveloppe de `cbStartDuel` quand la carte est ouverte. 2 voitures sauvages par route, poursuite < 30 m, 13 m/s, 5 s max puis 10 s de repos (`wIdxOn`).
+- Métro : `DEST.street` = « Région Néon » → `wOpen` ; ligne 2 = street, arcade, beach.
+
+## v1.9 : routes propres, stations, grande carte (new61 retouché, new62)
+- Jonctions : la voie double suit une courbe douce (points à 5 %, 20 %, 45 % de l'écart) ; tant qu'elle chevauche la principale (`p.sh`, écart < 2 × `W_HW`), elle n'est pas dessinée et la principale s'élargit de ce côté (`R.fl` / `R.fs`, aussi pris en compte dans la limite latérale). UV du bitume calculées selon la largeur réelle (sinon traces de pneus en zigzag). Matériaux de chaussée en double face.
+- Stations : renfoncement `R.bay` (côté opposé à la voie double, ±9 échantillons autour de 36 %, profondeur 13 m) ; auvent « NÉON FUEL », 2 îlots de pompes (collisions `W.col`), boutique derrière le mur, totem des prix avant l'entrée.
+- `W.obs` recense lampadaires, arbres, immeubles, piliers ; `wCheckRoad()` (new62) liste ce qui empiète sur une chaussée → doit rester vide (`t_monde.py`).
+- new62 : `labelSprite` réduit sa police pour tenir dans le cadre ; grande carte `wBigOpen` (toucher `#wMap`) ; `cbCity62` ajoute immeubles, néons, rues et lampadaires autour de l'arène de duel (hors de l'axe caméra) ; `.card.shiny` : lueur en `inset` (ne déborde plus) ; `.cb-mb em` sous le nom de l'attaque.
+
+## v2.0 : routes séparées + menu de station (new61)
+- `wTrace` : la voie double (`R.alt`, `isAlt` = vrai sur ce chemin ; `R.alt` sur la principale pointe vers elle) est un chemin à part, décalé de 26 m, qui part du bord des villes ; rampe douce (16 échantillons) → pont (plateau ±12 échantillons, 5,8 m) au-dessus de la principale avec changement de côté en S → rampe → ville. Plus aucun chevauchement : les anciens `sh`/`fl`/`onOther` sont supprimés.
+- Barrière sur les deux chaussées (`Pt.gate`). Portes des villes pour les deux.
+- Station : on se gare à moins de 3,6 m du point entre les deux îlots (îlots à 3,8 et 10,6 m du bord) → `ACT.wstation` : fiche `wstation` (soins `wHealCost` + boutique `CB_IT`, `ACT.wheal`).
+- HUD : barres « PV » (`#wTeam`).
+
+## v2.1 : jetons Néo, villes carrées, arcade, chien (new63, new64, new61 retouché)
+- Jetons Néo : `S.neo`, `neoN()`/`neoT()` (new63). Arène, coupes, champions, pilotes de rue, voitures sauvages, boutique et soins de la station utilisent Néo ; les crédits du jeu de base restent pour les courses. 600 offerts une fois (`S.neoInit`).
+- new63 : `cbBoxHTML` (altérations nommées `.cb-sts`), `wEncounter` (choc `crash62`, orbite `W.orbit` 240° puis duel), caméra d'ultime (`cbUlt3d`/`ultTick`, `CB3.U`, 4,2 s : charge devant la voiture → tir → impact → retour), fiche `cbcard` avant d'équiper (`ACT.cbteampick` ouvre, `ACT.cbteamtoggle` confirme).
+- Région : villes carrées (`W_R` = demi-côté 50 m, distances de Tchebychev), côtés N/E/S/O (`T.sOut`/`T.sIn`), routes en Bézier perpendiculaires aux arches, 2 arches par côté (principale + voie double à ±13 m). `wTrace` / `wSpawn` / construction des villes dans `wBuild`. Ciel en dôme + skyline lointaine, sol quadrillé, socles sous les immeubles.
+- new64 : fond de la Rue Néon (`bgDepth64`), `wGarageDoor` (porte de garage), `buildArcade2` (`arcUpright`, `arcPinball`, `arcPrize`), chien `DOG` (`dogMake`/`dogTick`, garage, labo, ranch, arcade).
+
+## v2.2 : modèles 3D importés (new65, tools_*.py)
+- `tools_glb2v2.py <id> <fichier.glb> <longueur> [--q 1.0] [--flip]` convertit un .glb en modèle « v2 » (pièces décimées par couleur, roues séparées, carrosserie repeignable) ; `tools_embed.py <id>` l'ajoute à `models_new.html` ; `new65.js` l'associe à une voiture (`glb`). Dépendances Python : numpy, trimesh, fast-simplification, scipy, networkx, pillow.
+- Phantom → `majestic` (5,5 m, ≈ 200 Ko), Tiguan → `steppe` (4,7 m, ≈ 400 Ko, CC BY-NC-SA). Reste 5 voitures en silhouette : piccola, kombi, riva, hauler, fury.

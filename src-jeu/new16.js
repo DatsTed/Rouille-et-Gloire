@@ -106,7 +106,7 @@ function packsHTML(){
 }
 const _pkInfo1=pkInfo;
 pkInfo=function(force){ _pkInfo1(force); const el=$('pkInfo'); if(el&&!el.querySelector('.rlink')&&!PK.arm){ const t=el.querySelector('.t'); if(t) t.insertAdjacentHTML('beforeend','<button class="rlink" data-a="rates">ℹ️ taux</button>'); } };
-function pkFit(){ const st=$('pk3'), ring=$('pkring'); if(!st||!ring) return; const h=st.clientHeight||318; ring.style.transformOrigin='50% 44%'; ring.style.transform=`scale(${Math.min(1,h/318).toFixed(3)})`; }
+function pkFit(){ const st=$('pk3'), ring=$('pkring'); if(!st||!ring) return; const h=st.clientHeight||318, w=st.clientWidth||360; ring.style.transformOrigin='50% 44%'; ring.style.transform=`scale(${Math.max(.6,Math.min(h/318,w/400*1.12,1.9)).toFixed(3)})`; }
 const _bindPacks1=bindPacks;
 bindPacks=function(){ _bindPacks1(); pkFit(); window.addEventListener('resize',pkFit); };
 /* ---- guide d'objectif : toujours dire quoi faire ensuite ---- */

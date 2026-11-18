@@ -1,4 +1,4 @@
-﻿/* ===== v1.5 · Éveil cosmique — 5/6 : passage au niveau 10 + cinématique (moteur 3D du jeu, ≈ 38 s) =====
+/* ===== v1.5 · Éveil cosmique — 5/6 : passage au niveau 10 + cinématique (moteur 3D du jeu, ≈ 38 s) =====
    Au niveau 10 : fenêtre de confirmation → cinématique (ville, être cosmique, boule d'énergie, salves, éveil des voitures)
    → S.niveau10CinematicSeen = true, le mode Combat s'ouvre. Rejouable depuis Base › Réglages. */
 
@@ -155,7 +155,7 @@ setInterval(()=>{ try{ if(!S||!S.intro||S.niveau10CinematicSeen||S.lvl<CB_LV) re
   openSheet({t:'lv10'}); }catch(e){} },3000);
 /* Épreuves : encart d'accès (l'Arène complète arrive avec les tournois) ; Réglages : revoir l'éveil */
 { const _r=render; render=function(){ const r=_r.apply(this,arguments); try{
-  if(view==='epreuves'&&S.lvl>=CB_LV){ const v=$('view'); if(v&&!v.querySelector('.cz-entry')){ const h=v.querySelector('.head'); const html=S.niveau10CinematicSeen?`<button class="cz-entry on" data-a="cbarena"><b>⚔️ Arène cosmique</b><small>Duels au tour par tour et tournois</small></button>`:`<button class="cz-entry" data-a="lv10ask"><b>🌌 L’éveil cosmique</b><small>Niveau ${CB_LV} atteint : quelque chose se prépare…</small></button>`; if(h) h.insertAdjacentHTML('afterend',html); else v.insertAdjacentHTML('afterbegin',html); } }
+  if(view==='epreuves'&&S.lvl>=CB_LV){ const v=$('view'); if(v&&!v.querySelector('.cz-entry')){ const h=v.querySelector('.head'); const html=S.niveau10CinematicSeen?'':`<button class="cz-entry" data-a="lv10ask"><b>🌌 L’éveil cosmique</b><small>Niveau ${CB_LV} atteint : quelque chose se prépare…</small></button>`; if(h) h.insertAdjacentHTML('afterend',html); else v.insertAdjacentHTML('afterbegin',html); } }
   if(S.niveau10CinematicSeen){ const b=document.querySelector('#view [data-a="cine"]'); if(b&&!document.querySelector('#view [data-a="cosmic"]')) b.insertAdjacentHTML('afterend',' <button class="btn alt" data-a="cosmic">🌌 Revoir l’éveil cosmique</button>'); }
   }catch(e){} return r; }; }
 ACT.lv10ask=()=>openSheet({t:'lv10'});

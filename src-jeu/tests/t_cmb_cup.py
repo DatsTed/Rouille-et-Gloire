@@ -1,4 +1,4 @@
-﻿# v1.5 · Arène et tournois (new56) + règles des voitures (patrouille seulement dans le Paquet Voiture, 1 max ; plus de vélo).
+# v1.5 · Arène et tournois (new56) + règles des voitures (patrouille seulement dans le Paquet Voiture, 1 max ; plus de vélo).
 import asyncio, os, sys, json
 from playwright.async_api import async_playwright
 URL = 'file:///' + os.path.abspath('out.html').replace('\\', '/')
@@ -38,24 +38,24 @@ async def main():
         r = await pg.evaluate(RULES); E = r['E']; print('patrouille : %.3f %% par Paquet Voiture' % (r['rate'] * 100))
         await pg.evaluate(SETUP, 30)
         # Arène, équipe, boutique
-        await pg.evaluate("()=>ACT.arena()"); await pg.wait_for_timeout(200)
+        await pg.evaluate("()=>{ ACT.arena(); AR.tab='cups'; render(); }"); await pg.wait_for_timeout(200)
         a = await pg.evaluate("()=>({t:view,cups:document.querySelectorAll('#view .ar-cup').length,lock:document.querySelectorAll('#view .ar-cup.lock').length,team:document.querySelectorAll('#view .ar-car').length})")
         if a != {'t': 'arena', 'cups': 5, 'lock': 4, 'team': 3}: E.append('Arène %s' % a)
-        await pg.evaluate("()=>{ ACT.cbteamopen(); ACT.cbteampick({id:String(S.cbTeam[2])}); }")
+        await pg.evaluate("()=>{ ACT.cbteamopen(); ACT.cbteampick({id:String(S.cbTeam[2])}); if(!sheet||sheet.t!=='cbcard') throw new Error('fiche de combat non ouverte'); ACT.cbteamtoggle({id:String(S.cbTeam[2])}); }")
         if await pg.evaluate("()=>S.cbTeam.length") != 2: E.append('retrait d’une voiture de l’équipe')
-        await pg.evaluate("()=>{ ACT.cbteampick({id:String(S.cars[0].uid)}); ACT.cbteampick({id:String(S.cars[3].uid)}); }")
-        if await pg.evaluate("()=>S.cbTeam.length") != 3: E.append('équipe limitée à 3')
+        await pg.evaluate("()=>{ ACT.cbteamtoggle({id:String(S.cars[0].uid)}); ACT.cbteamtoggle({id:String(S.cars[3].uid)}); }")
+        if await pg.evaluate("()=>S.cbTeam.length") not in (3, 4): E.append('équipe limitée à 4')
         await pg.evaluate("()=>{ S.cbTeam=S.cars.slice(-3).map(c=>c.uid); }")
-        b0 = await pg.evaluate("()=>{ ACT.cbshop(); const c=S.cr; ACT.cbbuy({id:'revision',v:'5'}); return [c-S.cr, S.cbBag.revision]; }")
+        b0 = await pg.evaluate("()=>{ ACT.cbshop(); S.neo=50000; const c=S.neo; ACT.cbbuy({id:'revision',v:'5'}); return [c-S.neo, S.cbBag.revision]; }")
         if b0 != [20000, 5]: E.append('achat en boutique %s' % b0)
         if await pg.evaluate("()=>{ cbCupStart(1); return !!S.cbT; }"): E.append('coupe 2 ouverte trop tôt')
         # coupe 1 jouée jusqu'au bout par l'interface
-        await pg.evaluate("()=>{ closeSheet(); cbCupStart(0); }"); seen = set(); cr0 = await pg.evaluate("()=>S.cr")
+        await pg.evaluate("()=>{ closeSheet(); cbCupStart(0); }"); seen = set(); cr0 = await pg.evaluate("()=>S.neo||0")
         for i in range(600):
             st = await pg.evaluate(PLAY); seen.add(st.split(':')[0])
             if st in ('cup', 'arena'): break
             await pg.wait_for_timeout(120)
-        res = await pg.evaluate("()=>({t:sheet&&sheet.t,won:!!(S.cbStat&&S.cbStat.cups.c1),w:S.cbStat&&S.cbStat.w,cr:S.cr,kit:S.cbBag.kit,cbT:S.cbT,got:sheet&&sheet.got})")
+        res = await pg.evaluate("()=>({t:sheet&&sheet.t,won:!!(S.cbStat&&S.cbStat.cups.c1),w:S.cbStat&&S.cbStat.w,cr:S.neo||0,kit:S.cbBag.kit,cbT:S.cbT,got:sheet&&sheet.got})")
         print('coupe 1 :', json.dumps(res, ensure_ascii=False))
         if res['t'] != 'cbcup' or not res['won']: E.append('coupe 1 non gagnée par une équipe niveau 30 : %s' % res)
         else:

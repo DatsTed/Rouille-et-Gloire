@@ -1,4 +1,4 @@
-﻿# v1.5 · éveil cosmique (new55) : proposition au niveau 10, « Plus tard », cinématique, déblocage du mode Combat, cloisonnement.
+# v1.5 · éveil cosmique (new55) : proposition au niveau 10, « Plus tard », cinématique, déblocage du mode Combat, cloisonnement.
 import asyncio, os, sys
 from playwright.async_api import async_playwright
 URL = 'file:///' + os.path.abspath('out.html').replace('\\', '/')
@@ -24,13 +24,13 @@ async def main():
         st = await pg.evaluate("()=>({seen:S.niveau10CinematicSeen,sheet:sheet&&sheet.t,ov:!!document.getElementById('cosmic'),bag:!!S.cbBag,cmb:Object.keys(S.cmb||{}).length})")
         if st['seen'] is not True or st['sheet'] != 'cbunlock' or st['ov'] or not st['bag'] or not st['cmb']: E.append('après la cinématique : %s' % st)
         await pg.evaluate("()=>{ closeSheet(); ACT.tab({id:'epreuves'}); }"); await pg.wait_for_timeout(300)
-        if not await pg.evaluate("()=>!!document.querySelector('.cz-entry[data-a=cbarena]')"): E.append('pas d’accès à l’Arène après l’éveil')
+        if await pg.evaluate("()=>!!document.querySelector('.cz-entry[data-a=cbarena]')"): E.append('bouton Arène cosmique encore dans Épreuves')
         await pg.evaluate("()=>{ ACT.car({id:String(S.cars[0].uid)}); }"); await pg.wait_for_timeout(300)
         if not await pg.evaluate("()=>!!$('sheet').querySelector('.cbsec')"): E.append('fiche de combat absente du garage')
         await pg.evaluate("()=>{ closeSheet(); ACT.tab({id:'base'}); }"); await pg.wait_for_timeout(300)
         has_cine = await pg.evaluate("()=>!!document.querySelector('#view [data-a=cine]')")
         if has_cine and not await pg.evaluate("()=>!!document.querySelector('#view [data-a=cosmic]')"): E.append('pas de bouton pour revoir l’éveil')
-        if not await pg.evaluate("()=>{ try{closeSheet()}catch(e){} ACT.arena(); return view==='arena'&&!!document.querySelector('#view .ar-cup'); }"): E.append('l’Arène ne s’ouvre pas')
+        if not await pg.evaluate("()=>{ try{closeSheet()}catch(e){} ACT.arena(); AR.tab='cups'; render(); return view==='arena'&&!!document.querySelector('#view .ar-cup'); }"): E.append('l’Arène ne s’ouvre pas')
         if await pg.evaluate("()=>{ ACT.cbtrain(); return !CBV; }"): E.append('l’entraînement ne lance pas de duel')
         await pg.evaluate("()=>{ if(CBV) cbClose(); }")
         if await pg.evaluate("()=>JSON.stringify(S.cars.map(c=>st(c)))!==window.__race0"): E.append('les caractéristiques de course ont changé')

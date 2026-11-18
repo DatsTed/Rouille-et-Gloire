@@ -1,0 +1,6 @@
+/* ===== v2.2 : nouveaux modèles 3D (Rolls-Royce Phantom pour l'Albion Majestic, VW Tiguan L pour la Marova Steppe) ===== */
+(function(){ const add=(carId,glb)=>{ if(!MODEL_IDS.includes(glb)) MODEL_IDS.push(glb); [CARS.find(c=>c.id===carId),M[carId]].forEach(o=>{ if(o) o.glb=glb; }); };
+  if(document.getElementById('mdl-phantom')) add('majestic','phantom');
+  if(document.getElementById('mdl-tiguan')) add('steppe','tiguan'); })();
+/* crédits des modèles 3D ajoutés (page Base) */
+{ const _r=render; render=function(){ const r=_r.apply(this,arguments); try{ if(view==='base'){ const v=$('view'); if(v&&!v.querySelector('.cred22')){ const secs=[...v.querySelectorAll('.sec')], s=secs.find(x=>/Crédits/.test(x.textContent)); if(s) s.insertAdjacentHTML('beforeend','<p class="note cred22">« Rolls-Royce Phantom » par Jaggu_wrld (Sketchfab), licence CC BY 4.0, simplifié pour le jeu.</p><p class="note cred22">« 2022 Volkswagen Tiguan L – Allspace » par Ddiaz Design (Sketchfab), licence CC BY-NC-SA : usage non commercial ; modèle simplifié pour le jeu, redistribué sous la même licence.</p>'); } } }catch(e){} return r; }; }

@@ -1,4 +1,4 @@
-﻿/* ===== v1.5 · 6/6 : règles des voitures (patrouille, vélo) + Arène cosmique : tournois, pilotes rivaux, équipe, boutique =====
+/* ===== v1.5 · 6/6 : règles des voitures (patrouille, vélo) + Arène cosmique : tournois, pilotes rivaux, équipe, boutique =====
    Les duels utilisent le moteur (new53) et l'écran (new54) ; récompenses dans l'économie du jeu (cr, jetons, objets, voitures). */
 
 /* ---- 0. Brenner Patrouille : seulement dans le Paquet Voiture, ultra rare, une seule par garage ---- */
@@ -52,17 +52,17 @@ const CB_CUPS=[
   {id:'c1',nm:'Coupe Étincelle',ic:'🥉',lv:5,d:1,iv:10,team:2,rounds:['mama','rosa','lina'],round:900,rw:{cr:8000,it:{kit:3,nitrorec:1}},d0:'Le premier tournoi des voitures éveillées.'},
   {id:'c2',nm:'Coupe Tempête',ic:'🌀',lv:10,d:2,iv:14,team:2,rounds:['tom','kenji','volt'],round:1800,rw:{cr:20000,tok:5,it:{superkit:2,turbox:1,degivre:1}},d0:'Météo déchaînée et pilotes techniques.'},
   {id:'c3',nm:'Coupe Néon',ic:'🥈',lv:16,d:2,iv:18,team:3,rounds:['ines','lumen','brenner','kenji'],round:3500,rw:{cr:45000,tok:10,it:{revision:1,superkit:2,nitrorec:2}},d0:'Les meilleurs pilotes de la ville, en équipes de trois.'},
-  {id:'c4',nm:'Coupe Éclipse',ic:'🥇',lv:24,d:3,iv:24,team:3,rounds:['corbeau','volt','lina','max'],round:7000,rw:{cr:90000,tok:20,it:{depann:1,revision:2,surchx:1,chassisx:1}},d0:'Quand la nuit tombe, les pilotes d’élite sortent.'},
-  {id:'c5',nm:'Coupe Cosmique',ic:'🌌',lv:32,d:3,iv:30,team:3,rounds:['max','corbeau','brenner','lumen','astra'],round:14000,rw:{cr:200000,tok:40,it:{revision:3,depann:2},car:['solus','aurion','volta']},d0:'La finale ultime. Astra l’Éveillée vous attend.'}
+  {id:'c4',nm:'Coupe Éclipse',ic:'🥇',lv:24,d:3,iv:24,team:4,rounds:['corbeau','volt','lina','max'],round:7000,rw:{cr:90000,tok:20,it:{depann:1,revision:2,surchx:1,chassisx:1}},d0:'Quand la nuit tombe, les pilotes d’élite sortent.'},
+  {id:'c5',nm:'Coupe Cosmique',ic:'🌌',lv:32,d:3,iv:30,team:4,rounds:['max','corbeau','brenner','lumen','astra'],round:14000,rw:{cr:200000,tok:40,it:{revision:3,depann:2},car:['solus','aurion','volta']},d0:'La finale ultime. Astra l’Éveillée vous attend.'}
 ];
 const cbSt=()=>{ if(!S.cbStat) S.cbStat={w:0,l:0,cups:{},tr:0}; return S.cbStat; };
 const cupOpen=i=>i===0||!!cbSt().cups[CB_CUPS[i-1].id];
 const cbTeamLv=()=>{ const t=cbTeam().map(u=>car(u)).filter(Boolean); return t.length?Math.round(t.reduce((a,c)=>a+cbOf(c).lv,0)/t.length):0; };
-function cbFoesFor(cup,ri){ const P=CB_PIL[cup.rounds[ri]], n=Math.min(3,cup.team+(P.boss?0:0)), lv=cup.lv+ri+(P.boss?3:0), out=[];
+function cbFoesFor(cup,ri){ const P=CB_PIL[cup.rounds[ri]], n=Math.min(4,cup.team+(P.boss?1:0)), lv=cup.lv+ri+(P.boss?3:0), out=[];
   for(let k=0;k<n;k++){ const mid=P.cars[k%P.cars.length], ty=cbTypesOf(mid), iv={}; CB_SK.forEach(x=>iv[x]=clamp(cup.iv+Math.floor(Math.random()*6)-2,0,31));
     out.push({mid,lv:clamp(lv-(n-1-k),1,CB_LVMAX),iv,tal:(P.tal||[])[k%(P.tal||[1]).length]||(CB_TAL_BY[ty[0]]||CB_TAL_BY.meca)[0]}); } return out; }
-const cbRwTxt=r=>[r.cr?fmt(r.cr)+' cr':'',r.tok?r.tok+' 🎟':'',...Object.entries(r.it||{}).map(([k,n])=>CB_IT[k].ic+' '+CB_IT[k].n+(n>1?' ×'+n:'')),r.car?'🏎️ une voiture d’exception':''].filter(Boolean).join(' · ');
-function cbGive(r,mult){ mult=mult||1; const got=[]; if(r.cr){ const c=Math.round(r.cr*mult); S.cr+=c; got.push(fmt(c)+' cr'); } if(r.tok){ const t=Math.max(1,Math.round(r.tok*mult)); S.tok+=t; got.push(t+' 🎟'); }
+const cbRwTxt=r=>[r.cr?neoT(r.cr):'',r.tok?r.tok+' 🎟':'',...Object.entries(r.it||{}).map(([k,n])=>CB_IT[k].ic+' '+CB_IT[k].n+(n>1?' ×'+n:'')),r.car?'🏎️ une voiture d’exception':''].filter(Boolean).join(' · ');
+function cbGive(r,mult){ mult=mult||1; const got=[]; if(r.cr){ const c=Math.round(r.cr*mult); S.neo=(S.neo||0)+c; got.push(neoT(c)); } if(r.tok){ const t=Math.max(1,Math.round(r.tok*mult)); S.tok+=t; got.push(t+' 🎟'); }
   const bag=cbBag(); Object.entries(r.it||{}).forEach(([k,n])=>{ const q=Math.max(1,Math.round(n*mult)); bag[k]=(bag[k]||0)+q; got.push(CB_IT[k].ic+' '+CB_IT[k].n+(q>1?' ×'+q:'')); });
   if(r.car&&mult>=1){ const mid=r.car.find(id=>!S.cars.some(c=>c.mid===id)); if(mid){ S.cars.push({uid:S.nuid++,mid,etat:100,xp:0,lvl:1,up:{},inv:0,mods:{},sh:1}); got.push('🏎️ '+M[mid].nom+' ✨'); } else { S.cr+=120000; got.push('120 000 cr (voitures déjà possédées)'); } }
   return got; }
@@ -72,8 +72,8 @@ function cbCupStart(i){ const cup=CB_CUPS[i]; if(!cup||!cupOpen(i)) return toast
   S.cbT={i,r:0,got:[]}; save(); openSheet({t:'cbtalk',ph:'pre'}); }
 function cbFight(){ const T=S.cbT; if(!T) return; const cup=CB_CUPS[T.i], pid=cup.rounds[T.r], P=CB_PIL[pid]; closeSheet();
   cbStartDuel({team:cbTeam(),foes:cbFoesFor(cup,T.r),d:cup.d,names:['Toi',P.nm],trainer:true,wx:P.wx,
-    rewardHTML:w=>w?`<div class="cb-rw">🏁 Manche ${T.r+1}/${cup.rounds.length} gagnée : <b>${fmt(cup.round)} cr</b></div>`:`<div class="cb-rw lose">${cup.nm} : élimination à la manche ${T.r+1}</div>`,
-    onEnd:(res)=>{ const st=cbSt(); if(res.win){ st.w++; S.cr+=cup.round; T.got.push(cup.round); } else st.l++; T.last=res.win?'win':'lose'; save(); },
+    rewardHTML:w=>w?`<div class="cb-rw">🏁 Manche ${T.r+1}/${cup.rounds.length} gagnée : <b>${neoT(cup.round)}</b></div>`:`<div class="cb-rw lose">${cup.nm} : élimination à la manche ${T.r+1}</div>`,
+    onEnd:(res)=>{ const st=cbSt(); if(res.win){ st.w++; S.neo=(S.neo||0)+cup.round; T.got.push(cup.round); } else st.l++; T.last=res.win?'win':'lose'; save(); },
     onClose:()=>{ if(!S.cbT) return; openSheet({t:'cbtalk',ph:S.cbT.last==='win'?'lose':'win'}); } }); }
 function cbNextRound(){ const T=S.cbT, cup=CB_CUPS[T.i]; if(T.last!=='win'){ S.cbT=null; save(); openSheet({t:'arena'}); return; }
   T.r++; if(T.r<cup.rounds.length){ T.last=null; save(); openSheet({t:'cbtalk',ph:'pre'}); return; }
@@ -95,7 +95,7 @@ function cbArenaHTML(X){ const st=cbSt(), t=cbTeam().map(u=>car(u)).filter(Boole
     ${CB_CUPS.map((cup,i)=>{ const open=cupOpen(i), won=st.cups[cup.id], diff=tl<cup.lv-4?'dur':tl>=cup.lv?'ok':'moyen';
       return `<div class="ar-cup ${open?'':'lock'} ${won?'won':''}"><div class="ar-ch"><span class="ar-ci">${cup.ic}</span><div><b>${cup.nm}</b><small>${cup.d0}</small></div></div>
         <div class="ar-pils">${cup.rounds.map(id=>`<span title="${CB_PIL[id].nm}" style="--pc:${CB_PIL[id].c}">${CB_PIL[id].ic}</span>`).join('<i>›</i>')}</div>
-        <p class="note sm">Niveau conseillé ${cup.lv} · ${cup.rounds.length} manches · équipes de ${cup.team} · ${fmt(cup.round)} cr par manche<br>Victoire : ${cbRwTxt(cup.rw)}${won?' (35 % en rejouant)':''}</p>
+        <p class="note sm">Niveau conseillé ${cup.lv} · ${cup.rounds.length} manches · équipes de ${cup.team} · ${neoT(cup.round)} par manche<br>Victoire : ${cbRwTxt(cup.rw)}${won?' (35 % en rejouant)':''}</p>
         ${open?`<button class="btn wide ${diff==='dur'?'alt':''}" data-a="cbcup" data-id="${i}">${won?'🔁 Rejouer':'▶ Participer'}${diff==='dur'?' · ⚠️ difficile':''}</button>`:'<button class="btn alt wide" disabled>🔒 Gagne la coupe précédente</button>'}</div>`; }).join('')}
   </div>`; }
 { const _sx=sheetExtra; sheetExtra=function(X){ const el=$('sheet');
@@ -109,19 +109,19 @@ function cbArenaHTML(X){ const st=cbSt(), t=cbTeam().map(u=>car(u)).filter(Boole
         ${P.wx?`<p class="note sm">${CB_WX[P.wx].ic} Le duel se déroule sous ${CB_WX[P.wx].n}.</p>`:''}
         <div class="tu-btns"><button class="btn alt" data-a="cbquitcup">Abandonner la coupe</button><button class="btn" data-a="cbfight">⚔️ Combattre</button></div>`
       :ph==='lose'?`<p class="note">Manche gagnée ! ${T.r+1<cup.rounds.length?'Prochain pilote : '+CB_PIL[cup.rounds[T.r+1]].ic+' '+CB_PIL[cup.rounds[T.r+1]].nm:'C’était la finale !'}</p><button class="btn wide" data-a="cbnext">${T.r+1<cup.rounds.length?'▶ Manche suivante':'🏆 Recevoir la coupe'}</button>`
-      :`<p class="note">Éliminé à la manche ${T.r+1}. Tu gardes les crédits des manches gagnées (${fmt(T.got.reduce((a,b)=>a+b,0))} cr). Entraîne tes voitures et retente ta chance !</p><button class="btn wide" data-a="cbnext">Retour à l’Arène</button>`}</div>`;
+      :`<p class="note">Éliminé à la manche ${T.r+1}. Tu gardes les jetons Néo des manches gagnées (${neoT(T.got.reduce((a,b)=>a+b,0))}). Entraîne tes voitures et retente ta chance !</p><button class="btn wide" data-a="cbnext">Retour à l’Arène</button>`}</div>`;
     return true; }
   if(sheet&&sheet.t==='cbcup'){ const cup=CB_CUPS[sheet.i];
     el.innerHTML=`${X}<div class="cbcupw"><div class="cw-rays"></div><div class="cc-ic">${cup.ic}</div><h2>${cup.nm} remportée !</h2><p class="note">${sheet.first?'Première victoire : récompense complète.':'Victoire à nouveau : 35 % de la récompense.'}</p>
       <div class="ulist">${sheet.got.map(g=>`<div class="ul-r"><i>🎁</i><div><b>${g}</b></div></div>`).join('')}</div>
       ${CB_CUPS[sheet.i+1]&&sheet.first?`<p class="note">🔓 Nouvelle coupe : ${CB_CUPS[sheet.i+1].ic} ${CB_CUPS[sheet.i+1].nm}</p>`:''}<button class="btn wide" data-a="arena">Retour à l’Arène</button></div>`; return true; }
   if(sheet&&sheet.t==='cbteam'){ const sel=cbTeam(), cars=S.cars.slice().sort((a,b)=>cbOf(b).lv-cbOf(a).lv);
-    el.innerHTML=`${X}<h2>🚗 Équipe de combat</h2><p class="note">Choisis jusqu’à 3 voitures. La première entre en piste en premier.</p>
+    el.innerHTML=`${X}<h2>🚗 Équipe de combat</h2><p class="note">Choisis jusqu’à 4 voitures. La première entre en piste en premier.</p>
       <div class="cbtm">${cars.map(c=>{ const s=cbOf(c), k=sel.indexOf(c.uid); return `<button class="cbtm-r ${k>=0?'on':''}" data-a="cbteampick" data-id="${c.uid}"><span class="cbtm-n">${k>=0?k+1:''}</span><div><b>${M[c.mid].nom}</b><small>Niv. ${s.lv} · ${s.ty.map(x=>CB_TYPES[x].ic+' '+CB_TYPES[x].n).join(' / ')} · ${CB_TAL[s.tal].n}</small></div></button>`; }).join('')}</div>
       <button class="btn wide" data-a="arena">✓ Terminé</button>`; return true; }
   if(sheet&&sheet.t==='cbshop'){ const bag=cbBag();
-    el.innerHTML=`${X}<h2>🛒 Boutique de combat</h2><p class="note">Tu as <b>${fmt(S.cr)} cr</b>. Objets utilisables pendant les duels (4 par combat).</p>
-      <div class="cbshop">${Object.entries(CB_IT).map(([k,it])=>`<div class="cbs-r"><span class="cbs-ic">${it.ic}</span><div><b>${it.n}</b><small>${it.d} · possédé : ${bag[k]||0}</small></div><div class="cbs-b"><button class="btn sm" data-a="cbbuy" data-id="${k}" data-v="1" ${S.cr<it.px?'disabled':''}>${fmt(it.px)} cr</button><button class="btn alt sm" data-a="cbbuy" data-id="${k}" data-v="5" ${S.cr<it.px*5?'disabled':''}>×5</button></div></div>`).join('')}</div>
+    el.innerHTML=`${X}<h2>🛒 Boutique de combat</h2><p class="note">Tu as <b>${neoT(neoN())}</b>. Objets utilisables pendant les duels (4 par combat).</p>
+      <div class="cbshop">${Object.entries(CB_IT).map(([k,it])=>`<div class="cbs-r"><span class="cbs-ic">${it.ic}</span><div><b>${it.n}</b><small>${it.d} · possédé : ${bag[k]||0}</small></div><div class="cbs-b"><button class="btn sm" data-a="cbbuy" data-id="${k}" data-v="1" ${neoN()<it.px?'disabled':''}>${fmt(it.px)} ◈</button><button class="btn alt sm" data-a="cbbuy" data-id="${k}" data-v="5" ${neoN()<it.px*5?'disabled':''}>×5</button></div></div>`).join('')}</div>
       <button class="btn wide" data-a="arena">Retour à l’Arène</button>`; return true; }
   return _sx.apply(this,arguments); }; }
 Object.assign(ACT,{
@@ -129,9 +129,9 @@ Object.assign(ACT,{
   cbcup(d){ cbCupStart(+d.id); }, cbfight(){ cbFight(); }, cbnext(){ cbNextRound(); },
   cbquitcup(){ S.cbT=null; save(); openSheet({t:'arena'}); },
   cbteamopen(){ openSheet({t:'cbteam'}); },
-  cbteampick(d){ const u=+d.id; let t=cbTeam().slice(); if(!S.cbTeam) S.cbTeam=t; t=S.cbTeam.filter(x=>car(x)); const k=t.indexOf(u); if(k>=0){ if(t.length<=1) return toast('Il faut au moins une voiture'); t.splice(k,1); } else { if(t.length>=3) return toast('3 voitures maximum : retires-en une d’abord'); t.push(u); } S.cbTeam=t; save(); renderSheet(); try{ ui('click'); }catch(_){} },
+  cbteampick(d){ const u=+d.id; let t=cbTeam().slice(); if(!S.cbTeam) S.cbTeam=t; t=S.cbTeam.filter(x=>car(x)); const k=t.indexOf(u); if(k>=0){ if(t.length<=1) return toast('Il faut au moins une voiture'); t.splice(k,1); } else { if(t.length>=4) return toast('4 voitures maximum : retires-en une d’abord'); t.push(u); } S.cbTeam=t; save(); renderSheet(); try{ ui('click'); }catch(_){} },
   cbshop(){ openSheet({t:'cbshop'}); },
-  cbbuy(d){ const it=CB_IT[d.id], q=+d.v||1; if(!it) return; if(S.cr<it.px*q) return toast('Pas assez de crédits'); S.cr-=it.px*q; const b=cbBag(); b[d.id]=(b[d.id]||0)+q; save(); renderSheet(); toast(it.ic+' '+it.n+' ×'+q+' ajouté au sac'); try{ ui('click'); }catch(_){} }
+  cbbuy(d){ const it=CB_IT[d.id], q=+d.v||1; if(!it) return; if(neoN()<it.px*q) return toast('Pas assez de jetons Néo'); S.neo=neoN()-it.px*q; const b=cbBag(); b[d.id]=(b[d.id]||0)+q; save(); renderSheet(); toast(it.ic+' '+it.n+' ×'+q+' ajouté au sac'); try{ ui('click'); }catch(_){} }
 });
 /* l'entraînement compte dans les statistiques de l'Arène */
 { const _tr=ACT.cbtrain; ACT.cbtrain=function(){ try{ if(sheet) closeSheet(); }catch(_){} const r=_tr.apply(this,arguments); try{ if(CBV){ const o=CBV.o, prev=o.onEnd; o.onEnd=(res,B)=>{ const st=cbSt(); if(res.win) st.w++; else st.l++; st.tr++; save(); if(prev) prev(res,B); }; o.onClose=()=>openSheet({t:'arena'}); } }catch(e){} return r; }; }

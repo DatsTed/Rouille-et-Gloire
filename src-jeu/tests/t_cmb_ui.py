@@ -1,4 +1,4 @@
-﻿# v1.5 · écran de duel (new54) : un duel complet joué par l'interface, sur 2 tailles d'écran.
+# v1.5 · écran de duel (new54) : un duel complet joué par l'interface, sur 2 tailles d'écran.
 # Vérifie : pas d'erreur, tout tient sur l'écran, menu utilisable, objets, changement, fin, XP sauvegardée, fermeture propre.
 import asyncio, os, sys
 from playwright.async_api import async_playwright
@@ -32,7 +32,8 @@ async def run(p, w, h):
     if not r or r['over'] is None: E.append('duel pas terminé %s' % r)
     else:
         if not r['end']: E.append('écran de fin absent')
-        if not any(a > b0 for a, b0 in zip(r['xp'], r['xp0'])): E.append('aucune XP gagnée')
+        if r['over'] == 0 and not any(a > b0 for a, b0 in zip(r['xp'], r['xp0'])): E.append('aucune XP gagnée')
+        if r['over'] != 0 and any(a > b0 for a, b0 in zip(r['xp'], r['xp0'])): E.append('XP gagnée malgré la défaite')
         if 'item' in seen and r['bag'].get('kit', 2) >= 2: E.append('objet utilisé mais pas retiré du sac')
     await pg.evaluate("document.querySelector('[data-cb=close]')&&document.querySelector('[data-cb=close]').click()"); await pg.wait_for_timeout(300)
     closed = await pg.evaluate("()=>!$('cbov')&&!CBV&&!document.body.classList.contains('cbon')&&!document.getElementById('upd')")

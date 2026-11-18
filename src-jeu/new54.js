@@ -1,4 +1,4 @@
-﻿/* ===== v1.5 · Éveil cosmique — 4/6 : écran de duel (plein écran, tient sur un écran) =====
+/* ===== v1.5 · Éveil cosmique — 4/6 : écran de duel (plein écran, tient sur un écran) =====
    cbStartDuel({team:[uid…], foes:[{mid,lv,tal,mv,iv,nm}…], d, names:[moi,rival], trainer, wx, onEnd})
    Le moteur (new53) calcule ; ici on rejoue B.ev avec animations, sons et journal. */
 
@@ -7,8 +7,8 @@ const cbSleep=ms=>new Promise(r=>setTimeout(r,ms));
 /* sac d'objets de combat du joueur (achats / récompenses : étape tournois) */
 const cbBag=()=>{ if(!S.cbBag) S.cbBag={kit:3,nitrorec:1,antidote:1,extinct:1}; return S.cbBag; };
 /* équipe : jusqu'à 3 voitures, par défaut les meilleurs niveaux de combat */
-function cbTeamDefault(){ return S.cars.slice().sort((a,b)=>cbOf(b).lv-cbOf(a).lv||(M[b.mid].t-M[a.mid].t)).slice(0,3).map(c=>c.uid); }
-function cbTeam(){ let t=(S.cbTeam||[]).filter(u=>car(u)); if(!t.length) t=cbTeamDefault(); return t.slice(0,3); }
+function cbTeamDefault(){ return S.cars.slice().sort((a,b)=>cbOf(b).lv-cbOf(a).lv||(M[b.mid].t-M[a.mid].t)).slice(0,4).map(c=>c.uid); }
+function cbTeam(){ let t=(S.cbTeam||[]).filter(u=>car(u)); if(!t.length) t=cbTeamDefault(); return t.slice(0,4); }
 
 /* ---- sons (bus « ui » du jeu, coupé si le son est coupé) ---- */
 const CB_SND={feu:['sawtooth',180,520],eau:['sine',700,240],glace:['triangle',1400,900],vent:['sine',300,900],tene:['sawtooth',160,70],lum:['triangle',900,1800],elec:['square',1200,300],acier:['square',220,160],terre:['sawtooth',90,60],meca:['square',300,200]};
@@ -130,7 +130,7 @@ function cbPlayTurn(a){ const B=CBV.B; if(B.over!=null||B.need) return; cbTurn(B
 function cbFinish(){ const B=CBV.B, o=CBV.o, win=B.over===0, foeLv=Math.round(B.sides[1].team.reduce((a,f)=>a+f.lv,0)/B.sides[1].team.length), res={win,xp:[],ups:[]};
   B.sides[0].team.forEach(f=>{ const c=car(f.uid); if(!c) return; const s=cbOf(c), used=f.turns>0||f.hp<f.mhp||B.sides[0].act===B.sides[0].team.indexOf(f);
     if(win) s.w=(s.w||0)+1; else s.l=(s.l||0)+1;
-    const xp=used?Math.round(cbXpFor(foeLv,!!o.trainer)*(win?1:.35)):0; if(xp){ const r=cbGainXP(c,xp); res.xp.push([f.nm,xp,r]); } });
+    const xp=used?Math.round(cbXpFor(foeLv,!!o.trainer)*(win?1:0)):0; if(xp){ const r=cbGainXP(c,xp); res.xp.push([f.nm,xp,r]); } });
   /* objets consommés */
   const bag=cbBag(); Object.keys(bag).forEach(k=>{ bag[k]=Math.max(0,B.sides[0].bag[k]||0); });
   try{ save(); }catch(_){} CBV.res=res; cbMenu();
@@ -144,4 +144,4 @@ function cbClose(){ const ov=document.getElementById('cbov'); if(ov) ov.remove()
 /* ---- duel d'entraînement (rival au hasard du même niveau) : sert de base à l'Arène ---- */
 function cbTrainFoes(n,lv){ const ids=CARS.map(c=>c.id).filter(id=>id!=='velo'), out=[]; for(let i=0;i<n;i++){ const mid=ids[Math.floor(Math.random()*ids.length)], ty=cbTypesOf(mid), iv={}; CB_SK.forEach(k=>iv[k]=8+Math.floor(Math.random()*16)); out.push({mid,lv:clamp(lv+Math.floor(Math.random()*3)-1,1,CB_LVMAX),iv,tal:(CB_TAL_BY[ty[0]]||CB_TAL_BY.meca)[Math.floor(Math.random()*4)]}); } return out; }
 ACT.cbtrain=function(){ if(!cbAwake()) return toast('🔒 Les combats s’ouvrent après l’éveil cosmique (niveau 10)'); const t=cbTeam(), lv=Math.round(t.reduce((a,u)=>a+cbOf(car(u)).lv,0)/t.length);
-  cbStartDuel({team:t,foes:cbTrainFoes(Math.min(3,t.length),lv),d:1,names:['Toi','Pilote d’entraînement'],trainer:false}); };
+  cbStartDuel({team:t,foes:cbTrainFoes(Math.min(4,t.length),lv),d:1,names:['Toi','Pilote d’entraînement'],trainer:false}); };
