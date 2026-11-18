@@ -22,7 +22,7 @@ function cbAutoMoves(ty,lv){
   const L=cbLearnable(ty,lv), off=L.filter(m=>m.c!=='sta'&&!(m.fx.selfko)), pick=[];
   const best=f=>off.filter(f).filter(m=>!pick.includes(m.id)).sort((a,b)=>(b.p*(b.a||100))-(a.p*(a.a||100))||b.lv-a.lv)[0];
   ty.forEach(t=>{ const m=best(x=>x.t===t&&!x.e); if(m) pick.push(m.id); });
-  { const u=best(x=>x.e>0&&x.t!=='meca'&&ty.includes(x.t)), m=best(x=>x.t==='meca'&&!x.e); if(u) pick.push(u.id); else if(m) pick.push(m.id); }
+  { const m=best(x=>x.t==='meca'&&!x.e); if(m) pick.push(m.id); }
   { const st=L.filter(m=>m.c==='sta'&&(ty.includes(m.t)||m.t==='meca')&&!pick.includes(m.id)).sort((a,b)=>b.lv-a.lv)[0]; if(st&&pick.length<4) pick.push(st.id); }
   while(pick.length<4){ const m=best(()=>true); if(!m) break; pick.push(m.id); }
   return pick.slice(0,4); }
@@ -30,7 +30,9 @@ function cbNew(c){
   const m=M[c.mid]||{t:1}, ty=cbTypesOf(c.mid), iv={}; CB_SK.forEach(k=>iv[k]=Math.floor(Math.random()*32));
   const pool=CB_TAL_BY[ty[0]]||CB_TAL_BY.meca, lv=clamp(5+2*((m.t||1)-1)+Math.floor(((c.lvl||1)-1)/2),5,20);
   return {v:1,ty,iv,tal:pool[Math.floor(Math.random()*pool.length)],lv,xp:cbNeed(lv),mv:cbAutoMoves(ty,lv),nw:[],w:0,l:0}; }
-function cbOf(c){ if(!c) return null; if(!S.cmb) S.cmb={}; let s=S.cmb[c.uid]; if(!s||s.v!==1){ s=S.cmb[c.uid]=cbNew(c); } return s; }
+function cbOf(c){ if(!c) return null; if(!S.cmb) S.cmb={}; let s=S.cmb[c.uid]; if(!s||s.v!==1){ s=S.cmb[c.uid]=cbNew(c); }
+  if(s.mv.some(id=>!CB_MV[id]||CB_MV[id].e)){ s.mv=s.mv.filter(id=>CB_MV[id]&&!CB_MV[id].e); if(!s.mv.length) s.mv=cbAutoMoves(s.ty,s.lv); }   /* anciennes fiches : les ultimes quittent les emplacements */
+  return s; }
 /* statistiques réelles (formule type Pokémon, sans points d'effort) */
 function cbStats(c,lvOver){ const s=cbOf(c), b=cbBase(c.mid), L=lvOver||s.lv, o={};
   CB_SK.forEach(k=>{ const r=Math.floor((2*b[k]+s.iv[k])*L/100); o[k]=k==='hp'?r+L+10:r+5; }); return o; }
@@ -57,6 +59,7 @@ function cbCarHTML(c){
     <div class="cbtal"><b>🧬 ${T.n||'—'}</b><small>${T.d||''}</small></div>
     ${rows}<p class="note sm">Barres : potentiel du modèle · chiffres : valeur au niveau ${s.lv}.</p><p class="note sm">Potentiel (IV) : <b>${ivTot}/186</b> · ${cbIvGrade(Math.round(ivTot/6))[0]}. Les IV sont fixés à l’acquisition de la voiture.</p>
     <div class="cbmvs">${s.mv.map(id=>cbMvChip(id)).join('')}</div>
+    <div class="cbultl">${cbMvChip(cbUltOf(s.ty,s.lv),' · ULTIME')}<small>⚡ Attaque ultime attitrée : se lance avec le bouton ULTIME quand la jauge d’Énergie est pleine (elle se remplit en attaquant et en encaissant).${CB_MV[cbUltOf(s.ty,s.lv)].e<100?' Une version légendaire se débloque vers le niveau 42.':''}</small></div>
     <button class="btn alt wide" data-a="cbmv" data-id="${c.uid}">📘 Gérer les attaques${s.nw.length?` <span class="cbnew">${s.nw.length} nouvelle${s.nw.length>1?'s':''}</span>`:''}</button>
     <p class="note sm">Ces pouvoirs ne servent qu’en combat dans l’Arène : ils ne changent rien aux courses.</p></div>`; }
 { const _rs=renderSheet; renderSheet=function(){ const r=_rs.apply(this,arguments); try{ if(sheet&&sheet.t==='car'&&cbAwake()){ const el=$('sheet'), c=car(sheet.uid); if(c&&!el.querySelector('.cbsec')){ const bars=el.querySelectorAll(':scope>.bar'), at=bars.length?bars[bars.length-1]:el.querySelector(':scope>.statgrid'); if(at) at.insertAdjacentHTML('afterend',cbCarHTML(c)); else el.insertAdjacentHTML('beforeend',cbCarHTML(c)); } } }catch(e){ console.error('cb fiche',e); } return r; }; }

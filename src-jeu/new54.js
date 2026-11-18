@@ -52,7 +52,7 @@ function cbBoxHTML(s){ const B=CBV.B, f=B.sides[s].team[CBV.shown[s]], hp=Math.m
   const dots=B.sides[s].team.map((x,i)=>`<b class="${x.hp<=0?'ko':''} ${i===B.sides[s].act?'on':''}"></b>`).join('');
   return `<div class="cb-nm"><b>${f.nm}</b><span>Niv. ${f.lv}</span></div><div class="cb-tys">${f.ty.map(t=>`<span style="--tc:${CB_TYPES[t].c}">${CB_TYPES[t].ic}</span>`).join('')}${st}${vol}<span class="cb-team">${dots}</span></div>
     <div class="cb-hp"><i style="width:${(p*100).toFixed(1)}%;background:${cbHpCol(p)}"></i></div><div class="cb-hpn">${s===0?`${hp} / ${f.mhp}`:Math.round(p*100)+' %'}</div>
-    <div class="cb-en" title="Énergie"><i style="width:${f.energy}%"></i></div>${stg?`<div class="cb-stg">${stg}</div>`:''}`; }
+    <div class="cb-en ${f.energy>=CB_ENERGY.max?'full':''}" title="Jauge d’ultime"><i style="width:${Math.min(100,f.energy/CB_ENERGY.max*100)}%"></i><span>⚡ ULTIME ${f.energy>=CB_ENERGY.max?'PRÊTE':Math.round(f.energy)+'%'}</span></div>${stg?`<div class="cb-stg">${stg}</div>`:''}`; }
 function cbDuelCarHTML(s){ const f=CBV.B.sides[s].team[CBV.shown[s]], m=M[f.mid]||M.epave, T=CB_TYPES[f.ty[0]];
   return `<div class="cb-cw" style="--t:${T.c}">${carSVG(m,100)}</div><div class="cb-aura" style="--tc:${T.c}"></div>`; }
 function cbDraw(){ if(!CBV) return; const B=CBV.B; [0,1].forEach(s=>{ const b=$('cbB'+s), c=$('cbC'+s); if(b) b.innerHTML=cbBoxHTML(s); if(c&&c.dataset.k!==CBV.shown[s]+'|'+B.sides[s].team[CBV.shown[s]].mid){ c.dataset.k=CBV.shown[s]+'|'+B.sides[s].team[CBV.shown[s]].mid; c.innerHTML=cbDuelCarHTML(s); } });
@@ -66,8 +66,8 @@ function cbMenu(){ const el=$('cbMenu'); if(!el||!CBV) return; const B=CBV.B, f=
   if(f.charging||f.recharge){ el.innerHTML=`<button class="btn wide cb-go" data-cb="cont">${f.recharge?'⏳ Refroidir le moteur':'▶ Continuer '+CB_MV[f.charging].n}</button>`; return; }
   const tabs=`<div class="cb-tabs">${[['mv','⚔️ Attaques'],['it','🎒 Objets'],['sw','🚗 Équipe']].map(t=>`<button class="${CBV.tab===t[0]?'on':''}" data-cb="tab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>`;
   let body='';
-  if(CBV.tab==='mv'){ const o=cbAct(B,1);
-    body=`<div class="cb-mvs">${f.mv.map((x,i)=>{ const m=CB_MV[x.id], T=CB_TYPES[m.t], ok=cbUsable(B,0,i), e=m.c==='sta'?1:cbEff(m.t,o.ty), hint=m.c==='sta'?'':e===0?'aucun effet':e>=2?'super efficace':e<1?'peu efficace':'';
+  if(CBV.tab==='mv'){ const o=cbAct(B,1), um=f.ult&&CB_MV[f.ult], ur=cbUltReady(B,0), ue=um?cbEff(um.t,o.ty):1;
+    body=(um?`<button class="cb-ultb ${ur?'ready':''} ${um.e>=100?'leg':''}" style="--tc:${CB_TYPES[um.t].c};--p:${Math.min(100,f.energy/CB_ENERGY.max*100)}%" data-cb="ult" ${ur?'':'disabled'}><span class="cb-ulf"></span><b>⚡ ULTIME · ${CB_TYPES[um.t].ic} ${um.n}</b><small>${ur?'PRÊTE ! Touche pour la déclencher':'Jauge '+Math.round(f.energy)+' / '+CB_ENERGY.max+' · se remplit en attaquant et en encaissant'}${ue>=2?' · super efficace':ue===0?' · aucun effet':''}</small></button>`:'')+`<div class="cb-mvs">${f.mv.map((x,i)=>{ const m=CB_MV[x.id], T=CB_TYPES[m.t], ok=cbUsable(B,0,i), e=m.c==='sta'?1:cbEff(m.t,o.ty), hint=m.c==='sta'?'':e===0?'aucun effet':e>=2?'super efficace':e<1?'peu efficace':'';
       return `<button class="cb-mb ${m.e?'ult':''} ${m.e>=100?'leg':''}" style="--tc:${T.c}" data-cb="mv" data-v="${i}" ${ok?'':'disabled'}><b>${T.ic} ${m.n}</b><small>${m.c==='phy'?'Phy':m.c==='spe'?'Spé':'Statut'}${m.p>1?' · '+m.p:''} · ${m.e?'⚡'+m.e:x.pp+'/'+x.max+' PP'}</small>${hint?`<em class="${e>=2?'se':e<1?'nve':''}">${hint}</em>`:''}</button>`; }).join('')}</div>`; }
   if(CBV.tab==='it'){ const bag=B.sides[0].bag, ids=Object.keys(bag).filter(k=>bag[k]>0&&CB_IT[k]);
     body=ids.length?`<div class="cb-its">${ids.map(k=>{ const it=CB_IT[k], tgt=it.revive?B.sides[0].team.findIndex(x=>x.hp<=0):undefined, ok=cbItemOk(B,0,k,tgt);
@@ -121,6 +121,7 @@ function cbClick(ev){ const b=ev.target.closest('[data-cb]'); if(!b||!CBV||b.dis
   if(k==='rep'){ if(cbReplace(B,0,+v)) cbRun(B.ev.splice(0)); return; }
   if(k==='run'){ if(B.over!=null) return; if(!CBV.runArm){ CBV.runArm=1; b.classList.add('arm'); cbLine('Touche encore 🏳️ pour abandonner le duel.'); setTimeout(()=>{ if(CBV){ CBV.runArm=0; b.classList.remove('arm'); } },2500); return; } CBV.runArm=0; cbPlayTurn({k:'run'}); return; }
   if(k==='mv') return cbPlayTurn({k:'mv',i:+v});
+  if(k==='ult') return cbPlayTurn({k:'mv',ult:true});
   if(k==='cont') return cbPlayTurn({k:'mv',i:0});
   if(k==='sw') return cbPlayTurn({k:'sw',i:+v});
   if(k==='it'){ const it=CB_IT[v], tgt=it.revive?B.sides[0].team.findIndex(x=>x.hp<=0):undefined; return cbPlayTurn({k:'it',id:v,tgt}); } }

@@ -1,4 +1,4 @@
-# v1.5 · Arène et tournois (new56) + règles des voitures (patrouille seulement dans le Paquet Voiture, 1 max ; plus de vélo).
+﻿# v1.5 · Arène et tournois (new56) + règles des voitures (patrouille seulement dans le Paquet Voiture, 1 max ; plus de vélo).
 import asyncio, os, sys, json
 from playwright.async_api import async_playwright
 URL = 'file:///' + os.path.abspath('out.html').replace('\\', '/')
@@ -28,7 +28,7 @@ PLAY = """()=>{ if(CBV){ if(CBV.busy){ CBV.fast=true; return 'busy'; } const B=C
    const a=cbAI(B,0,3); if(a.k==='mv'){ const b=document.querySelector('[data-cb=cont]')||document.querySelector('[data-cb=mv][data-v="'+a.i+'"]:not([disabled])')||document.querySelector('[data-cb=mv]:not([disabled])'); b&&b.click(); return 'mv'; }
    const b=document.querySelector('[data-cb=mv]:not([disabled])')||document.querySelector('[data-cb=cont]'); b&&b.click(); return 'mv'; }
   if(sheet&&sheet.t==='cbtalk'){ const b=document.querySelector('#sheet [data-a=cbfight],#sheet [data-a=cbnext]'); if(b){ b.click(); return 'talk'; } }
-  if(sheet&&sheet.t==='cbcup') return 'cup'; if(sheet&&sheet.t==='arena') return 'arena'; return 'other:'+(sheet&&sheet.t); }"""
+  if(sheet&&sheet.t==='cbcup') return 'cup'; if(!sheet&&view==='arena') return 'arena'; return 'other:'+(sheet&&sheet.t); }"""
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page(viewport={'width': 390, 'height': 844})
@@ -39,7 +39,7 @@ async def main():
         await pg.evaluate(SETUP, 30)
         # Arène, équipe, boutique
         await pg.evaluate("()=>ACT.arena()"); await pg.wait_for_timeout(200)
-        a = await pg.evaluate("()=>({t:sheet&&sheet.t,cups:document.querySelectorAll('#sheet .ar-cup').length,lock:document.querySelectorAll('#sheet .ar-cup.lock').length,team:document.querySelectorAll('#sheet .ar-car').length})")
+        a = await pg.evaluate("()=>({t:view,cups:document.querySelectorAll('#view .ar-cup').length,lock:document.querySelectorAll('#view .ar-cup.lock').length,team:document.querySelectorAll('#view .ar-car').length})")
         if a != {'t': 'arena', 'cups': 5, 'lock': 4, 'team': 3}: E.append('Arène %s' % a)
         await pg.evaluate("()=>{ ACT.cbteamopen(); ACT.cbteampick({id:String(S.cbTeam[2])}); }")
         if await pg.evaluate("()=>S.cbTeam.length") != 2: E.append('retrait d’une voiture de l’équipe')
@@ -62,8 +62,8 @@ async def main():
             if res['cr'] - cr0 < 8000 + 3 * 900: E.append('récompenses de la coupe 1')
             if res['kit'] < 8: E.append('objets de la coupe 1 non reçus')
             if res['cbT']: E.append('tournoi non clôturé')
-            await pg.evaluate("()=>ACT.arena()")
-            if await pg.evaluate("()=>document.querySelectorAll('#sheet .ar-cup.lock').length") != 3: E.append('coupe 2 non débloquée')
+            await pg.evaluate("()=>{ closeSheet(); ACT.artab({id:'cups'}); }")
+            if await pg.evaluate("()=>document.querySelectorAll('#view .ar-cup.lock').length") != 3: E.append('coupe 2 non débloquée')
         # défaite : équipe niveau 5 contre la coupe Cosmique (ouverte de force)
         await pg.evaluate(SETUP, 5)
         await pg.evaluate("()=>{ ['c1','c2','c3','c4'].forEach(k=>cbSt().cups[k]=1); closeSheet(); cbCupStart(4); }")

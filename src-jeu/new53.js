@@ -8,9 +8,10 @@ function cbCalc(mid,iv,lv){ const b=cbBase(mid), o={}; CB_SK.forEach(k=>{ const 
 /* une voiture en combat (copie : la fiche sauvegardée n'est modifiée qu'à la fin, pour l'XP) */
 function cbFighter(o){
   const ty=o.ty||cbTypesOf(o.mid), lv=clamp(o.lv||5,1,CB_LVMAX), iv=o.iv||{hp:15,atk:15,def:15,spa:15,spd:15,vit:15}, st=cbCalc(o.mid,iv,lv);
-  const mv=(o.mv&&o.mv.length?o.mv:cbAutoMoves(ty,lv)).filter(id=>CB_MV[id]).slice(0,4).map(id=>({id,pp:CB_MV[id].pp,max:CB_MV[id].pp}));
+  let ids=(o.mv&&o.mv.length?o.mv:cbAutoMoves(ty,lv)).filter(id=>CB_MV[id]&&!CB_MV[id].e); if(!ids.length) ids=cbAutoMoves(ty,lv);
+  const mv=ids.slice(0,4).map(id=>({id,pp:CB_MV[id].pp,max:CB_MV[id].pp})), ult=o.ult&&CB_MV[o.ult]?o.ult:cbUltOf(ty,lv);
   const tal=o.tal&&CB_TAL[o.tal]?o.tal:(CB_TAL_BY[ty[0]]||CB_TAL_BY.meca)[0];
-  return {nm:o.nm||((M[o.mid]||{}).nom||'Voiture'),mid:o.mid,uid:o.uid||null,ty,tal,lv,st,mhp:st.hp,hp:o.hp!=null?Math.min(o.hp,st.hp):st.hp,mv,
+  return {nm:o.nm||((M[o.mid]||{}).nom||'Voiture'),mid:o.mid,uid:o.uid||null,ty,tal,lv,st,mhp:st.hp,hp:o.hp!=null?Math.min(o.hp,st.hp):st.hp,mv,ult,
     stage:{atk:0,def:0,spa:0,spd:0,vit:0,acc:0,eva:0},crit:0,status:null,vol:{},energy:CB_ENERGY.start+(tal==='nitro'?30:0),
     charging:null,inv:false,recharge:false,protectN:0,protected:false,lastMove:null,hit:{phy:0,spe:0},turns:0,firstUsed:false}; }
 const cbFromCar=c=>{ const s=cbOf(c); return cbFighter({mid:c.mid,uid:c.uid,lv:s.lv,iv:s.iv,tal:s.tal,mv:s.mv,ty:s.ty,nm:M[c.mid].nom}); };
@@ -86,11 +87,13 @@ function cbVol(B,s,id,from){ const f=cbAct(B,s); if(f.hp<=0) return;
 /* ---- une action ---- */
 const CB_LUTTE={id:'lutte',n:'Calage forcé',t:'meca',c:'phy',p:50,a:0,pp:1,lv:1,pr:0,e:0,fx:{recoil:.25}};
 const cbTargetsFoe=m=>{ const f=m.fx||{}; return m.c!=='sta'||!!(f.st||f.vol||(f.sb&&f.sb.who==='foe')||f.taunt||f.leech); };
+const cbUltReady=(B,s)=>{ const f=cbAct(B,s); return !!(f&&f.hp>0&&f.ult&&CB_MV[f.ult]&&f.energy>=CB_ENERGY.max&&!f.charging&&!f.recharge); };
 function cbUsable(B,s,i){ const f=cbAct(B,s), x=f.mv[i]; if(!x) return false; const m=CB_MV[x.id]; if(x.pp<=0) return false; if(m.e>f.energy) return false; if(f.vol.taunt&&m.c==='sta') return false; if(m.fx.first&&f.turns>0) return false; return true; }
 function cbMove(B,s,act){
   const u=cbAct(B,s), o=cbAct(B,1-s), os=1-s; if(!u||u.hp<=0) return; u.acted=true;
   if(u.recharge){ u.recharge=false; cbLog(B,u.nm+' doit refroidir son moteur…',{k:'rest',s}); return; }
-  let m=act.forced?CB_MV[act.forced]:null, slot=null;
+  let m=act.forced?CB_MV[act.forced]:null, slot=null, ultAct=false;
+  if(!m&&act.ult&&u.ult&&CB_MV[u.ult]){ if(u.energy>=CB_ENERGY.max){ m=CB_MV[u.ult]; ultAct=true; } else { cbLog(B,'La jauge d’ultime de '+u.nm+' n’est pas pleine.'); return; } }
   if(!m){ slot=u.mv[act.i]; if(!u.mv.some((x,i)=>cbUsable(B,s,i))) m=CB_LUTTE; else if(!slot||!cbUsable(B,s,act.i)){ const j=u.mv.findIndex((x,i)=>cbUsable(B,s,i)); slot=u.mv[j]; m=CB_MV[slot.id]; } else m=CB_MV[slot.id]; }
   /* états qui empêchent d'agir */
   if(u.status&&u.status.id==='gel'){ if(m.fx.thaw||B.rng()<.2){ u.status=null; cbLog(B,u.nm+' est dégelé !',{k:'cure',s}); } else { cbLog(B,u.nm+' est bloqué par le verglas !',{k:'stuck',s,st:'gel'}); u.charging=null; u.inv=false; return; } }
@@ -101,11 +104,11 @@ function cbMove(B,s,act){
   /* copilote */
   if(m.fx.copy){ const c=o&&o.lastMove&&CB_MV[o.lastMove]; if(slot) slot.pp--; if(!c||c.fx.copy||c.e){ cbLog(B,u.nm+' utilise Copilote… mais rien à copier !'); return; } cbLog(B,u.nm+' utilise Copilote !',{k:'move',s,id:m.id}); m=c; slot=null; }
   if(m.fx.first&&u.turns>0&&!act.forced){ if(slot) slot.pp--; cbLog(B,u.nm+' utilise '+m.n+'… mais ça ne marche qu’au premier tour !'); return; }
-  if(m.e&&m.e>u.energy){ cbLog(B,u.nm+' n’a pas assez d’Énergie pour '+m.n+'.'); return; }
+  if(!ultAct&&m.e&&m.e>u.energy){ cbLog(B,u.nm+' n’a pas assez d’Énergie pour '+m.n+'.'); return; }
   /* charge en deux tours */
   if(m.fx.charge&&u.charging!==m.id){ const w=cbWx(B); if(!(m.fx.charge==='wx'&&(w==='canicule'||w==='aurore'))){ if(slot) slot.pp--; u.charging=m.id; u.inv=!!m.fx.inv; cbLog(B,u.nm+' se prépare pour '+m.n+'…',{k:'charge',s,id:m.id}); return; } }
   const second=u.charging===m.id; u.charging=null; u.inv=false;
-  if(slot&&!second&&!act.forced) slot.pp--; if(m.e) u.energy-=m.e;
+  if(slot&&!second&&!act.forced) slot.pp--; if(ultAct) u.energy=0; else if(m.e&&!second) u.energy=Math.max(0,u.energy-m.e);
   u.lastMove=m.id; if(!m.fx.protect) u.protectN=0;
   cbLog(B,u.nm+' utilise '+m.n+' !',{k:'move',s,id:m.id,t:m.t,c:m.c,ult:!!m.e});
   const F=m.fx;
@@ -134,6 +137,7 @@ function cbMove(B,s,act){
         cbLog(B,(crit?'Coup critique ! ':'')+o.nm+' perd '+d+' de blindage.',{k:'dmg',s:os,n:d,eff:r.eff,crit,t:m.t,c:m.c});
         if(o.status&&o.status.id==='gel'&&m.t==='feu'){ o.status=null; cbLog(B,o.nm+' est dégelé par la chaleur !'); }
         if(m.c==='phy'&&o.tal==='epines'&&u.hp>0){ const e=Math.max(1,Math.floor(u.mhp/8)); u.hp=Math.max(0,u.hp-e); cbLog(B,u.nm+' se blesse sur le pare-chocs épineux (−'+e+') !',{k:'dmg',s,n:e}); } }
+      if(total>0&&!ultAct) u.energy=Math.min(CB_ENERGY.max,u.energy+CB_ENERGY.deal);
       if(n>1) cbLog(B,'Touché '+n+' fois !'); if(last){ const t=cbEffTxt(last.eff); if(t) cbLog(B,t,{k:'eff',eff:last.eff}); } }
     if(F.drain&&total){ const h=Math.max(1,Math.floor(total*F.drain)); u.hp=Math.min(u.mhp,u.hp+h); cbLog(B,u.nm+' récupère '+h+' de blindage.',{k:'heal',s,n:h}); }
     if(F.recoil&&total&&u.tal!=='prudent'){ const r=Math.max(1,Math.floor(total*F.recoil)); u.hp=Math.max(0,u.hp-r); cbLog(B,u.nm+' subit le contrecoup (−'+r+') !',{k:'dmg',s,n:r}); }
@@ -213,7 +217,7 @@ function cbTurn(B,acts){ if(B.over!=null||B.need) return B; B.t++; B.ev=[];
   const sp=[0,1].sort((a,b)=>cbSpeed(B,b)-cbSpeed(B,a)||(B.rng()<.5?-1:1));
   sp.forEach(s=>{ const a=acts[s]; if(a.k==='sw'){ const f=cbAct(B,s); if(f.vol.trap){ cbLog(B,f.nm+' est coincé, impossible de changer !'); acts[s]={k:'none'}; } else cbSwitch(B,s,a.i); } });
   sp.forEach(s=>{ const a=acts[s]; if(a.k==='it') cbItem(B,s,a.id,a.tgt); });
-  const pr=s=>{ const a=acts[s], f=cbAct(B,s); if(a.k!=='mv') return -99; const m=a.forced?CB_MV[a.forced]:(f.mv[a.i]?CB_MV[f.mv[a.i].id]:CB_LUTTE); let p=m?m.pr:0; if(f.tal==='demarrage'&&!f.firstUsed&&m&&m.c!=='sta') p+=1; return p; };
+  const pr=s=>{ const a=acts[s], f=cbAct(B,s); if(a.k!=='mv') return -99; const m=a.forced?CB_MV[a.forced]:a.ult&&f.ult?CB_MV[f.ult]:(f.mv[a.i]?CB_MV[f.mv[a.i].id]:CB_LUTTE); let p=m?m.pr:0; if(f.tal==='demarrage'&&!f.firstUsed&&m&&m.c!=='sta') p+=1; return p; };
   const order=[0,1].filter(s=>acts[s].k==='mv').sort((a,b)=>(pr(b)-pr(a))||(cbSpeed(B,b)-cbSpeed(B,a))||(B.rng()<.5?-1:1));
   const actors=[cbAct(B,0),cbAct(B,1)];
   for(const s of order){ if(B.over!=null) break; const f=cbAct(B,s); if(f!==actors[s]||f.hp<=0) continue;   /* remplacée ou K.O. : l'action est perdue */
@@ -254,7 +258,10 @@ function cbAI(B,s,dOverride){ const S2=B.sides[s], d=dOverride!=null?dOverride:(
   if(d>=3&&!u.vol.trap){ const bench=S2.team.map((f,i)=>i).filter(i=>i!==S2.act&&S2.team[i].hp>0);
     if(bench.length){ const threat=f=>Math.max(0,...o.mv.map(x=>cbEff(CB_MV[x.id].t,f.ty)*(CB_MV[x.id].c==='sta'?0:1))), power=f=>Math.max(0,...f.mv.map(x=>CB_MV[x.id].c==='sta'?0:cbEff(CB_MV[x.id].t,o.ty)));
       if(threat(u)>=2&&power(u)<=1&&u.hp>u.mhp*.3){ const best=bench.map(i=>({i,v:power(S2.team[i])*2-threat(S2.team[i])})).sort((a,b)=>b.v-a.v)[0]; if(best&&best.v>power(u)*2-threat(u)&&r()<.75) return {k:'sw',i:best.i}; } } }
-  const sc=cbScoreMoves(B,s); if(!sc.length) return {k:'mv',i:0};
+  const sc=cbScoreMoves(B,s);
+  /* ultime : dès que la jauge est pleine, si elle fait plus mal que le reste (ou achève) */
+  if(cbUltReady(B,s)){ const um=CB_MV[u.ult], ue=cbEst(B,u,o,um)*((um.a||100)/100), best=Math.max(0,...sc.map(x=>x.sc)); if(ue>0&&(ue>=o.hp||ue/o.mhp*100>=best*.9||d===0&&r()<.5)) return {k:'mv',ult:true}; }
+  if(!sc.length) return {k:'mv',i:0};
   const noise=[1,.4,.15,.05][clamp(d,0,3)]; if(d===0&&r()<.45) return {k:'mv',i:sc[Math.floor(r()*sc.length)].i};
   sc.forEach(x=>x.v=x.sc*(1+(r()*2-1)*noise)+(r()*2-1)*noise*20); sc.sort((a,b)=>b.v-a.v); return {k:'mv',i:sc[0].i}; }
 function cbAIReplace(B,s){ const S2=B.sides[s], o=cbAct(B,1-s), alive=S2.team.map((f,i)=>i).filter(i=>S2.team[i].hp>0);

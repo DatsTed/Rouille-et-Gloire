@@ -27,6 +27,11 @@
 ## Ce qui n'est pas vérifié
 Le rendu 3D réel (décor du labo, circuits), l'audio à l'oreille, le toucher sur téléphone et l'équilibrage sur une longue session.
 
+## v1.6 (new57, new58)
+- `new57` : 6 attaques légendaires (100 d'Énergie) + `cbLegend(e)`, mini-cinématiques DOM de 2,2 à 2,7 s (styles beam, sphere, meteor, wave, bolt, spikes, vortex) jouées pour toute attaque à Énergie.
+- Ultime attitrée : `cbUltOf(types,niveau)` (ultime du 1er type, légendaire à partir de son niveau). Les attaques à Énergie ne vont plus dans les 4 emplacements ; action `{k:'mv',ult:true}` quand `f.energy>=CB_ENERGY.max` ; jauge +8 par tour, +12 en touchant, +6 en étant touché. Bouton « ⚡ ULTIME » dans le duel, l'IA s'en sert (`cbAI`).
+- `new58` : Arène = vraie page `view==='arena'` (`vArena`, sous-onglets `AR.tab` cups/team/shop ; `patch5.py` ajoute `arena:vArena` au rendu). Duel en 3D (`CB3`, `cb3dStart`) : vrais modèles `buildCar`, vue 3/4 en hauteur, voitures face à face ; les repères `#cbC0/#cbC1` et les variables `--p0x…` suivent la projection des voitures pour les effets DOM. Repli SVG si pas de WebGL.
+
 ## v1.5 : Éveil cosmique et mode Combat (new51 à new56, extra7.css)
 Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam`, `S.cbStat`, `S.cbT` ; rien ne touche aux caractéristiques de course (testé).
 - `new51` catalogue (données pures) : `CB_TYPES` (10 types dont Méca), `CB_CHART`/`cbEff` (efficacités), `CB_STATS`, `CB_TPROF` (profils), `CB_ST`/`CB_VOL` (altérations), `CB_WX` (6 météos), `CB_MV_ROWS` → `CB_MV` (112 attaques, effets dans `fx`, description générée par `cbDesc`), `CB_TAL` (38 talents) / `CB_TAL_BY`, `CB_IT` (17 objets), `CB_ENERGY`.

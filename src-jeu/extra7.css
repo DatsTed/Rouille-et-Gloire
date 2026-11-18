@@ -228,3 +228,23 @@ body.cbon{overflow:hidden}
 @keyframes lgVor{0%,12%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1.1) rotate(720deg)}80%{opacity:.8;transform:scale(1.25) rotate(1300deg)}100%{opacity:0;transform:scale(1.6) rotate(1600deg)}}
 @keyframes lgVor2{0%,15%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1) rotate(-900deg)}100%{opacity:0;transform:scale(1.4) rotate(-1700deg)}}
 .cb-mb.leg{border-color:#ffd24a;box-shadow:0 0 16px rgba(255,210,74,.5);background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 34%,#3a2a05),#1a1405)}.cb-mb.leg b::after{content:" ⭐";color:#ffd24a}
+/* ---- v1.6 : duel en 3D, jauge d'ultime, bouton ULTIME, page Arène ---- */
+.cb-3d{position:absolute;inset:0;z-index:0}.cb-3d canvas{display:block;width:100%;height:100%}
+.cb-ar.is3d .cb-sky,.cb-ar.is3d .cb-city,.cb-ar.is3d .cb-pad{display:none}.cb-ar.is3d::after{display:none}
+.cb-ar.is3d .cb-car{pointer-events:none}
+.cbfx.s0{left:var(--p0x,28%);top:var(--p0y,76%)}.cbfx.s1{left:var(--p1x,72%);top:var(--p1y,38%)}
+@keyframes cbP0{0%{left:var(--p0x,30%);top:var(--p0y,72%);opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1}100%{left:var(--p1x,72%);top:var(--p1y,38%);transform:translate(-50%,-50%) scale(1.4);opacity:.2}}
+@keyframes cbP1{0%{left:var(--p1x,70%);top:var(--p1y,40%);opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1}100%{left:var(--p0x,28%);top:var(--p0y,76%);transform:translate(-50%,-50%) scale(1.4);opacity:.2}}
+.cb-en{position:relative;height:13px;border-radius:7px;margin-top:4px;background:rgba(255,255,255,.08);overflow:hidden}
+.cb-en i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#8f6bff,#ff2bd6,#ffd24a);border-radius:7px}
+.cb-en span{position:relative;display:block;text-align:center;font:800 8.5px/13px "Chakra Petch",sans-serif;letter-spacing:.12em;color:#fff;text-shadow:0 1px 2px #000}
+.cb-en.full{box-shadow:0 0 12px #ffd24a;animation:cbEnF 1s ease-in-out infinite}@keyframes cbEnF{50%{box-shadow:0 0 22px #ffd24a,0 0 4px #fff}}
+.cb-ultb{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:1px;width:100%;margin-bottom:6px;padding:8px 12px;border-radius:14px;overflow:hidden;text-align:left;color:#fff;background:#191838;border:1px solid color-mix(in srgb,var(--tc) 60%,transparent)}
+.cb-ultb .cb-ulf{position:absolute;left:0;top:0;bottom:0;width:var(--p);background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 25%,transparent),color-mix(in srgb,var(--tc) 55%,transparent));transition:width .4s}
+.cb-ultb b,.cb-ultb small{position:relative}.cb-ultb b{font:800 13px "Chakra Petch",sans-serif;letter-spacing:.04em}.cb-ultb small{font-size:10px;color:#d6d3f5}
+.cb-ultb:disabled{opacity:1;filter:saturate(.75)}.cb-ultb:disabled b{opacity:.75}
+.cb-ultb.ready{border-color:#ffd24a;box-shadow:0 0 18px rgba(255,210,74,.55);animation:cbUlt2 1.1s ease-in-out infinite}.cb-ultb.ready .cb-ulf{background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 55%,#ffd24a),#ffd24a)}.cb-ultb.ready b,.cb-ultb.ready small{color:#160d00;text-shadow:none}
+@keyframes cbUlt2{50%{transform:scale(1.02);box-shadow:0 0 30px rgba(255,210,74,.85)}}
+.cbultl{display:flex;flex-direction:column;gap:4px;margin:0 0 8px}.cbultl small{font-size:11px;color:var(--muted)}
+.ar-resume{border-color:#ffd24a;background:linear-gradient(120deg,#3a2a05,#1b1d45)}
+.arena{margin-top:10px}

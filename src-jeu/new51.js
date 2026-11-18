@@ -219,7 +219,11 @@ function cbDesc(m){ if(!m) return ''; const f=m.fx||{}, o=[];
   if(f.shield) o.push('Sacrifie '+pct(f.shield)+' du blindage pour un bouclier'); if(f.hazard) o.push('Gravillons : les voitures adverses qui entrent perdent 1/8');
   if(f.veil) o.push('Dégâts reçus divisés par 2 pendant 5 tours'); if(f.ignore) o.push('Ignore les crans de l’adversaire'); if(f.wxacc) o.push('Ne rate jamais sous '+f.wxacc.map(w=>CB_WX[w].n).join(' ou '));
   if(f.thaw) o.push('Dégèle la voiture'); return o.join('. ')+'.'; }
-const cbLearnable=(types,lv)=>Object.values(CB_MV).filter(m=>(m.t==='meca'||types.includes(m.t))&&m.lv<=lv).sort((a,b)=>a.lv-b.lv);
+/* les attaques à Énergie (ultimes, légendaires) ne vont pas dans les 4 emplacements : chaque voiture a son ULTIME attitrée */
+const cbLearnable=(types,lv)=>Object.values(CB_MV).filter(m=>!m.e&&(m.t==='meca'||types.includes(m.t))&&m.lv<=lv).sort((a,b)=>a.lv-b.lv);
+function cbUltOf(ty,lv){ const all=Object.values(CB_MV).filter(m=>m.e>0), t=ty[0];
+  const leg=all.filter(m=>m.e>=100&&m.t===t&&lv>=m.lv)[0]||(lv>=46&&!all.some(m=>m.e>=100&&m.t===t)?CB_MV.bombestellaire:null);
+  return (leg||all.find(m=>m.e<100&&m.t===t)||CB_MV.modecourse).id; }
 
 /* ---- talents (compétences passives, 1 par voiture) ----
    k : déclencheur lu par le moteur (pinch, immune, absorb, entry, wxset, turn, stat, dmgIn, dmgOut, crit, contact, guard...) */
@@ -289,4 +293,4 @@ const CB_IT={
   depann:  {n:'Kit de remorquage',ic:'🚚',revive:.5,px:3500,d:'Remet en état une voiture K.O. (50 % du blindage).'}
 };
 const CB_IT_MAX=4;
-const CB_ENERGY={start:20,turn:10,hit:5,max:100};                        /* jauge d'Énergie (attaques ultimes) */
+const CB_ENERGY={start:20,turn:8,hit:6,deal:12,max:100};                  /* jauge d'ultime : +8 par tour, +12 quand on touche, +6 quand on est touché */
