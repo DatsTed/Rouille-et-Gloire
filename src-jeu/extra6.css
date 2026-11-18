@@ -1,0 +1,66 @@
+/* ===== v1.4 ===== */
+/* fond uni : plus de motif de feuilles ni de quadrillage */
+body{background:radial-gradient(900px 420px at 50% -10%,rgba(0,229,255,.07),transparent 62%),radial-gradient(700px 420px at 100% 105%,rgba(255,212,0,.04),transparent 58%),var(--bg)}
+
+/* pavé de course : volant plus grand, pédales moins larges (même hauteur) */
+.pad49{grid-template-columns:clamp(128px,38vw,172px) minmax(0,.6fr) minmax(0,.76fr) minmax(0,1.02fr)}
+.pad49.p3{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1.5fr)}
+.pad49 .steer{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.pad49 .steer .wheel{width:130px;height:130px;flex:none}
+.pad49 .steer .lab{margin:0}
+.pad49 .dnk>.pedal{width:100%;min-width:0}
+.pad49 .dnk .pedal.nit{font-size:10px;gap:3px;padding:0 2px;overflow:hidden;white-space:nowrap}
+.pad49 .dnk .pedal.nit::before{font-size:13px}
+.pad49 .dnk .pedal.nit small{font-size:10px}
+.pad49 .pedal.gas.big span{padding:0 4px}
+@media (min-height:850px){.pad49{height:162px}.pad49 .steer .wheel{width:142px;height:142px}}
+@media (max-height:780px){.pad49{height:128px}.pad49 .steer .wheel{width:110px;height:110px}}
+@media (max-height:680px){.pad49{height:116px}.pad49 .steer .wheel{width:98px;height:98px}}
+/* boutons sous le pavé : plus compacts */
+.race #bAud,.race #bCam,.race #bResp,.race #bQuit{min-height:0;padding:7px 4px;font-size:10px;line-height:1.15;letter-spacing:.02em}
+
+/* boutons recentrés (atelier : raretés et emplacements) */
+.x-slots button,.x-rar button{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px}
+.x-rar button b{line-height:1.15}
+
+/* garage 3D : le sac à dos n'apparaît que dans le labo */
+body:not(.inlab50) .hubw .bagbtn[data-a="inv"]{display:none!important}
+
+/* missions : paliers de niveau */
+.pal50{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;margin-right:10px;font:700 14px/1 "Chakra Petch",system-ui,sans-serif;color:var(--muted);border:2px solid var(--line);background:rgba(255,255,255,.03)}
+.pal50.ok{color:#0b1020;background:linear-gradient(135deg,#ffd24a,#ff9a1a);border-color:#ffd24a;box-shadow:0 0 14px rgba(255,210,74,.55);animation:pal50 1.6s ease-in-out infinite}
+.pal50.got{color:#3cff9e;border-color:rgba(60,255,158,.5)}
+@keyframes pal50{50%{transform:scale(1.08)}}
+.claimall{margin:0 0 12px}
+
+/* paquets : halo de la couleur du paquet, étincelles, flash d'arrivée */
+#pk3{position:relative}
+#pk3::before{content:"";position:absolute;left:18%;right:18%;top:6%;bottom:18%;border-radius:50%;background:radial-gradient(closest-side,var(--hc,#00e5ff),transparent);opacity:.3;filter:blur(22px);pointer-events:none;z-index:0;animation:halo50 3.2s ease-in-out infinite;transition:background .4s}
+@keyframes halo50{50%{opacity:.48;transform:scale(1.06)}}
+#pk3 .ring{z-index:1}
+.fx50{position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.fx50 i{position:absolute;left:calc(26% + var(--k)*6%);bottom:20%;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 8px 2px var(--hc,#00e5ff),0 0 2px #fff;opacity:0;animation:spark50 calc(2.4s + var(--k)*.23s) ease-in infinite;animation-delay:calc(var(--k)*-.41s)}
+.fx50 i:nth-child(3n){width:3px;height:3px;box-shadow:0 0 6px 2px var(--hc2,#ff2bd6)}
+@keyframes spark50{0%{opacity:0;transform:translate(0,0) scale(.6)}15%{opacity:1}100%{opacity:0;transform:translate(calc((var(--k) - 4)*9px),-190px) scale(1.2)}}
+.pk{transition:filter .25s}
+.pk.sel{filter:drop-shadow(0 16px 26px rgba(0,0,0,.55)) drop-shadow(0 0 18px color-mix(in srgb,var(--c1) 55%,transparent))}
+.pk.land50{animation:land50 .5s ease-out}
+@keyframes land50{0%{filter:brightness(2.1) drop-shadow(0 0 28px var(--c1))}100%{filter:drop-shadow(0 16px 26px rgba(0,0,0,.55)) drop-shadow(0 0 18px color-mix(in srgb,var(--c1) 55%,transparent))}}
+.pkcat button{transition:transform .18s var(--ease),background .25s,color .25s}
+.pkcat button:active,.pkq button:active,.pkInfo .btn:active{transform:scale(.94)}
+.pkInfo{animation:pkin50 .35s var(--ease)}
+@keyframes pkin50{from{opacity:.4;transform:translateY(6px)}}
+.dots i{transition:transform .3s var(--ease),background .3s,width .3s}
+.dots i.on{transform:scale(1.35)}
+
+/* explosion à l'ouverture d'un paquet et à la révélation d'une carte rare */
+.burst50{position:fixed;inset:0;pointer-events:none;z-index:99999;display:grid;place-items:center}
+.burst50 .fl{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#fff 0,color-mix(in srgb,var(--bc) 60%,transparent) 22%,transparent 60%);animation:bfl50 .55s ease-out forwards}
+.burst50.big .fl{animation-duration:.85s}
+@keyframes bfl50{0%{opacity:.95}100%{opacity:0}}
+.burst50 i{position:absolute;left:50%;top:45%;width:9px;height:9px;margin:-4px;border-radius:2px;background:var(--bc);box-shadow:0 0 10px var(--bc);opacity:0;animation:bpt50 .9s cubic-bezier(.15,.8,.3,1) forwards;animation-delay:var(--d)}
+.burst50 i:nth-child(2n){border-radius:50%;background:#fff}
+@keyframes bpt50{0%{opacity:1;transform:translate(0,0) scale(var(--s)) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2) rotate(240deg)}}
+.bigc.in{animation:flip50 .5s cubic-bezier(.2,.9,.3,1.25)}
+@keyframes flip50{0%{transform:perspective(700px) rotateY(90deg) scale(.85);filter:brightness(2)}100%{transform:none;filter:none}}
+@media (prefers-reduced-motion:reduce){#pk3::before,.fx50 i,.pal50.ok{animation:none}}

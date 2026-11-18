@@ -9,3 +9,6 @@ android/build/
 android/app/build/
 android/app/src/main/assets/www/
 android/local.properties
+
+# Config locale de l'app Claude
+.claude/

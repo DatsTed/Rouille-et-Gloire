@@ -27,6 +27,15 @@
 ## Ce qui n'est pas vérifié
 Le rendu 3D réel (décor du labo, circuits), l'audio à l'oreille, le toucher sur téléphone et l'équilibrage sur une longue session.
 
+## v1.4 (new50.js, voix50.js, extra6.css)
+- Barre du bas à 6 onglets (Base revenu, retiré des sous-onglets de l'Atelier).
+- Missions : paliers `lv2…lv30` (catégorie « Paliers », avec m38/m9/m39), `claimBar()` remis en haut.
+- Garage 3D : `hubSecret` neutralisé (plus de cloison), `farm().found` mis à 1 dès que le labo est débloqué ; 🎒 masqué hors des cartes GROW (classe `body.inlab50`).
+- Spa (TRK.cur nul) : `buildSpa` enveloppé → `spaLines50` ne garde que les lignes de bord de piste, `spaCity50` ajoute ~290 immeubles à fenêtres éclairées et liserés néon, rangés dans les tuiles.
+- Paquets : `pkLayout` à ressort, déclic + vibration à chaque paquet, halo `--hc`, étincelles `.fx50`, `burst50()` à l'ouverture et sur les cartes rares.
+- Intro : `CS` vidé (plus de texte, le titre final reste), voix off `VOIX50` (synthèse vocale Windows « Paul », WAV 12 kHz) jouée selon `VO50` dans `cineBuild`.
+- Pavé de course : volant 130–142 px, pédales plus étroites (extra6.css).
+
 ## v1.3
 - new23: saucers repositioned (scan), closed hole = pass-through, speed gate, ramp mouths at walls.
 - new48: pcar tok:50, openCarPack pays tokens when k==='tok' (sheet.k kept for "Encore un").
