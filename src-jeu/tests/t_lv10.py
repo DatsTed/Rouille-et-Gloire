@@ -1,0 +1,38 @@
+# v1.5 · éveil cosmique (new55) : proposition au niveau 10, « Plus tard », cinématique, déblocage du mode Combat, cloisonnement.
+import asyncio, os, sys
+from playwright.async_api import async_playwright
+URL = 'file:///' + os.path.abspath('out.html').replace('\\', '/')
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch(args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'])
+        pg = await b.new_page(viewport={'width': 390, 'height': 844})
+        errs = []; pg.on('pageerror', lambda e: errs.append(str(e)[:300]))
+        await pg.goto(URL); await pg.wait_for_timeout(2500); E = []
+        await pg.evaluate("()=>{ S=fresh(); S.age18=true; S.intro=true; S.seenVer=GAME_VER; S.lvl=9; S.tx={}; Object.keys(TUTX||{}).forEach(k=>S.tx[k]=1); S.unlQ=[]; try{closeSheet()}catch(e){} save(); window.__race0=JSON.stringify(S.cars.map(c=>st(c))); }")
+        await pg.wait_for_timeout(3800)
+        if await pg.evaluate("()=>sheet&&sheet.t==='lv10'"): E.append('proposé avant le niveau 10')
+        if await pg.evaluate("()=>{ ACT.cbtrain(); return !!CBV; }"): E.append('combat possible avant l’éveil')
+        await pg.evaluate("()=>{ S.lvl=10; S.unlQ=[]; try{closeSheet()}catch(e){} }"); await pg.wait_for_timeout(3800)
+        if not await pg.evaluate("()=>sheet&&sheet.t==='lv10'"): E.append('pas de fenêtre de confirmation au niveau 10 : %s' % await pg.evaluate("()=>sheet&&sheet.t"))
+        await pg.evaluate("()=>ACT.lv10later()"); await pg.wait_for_timeout(3800)
+        if await pg.evaluate("()=>sheet&&sheet.t==='lv10'"): E.append('« Plus tard » ignoré')
+        await pg.evaluate("()=>{ ACT.tab({id:'epreuves'}); }"); await pg.wait_for_timeout(300)
+        if not await pg.evaluate("()=>!!document.querySelector('.cz-entry[data-a=lv10ask]')"): E.append('pas d’accès à l’éveil dans Épreuves')
+        await pg.evaluate("()=>{ czAwaken({auto:true,speed:14}); }"); await pg.wait_for_timeout(1500)
+        if not await pg.evaluate("()=>!!document.getElementById('cosmic')&&!!window.__cz"): E.append('cinématique non lancée')
+        await pg.wait_for_timeout(4500)
+        st = await pg.evaluate("()=>({seen:S.niveau10CinematicSeen,sheet:sheet&&sheet.t,ov:!!document.getElementById('cosmic'),bag:!!S.cbBag,cmb:Object.keys(S.cmb||{}).length})")
+        if st['seen'] is not True or st['sheet'] != 'cbunlock' or st['ov'] or not st['bag'] or not st['cmb']: E.append('après la cinématique : %s' % st)
+        await pg.evaluate("()=>{ closeSheet(); ACT.tab({id:'epreuves'}); }"); await pg.wait_for_timeout(300)
+        if not await pg.evaluate("()=>!!document.querySelector('.cz-entry[data-a=cbarena]')"): E.append('pas d’accès à l’Arène après l’éveil')
+        await pg.evaluate("()=>{ ACT.car({id:String(S.cars[0].uid)}); }"); await pg.wait_for_timeout(300)
+        if not await pg.evaluate("()=>!!$('sheet').querySelector('.cbsec')"): E.append('fiche de combat absente du garage')
+        await pg.evaluate("()=>{ closeSheet(); ACT.tab({id:'base'}); }"); await pg.wait_for_timeout(300)
+        has_cine = await pg.evaluate("()=>!!document.querySelector('#view [data-a=cine]')")
+        if has_cine and not await pg.evaluate("()=>!!document.querySelector('#view [data-a=cosmic]')"): E.append('pas de bouton pour revoir l’éveil')
+        if await pg.evaluate("()=>{ try{closeSheet()}catch(e){} ACT.arena(); return !CBV; }"): E.append('l’Arène ne lance pas de duel')
+        await pg.evaluate("()=>{ if(CBV) cbClose(); }")
+        if await pg.evaluate("()=>JSON.stringify(S.cars.map(c=>st(c)))!==window.__race0"): E.append('les caractéristiques de course ont changé')
+        if await pg.evaluate("()=>{ S.lvl=12; delete S.lv10Later; return new Promise(r=>setTimeout(()=>r(sheet&&sheet.t==='lv10'),3600)); }"): E.append('reproposé après l’éveil')
+        print('ERREURS' if E or errs else 'OK', E, errs); await b.close(); sys.exit(1 if E or errs else 0)
+asyncio.run(main())

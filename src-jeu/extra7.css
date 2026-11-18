@@ -106,3 +106,23 @@ body.cbon{overflow:hidden}
 @media (max-height:700px){.cb-menu{min-height:150px;padding-top:6px}.cb-mb,.cb-ib,.cb-tb{padding:7px 9px}.cb-log{height:46px}}
 @media (prefers-reduced-motion:reduce){.cb-aura,.cb-wx{animation:none!important}}
 .cb-menu.busy .cb-tabs,.cb-menu.busy .cb-mvs,.cb-menu.busy .cb-its,.cb-menu.busy .cb-tm,.cb-menu.busy .cb-go{opacity:.45;pointer-events:none;filter:saturate(.6)}
+
+/* ---- cinématique de l'éveil cosmique ---- */
+#cosmic{position:fixed;inset:0;z-index:99995;background:#05030f;overflow:hidden;color:#fff}
+#cosmic canvas{position:absolute;inset:0}
+.cz-bar{position:absolute;left:0;right:0;height:9%;background:#000;z-index:2}.cz-bar.t{top:0}.cz-bar.b{bottom:0}
+.cz-flash{position:absolute;inset:0;z-index:3;background:radial-gradient(circle at 55% 60%,#fff,#e6d2ff 40%,rgba(160,100,255,.6));opacity:0;pointer-events:none}
+.cz-flash.on{animation:czFl 1.6s ease-out forwards}@keyframes czFl{0%{opacity:0}6%{opacity:1}100%{opacity:0}}
+.cz-cap{position:absolute;z-index:4;left:6%;right:6%;bottom:12%;text-align:center;font:600 16px/1.35 system-ui,sans-serif;text-shadow:0 2px 6px #000,0 0 18px rgba(143,107,255,.8);opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s}
+.cz-cap.on{opacity:1;transform:none}
+.cz-title{position:absolute;z-index:4;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity 1.2s;pointer-events:none}
+.cz-title b{font:800 clamp(28px,9vw,54px) "Chakra Petch",sans-serif;letter-spacing:.12em;background:linear-gradient(90deg,#00e5ff,#c39bff,#ff2bd6,#ffd24a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(195,155,255,.8))}
+.cz-title span{font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:#e8dcff}
+.cz-title.on{opacity:1}
+.cz-skip{position:absolute;z-index:6;right:4%;top:calc(9% + 10px);padding:6px 12px;border-radius:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:12px}
+.cz-go{position:absolute;inset:0;z-index:7;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;background:radial-gradient(circle at 50% 40%,#2a1358,#05030f 70%);cursor:pointer}
+.cz-go b{font:800 34px "Chakra Petch",sans-serif;letter-spacing:.14em;color:#e8dcff;text-shadow:0 0 20px #8f6bff}.cz-go span{font-size:13px;color:#b9b2e6;line-height:1.5}
+.cz-entry{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;margin:0 0 12px;padding:14px 16px;border-radius:16px;text-align:left;color:#fff;background:linear-gradient(120deg,#2a1358,#11204a 60%,#3a0f3f);border:1px solid rgba(195,155,255,.55);box-shadow:0 0 24px rgba(143,107,255,.25);position:relative;overflow:hidden}
+.cz-entry b{font:800 16px "Chakra Petch",sans-serif;letter-spacing:.06em}.cz-entry small{color:#c9c2f0;font-size:12px}
+.cz-entry::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);transform:translateX(-100%);animation:czShine 3.5s ease-in-out infinite}@keyframes czShine{60%,100%{transform:translateX(100%)}}
+.cz-sh .ulist{max-height:38vh;overflow:auto}
