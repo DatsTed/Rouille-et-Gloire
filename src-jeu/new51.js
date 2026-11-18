@@ -15,9 +15,9 @@ const CB_CHART={
   feu:  [['glace','acier','vent'],['feu','eau','terre'],[]],
   eau:  [['feu','terre','acier'],['eau','glace','vent'],[]],
   glace:[['vent','terre','eau'],['feu','acier','glace'],[]],
-  vent: [['tene','eau'],['acier','elec','vent'],[]],
+  vent: [['tene','eau','terre'],['acier','elec','vent'],[]],
   tene: [['lum','elec'],['tene','feu','acier'],[]],
-  lum:  [['tene','vent'],['lum','acier','feu'],[]],
+  lum:  [['tene','glace'],['lum','acier','feu'],[]],
   elec: [['eau','vent','acier'],['elec','lum'],['terre']],
   acier:[['glace','lum','terre'],['feu','acier','eau','elec'],[]],
   terre:[['elec','feu','acier'],['glace','eau'],['vent']],
@@ -36,8 +36,8 @@ const cbStageK=(st,n)=>{ n=Math.max(-6,Math.min(6,n|0)); return st==='acc'||st==
 const CB_CRIT=[1/24,1/8,1/2,1];                                          /* chance de critique par cran (×1,5) */
 /* profil de base par type (somme ≈ 480) : sert aux fiches des voitures (new52) */
 const CB_TPROF={
-  feu:  {hp:75,atk:90,def:65,spa:100,spd:65,vit:85}, eau:  {hp:90,atk:70,def:80,spa:90,spd:85,vit:65},
-  glace:{hp:80,atk:75,def:85,spa:95,spd:80,vit:65}, vent: {hp:70,atk:80,def:60,spa:85,spd:65,vit:120},
+  feu:  {hp:75,atk:90,def:65,spa:100,spd:65,vit:85}, eau:  {hp:95,atk:78,def:82,spa:95,spd:88,vit:70},
+  glace:{hp:80,atk:75,def:85,spa:95,spd:80,vit:65}, vent: {hp:80,atk:85,def:68,spa:88,spd:72,vit:122},
   tene: {hp:75,atk:100,def:70,spa:85,spd:70,vit:80}, lum:  {hp:85,atk:65,def:75,spa:100,spd:95,vit:60},
   elec: {hp:65,atk:70,def:60,spa:110,spd:75,vit:100},acier:{hp:85,atk:95,def:115,spa:55,spd:85,vit:45},
   terre:{hp:100,atk:105,def:95,spa:55,spd:65,vit:60}, meca: {hp:85,atk:85,def:80,spa:75,spd:75,vit:80}

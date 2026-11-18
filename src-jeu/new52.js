@@ -5,7 +5,7 @@
 const cbAwake=()=>!!(S&&S.niveau10CinematicSeen===true);
 /* types par modèle (double type pour la plupart) */
 const CB_CARTY={
-  piccola:['vent'], kombi:['eau','meca'], steppe:['terre','glace'], riva:['vent','elec'], hauler:['terre','feu'],
+  piccola:['vent','lum'], kombi:['eau','terre'], steppe:['terre','glace'], riva:['vent','elec'], hauler:['terre','feu'],
   patrouille:['lum','elec'], velo:['vent','meca'], subi:['eau','vent'], audi:['acier','glace'], merco:['lum','acier'],
   touge:['vent','feu'], fury:['feu','tene'], rx4:['feu','elec'], gts:['elec','vent'], volta:['elec','lum'],
   majestic:['lum','tene'], rossa:['feu','acier'], aurion:['elec','eau'], solus:['tene','vent'], epave:['acier','terre']
@@ -15,14 +15,14 @@ const cbTypesOf=mid=>CB_CARTY[mid]||((M[mid]&&M[mid].t>=4)?['meca','acier']:['me
 const cbNeed=l=>Math.round(.8*Math.pow(Math.max(1,l),3));
 const cbLvOfXp=x=>{ let l=1; while(l<CB_LVMAX&&cbNeed(l+1)<=x) l++; return l; };
 function cbBase(mid){
-  const m=M[mid]||{t:1,kg:1200}, ty=cbTypesOf(mid), p1=CB_TPROF[ty[0]], p2=CB_TPROF[ty[1]||ty[0]], kgF=clamp((m.kg||1200)/1300,.55,1.6), tier=1+.07*((m.t||1)-1), o={};
-  CB_SK.forEach(k=>{ let v=p1[k]*.62+p2[k]*.38; if(k==='hp') v*=Math.pow(kgF,.35); if(k==='def') v*=Math.pow(kgF,.25); if(k==='vit') v/=Math.pow(kgF,.3); o[k]=Math.round(v*tier); });
+  const m=M[mid]||{t:1,kg:1200}, ty=cbTypesOf(mid), p1=CB_TPROF[ty[0]], p2=CB_TPROF[ty[1]||ty[0]], kgF=clamp((m.kg||1200)/1300,.7,1.5), tier=1+.035*((m.t||1)-1), o={};
+  CB_SK.forEach(k=>{ let v=p1[k]*.62+p2[k]*.38; if(k==='hp') v*=Math.pow(kgF,.2); if(k==='def') v*=Math.pow(kgF,.15); if(k==='vit') v/=Math.pow(kgF,.2); o[k]=Math.round(v*tier); });
   return o; }
 function cbAutoMoves(ty,lv){
   const L=cbLearnable(ty,lv), off=L.filter(m=>m.c!=='sta'&&!(m.fx.selfko)), pick=[];
   const best=f=>off.filter(f).filter(m=>!pick.includes(m.id)).sort((a,b)=>(b.p*(b.a||100))-(a.p*(a.a||100))||b.lv-a.lv)[0];
   ty.forEach(t=>{ const m=best(x=>x.t===t&&!x.e); if(m) pick.push(m.id); });
-  { const m=best(x=>x.t==='meca'&&!x.e); if(m) pick.push(m.id); }
+  { const u=best(x=>x.e>0&&x.t!=='meca'&&ty.includes(x.t)), m=best(x=>x.t==='meca'&&!x.e); if(u) pick.push(u.id); else if(m) pick.push(m.id); }
   { const st=L.filter(m=>m.c==='sta'&&(ty.includes(m.t)||m.t==='meca')&&!pick.includes(m.id)).sort((a,b)=>b.lv-a.lv)[0]; if(st&&pick.length<4) pick.push(st.id); }
   while(pick.length<4){ const m=best(()=>true); if(!m) break; pick.push(m.id); }
   return pick.slice(0,4); }
