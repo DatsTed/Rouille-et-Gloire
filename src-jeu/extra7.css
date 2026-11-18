@@ -1,4 +1,4 @@
-/* ===== v1.5 · Éveil cosmique : fiches et combats ===== */
+﻿/* ===== v1.5 · Éveil cosmique : fiches et combats ===== */
 .cbsec{border:1px solid rgba(143,107,255,.45);border-radius:16px;padding:12px;background:linear-gradient(160deg,rgba(143,107,255,.12),rgba(0,229,255,.05));box-shadow:0 0 22px rgba(143,107,255,.15)}
 .cbsec h3{margin-top:0}
 .cbhd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
@@ -20,3 +20,89 @@
 .cbl.on .cbmv{outline:2px solid #fff}.cbl.eq{opacity:.55}.cbl.nw .cbmv::after{content:"NOUVEAU";font-size:9px;font-weight:800;color:#ffd24a}
 .cblearn.soon{opacity:.5}.cbsel{font-size:12px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06)}
 .cbnew{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#ffd24a;color:#0b1020;font-size:10px;font-weight:800}
+
+/* ---- écran de duel ---- */
+body.cbon{overflow:hidden}
+#cbov{position:fixed;inset:0;z-index:99990;display:flex;flex-direction:column;background:#07051a;color:#e8ebff;font-family:inherit;padding-bottom:env(safe-area-inset-bottom)}
+.cb-ar{position:relative;flex:1 1 auto;min-height:230px;overflow:hidden;touch-action:manipulation}
+.cb-sky{position:absolute;inset:0;background:radial-gradient(120% 70% at 70% 0%,#3a1466 0,#170a35 45%,#07051a 80%)}
+.cb-city{position:absolute;left:0;right:0;bottom:34%;height:34%;opacity:.55;background:
+  linear-gradient(90deg,transparent 0 4%,#1a1840 4% 11%,transparent 11% 14%,#221d52 14% 22%,transparent 22% 25%,#16163a 25% 31%,transparent 31% 36%,#251f58 36% 45%,transparent 45% 49%,#1b1a45 49% 57%,transparent 57% 60%,#231c50 60% 70%,transparent 70% 73%,#18173f 73% 82%,transparent 82% 85%,#211c4f 85% 94%,transparent 94%) bottom/100% 100% no-repeat;
+  -webkit-mask:linear-gradient(0deg,#000 0 30%,transparent 30% 34%,#000 34% 60%,transparent 60% 63%,#000 63%);mask:linear-gradient(0deg,#000 0 30%,transparent 30% 34%,#000 34% 60%,transparent 60% 63%,#000 63%)}
+.cb-ar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:36%;background:linear-gradient(180deg,#1b1d45,#0d0c26);border-top:2px solid rgba(0,229,255,.35);box-shadow:0 -6px 30px rgba(255,43,214,.18)}
+.cb-pad{position:absolute;z-index:1;border-radius:50%;background:radial-gradient(closest-side,rgba(0,229,255,.35),rgba(0,229,255,.05) 70%,transparent);height:12%}
+.cb-pad.foe{right:4%;width:48%;top:46%}.cb-pad.me{left:2%;width:54%;bottom:3%}
+.cb-car{position:absolute;z-index:3;transition:filter .2s}
+.cb-car.foe{right:6%;width:44%;top:26%}.cb-car.me{left:4%;width:50%;bottom:6%}
+.cb-car.foe .cb-cw{transform:scaleX(-1)}
+.cb-cw svg{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6)) drop-shadow(0 0 10px var(--t))}
+.cb-aura{position:absolute;inset:-12% -6%;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--tc) 40%,transparent),transparent);opacity:.55;animation:cbAura 2.4s ease-in-out infinite;z-index:-1}
+@keyframes cbAura{50%{opacity:.9;transform:scale(1.06)}}
+.cb-box{position:absolute;z-index:4;padding:8px 10px;border-radius:14px;background:rgba(14,14,40,.86);border:1px solid rgba(255,255,255,.14);box-shadow:0 6px 18px rgba(0,0,0,.4);backdrop-filter:blur(4px)}
+.cb-box.foe{left:3%;top:3%;width:54%}.cb-box.me{right:3%;bottom:5%;width:46%}
+.cb-nm{display:flex;justify-content:space-between;gap:6px;font-size:13px}.cb-nm b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cb-nm span{font:700 11px "Chakra Petch",sans-serif;color:#ffd24a;flex:none}
+.cb-tys{display:flex;align-items:center;gap:4px;margin:4px 0;font-size:12px;flex-wrap:wrap}.cb-tys>span[style]{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,var(--tc) 35%,transparent);border:1px solid var(--tc)}
+.cb-st{padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;background:color-mix(in srgb,var(--sc) 30%,transparent);border:1px solid var(--sc)}.cb-vl{font-size:12px}
+.cb-team{margin-left:auto;display:flex;gap:3px}.cb-team b{width:7px;height:7px;border-radius:50%;background:#3cff9e}.cb-team b.ko{background:#55597a}.cb-team b.on{box-shadow:0 0 0 2px rgba(255,255,255,.5)}
+.cb-hp{height:8px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}.cb-hp i{display:block;height:100%;border-radius:6px;transition:width .45s ease,background .3s}
+.cb-hpn{font:700 11px "Chakra Petch",sans-serif;text-align:right;margin-top:2px}
+.cb-en{height:3px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:3px}.cb-en i{display:block;height:100%;background:linear-gradient(90deg,#8f6bff,#ff2bd6);transition:width .4s}
+.cb-stg{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}.cb-stg i{font-style:normal;font-size:9px;padding:1px 5px;border-radius:6px}.cb-stg i.up{background:rgba(60,255,158,.18);color:#3cff9e}.cb-stg i.dn{background:rgba(255,77,109,.18);color:#ff6a8a}
+.cb-wxb{position:absolute;z-index:5;left:50%;transform:translateX(-50%);top:calc(3% + 4px);font-size:10px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.45);white-space:nowrap}.cb-wxb:empty{display:none}
+.cb-wxb{top:auto;bottom:38%;left:auto;right:3%;transform:none;z-index:5}
+.cb-quit{position:absolute;z-index:6;right:3%;top:3%;width:34px;height:34px;border-radius:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.18);font-size:16px}
+.cb-quit.arm{background:#ff4d6d;animation:cbarm 1s infinite}
+.cb-log{flex:none;height:58px;padding:6px 12px;background:#0d0c26;border-top:1px solid rgba(255,255,255,.08);overflow:hidden;font-size:12px;line-height:1.3}
+.cb-log p{margin:0;color:#8b90c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cb-log p.on{color:#fff;font-weight:600}
+.cb-menu{flex:none;padding:8px 10px 12px;background:#11102e;min-height:178px}
+.cb-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}.cb-tabs button{padding:7px 4px;border-radius:12px;font-size:12px;font-weight:700;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#c9cdf2}.cb-tabs button.on{background:#00e5ff;color:#05121a;border-color:#00e5ff}
+.cb-mvs,.cb-its,.cb-tm{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cb-mb,.cb-ib,.cb-tb{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 10px;border-radius:14px;text-align:left;color:#fff;min-width:0;background:linear-gradient(160deg,color-mix(in srgb,var(--tc,#5a5f99) 34%,#14143a),#14143a);border:1px solid color-mix(in srgb,var(--tc,#5a5f99) 70%,transparent);transition:transform .12s}
+.cb-mb:active,.cb-ib:active,.cb-tb:active{transform:scale(.96)}.cb-mb:disabled,.cb-ib:disabled,.cb-tb:disabled{opacity:.35}
+.cb-mb b,.cb-ib b,.cb-tb b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.cb-mb small,.cb-ib small,.cb-tb small{font-size:10px;color:#b5b9e6}
+.cb-mb em{position:absolute;right:6px;top:5px;font-style:normal;font-size:8.5px;font-weight:800;text-transform:uppercase}.cb-mb em.se{color:#3cff9e}.cb-mb em.nve{color:#ff8aa0}
+.cb-mb.ult{box-shadow:0 0 14px color-mix(in srgb,var(--tc) 60%,transparent)}
+.cb-tb i{display:block;width:100%;height:4px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}.cb-tb em{display:block;height:100%}
+.cb-ib small{white-space:normal;line-height:1.2}
+.cb-note{font-size:11px;color:#8b90c8;margin:6px 2px 0}.cb-h{font-weight:700;margin:2px 0 8px}
+.cb-wait{display:grid;place-items:center;height:150px;color:#8b90c8;font-size:12px}
+.cb-go{margin-top:30px}
+.cb-end{text-align:center;padding:4px}.cb-et{font:800 24px "Chakra Petch",sans-serif;letter-spacing:.08em;margin:4px 0 8px}.cb-end.win .cb-et{color:#ffd24a;text-shadow:0 0 18px rgba(255,210,74,.6)}.cb-end.lose .cb-et{color:#ff6a8a}
+.cb-xpl{display:flex;flex-direction:column;gap:1px;padding:6px 10px;margin:4px 0;border-radius:12px;background:rgba(255,255,255,.05);text-align:left;font-size:12px}.cb-xpl em{color:#3cff9e;font-style:normal;font-weight:800}.cb-xpl small{color:#ffd24a}
+.cb-end .btn{margin-top:8px}
+/* animations */
+.cb-car.cb-in{animation:cbIn .7s cubic-bezier(.2,.9,.3,1.2)}@keyframes cbIn{0%{opacity:0;transform:translateX(-40%) scale(.6)}100%{opacity:1;transform:none}}
+.cb-car.foe.cb-in{animation-name:cbInF}@keyframes cbInF{0%{opacity:0;transform:translateX(40%) scale(.6)}100%{opacity:1;transform:none}}
+.cb-car.cb-out{animation:cbOut .5s ease-in forwards}@keyframes cbOut{to{opacity:0;transform:scale(.5)}}
+.cb-car.me.cb-lunge{animation:cbL0 .5s ease}@keyframes cbL0{40%{transform:translate(14%,-10%) scale(1.05)}}
+.cb-car.foe.cb-lunge{animation:cbL1 .5s ease}@keyframes cbL1{40%{transform:translate(-14%,10%) scale(1.05)}}
+.cb-car.cb-hit{animation:cbHit .45s ease}@keyframes cbHit{0%,100%{transform:none;filter:none}20%{transform:translateX(-6%);filter:brightness(3) saturate(0)}40%{transform:translateX(5%)}60%{transform:translateX(-3%);filter:brightness(2) saturate(0)}80%{transform:translateX(2%)}}
+.cb-car.cb-glow{animation:cbGlow .7s ease}@keyframes cbGlow{50%{filter:drop-shadow(0 0 18px #3cff9e) brightness(1.4)}}
+.cb-car.cb-faint{animation:cbFaint .9s ease-in forwards}@keyframes cbFaint{to{opacity:0;transform:translateY(30%) rotate(8deg) scale(.85);filter:grayscale(1)}}
+.cb-car.cb-gone{opacity:0}
+.cb-ar.cb-shake{animation:cbShake .4s}@keyframes cbShake{25%{transform:translate(4px,-3px)}50%{transform:translate(-4px,3px)}75%{transform:translate(3px,2px)}}
+.cb-ar.cb-ultf::before{content:"";position:absolute;inset:0;z-index:7;background:radial-gradient(circle,#fff,transparent 70%);animation:cbUlt .7s ease-out forwards;pointer-events:none}@keyframes cbUlt{0%{opacity:.9}100%{opacity:0}}
+.cb-fx{position:absolute;inset:0;z-index:8;pointer-events:none}
+.cbfx{position:absolute;transform:translate(-50%,-50%)}.cbfx.s0{left:28%;top:76%}.cbfx.s1{left:72%;top:38%}
+.cb-proj{font-size:30px;filter:drop-shadow(0 0 12px var(--tc)) drop-shadow(0 0 4px #fff)}
+.cb-proj.s0{animation:cbP0 .6s ease-in forwards}@keyframes cbP0{0%{left:30%;top:72%;opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1}100%{left:72%;top:38%;transform:translate(-50%,-50%) scale(1.4);opacity:.2}}
+.cb-proj.s1{animation:cbP1 .6s ease-in forwards}@keyframes cbP1{0%{left:70%;top:40%;opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1}100%{left:28%;top:76%;transform:translate(-50%,-50%) scale(1.4);opacity:.2}}
+.cb-proj.phy{font-size:22px}.cb-proj.ult{font-size:52px;animation-duration:.85s}
+.cb-aurafx{width:46%;aspect-ratio:1;border-radius:50%;border:3px solid var(--tc);box-shadow:0 0 24px var(--tc),inset 0 0 24px var(--tc);animation:cbRing .8s ease-out forwards}.cb-aurafx.big{width:60%}@keyframes cbRing{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) scale(1.2);opacity:0}}
+.cb-num{font:800 22px "Chakra Petch",sans-serif;color:#fff;text-shadow:0 2px 0 #000,0 0 10px #ff2bd6;animation:cbNum 1s ease-out forwards}.cb-num.crit{font-size:30px;color:#ffd24a}.cb-num.se{color:#ff9a1a}.cb-num.heal{color:#3cff9e;text-shadow:0 2px 0 #000,0 0 10px #3cff9e}
+@keyframes cbNum{0%{transform:translate(-50%,-30%) scale(.6);opacity:0}15%{transform:translate(-50%,-80%) scale(1.2);opacity:1}100%{transform:translate(-50%,-190%);opacity:0}}
+.cb-pop{font:800 13px "Chakra Petch",sans-serif;letter-spacing:.06em;white-space:nowrap;padding:4px 10px;border-radius:10px;background:rgba(0,0,0,.6);animation:cbPop 1s ease-out forwards;margin-top:-34px}.cb-pop.se{color:#3cff9e}.cb-pop.nve{color:#ff8aa0}.cb-pop.st{border:1px solid var(--sc,#fff)}
+@keyframes cbPop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}20%{transform:translate(-50%,-50%) scale(1.15);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-90%);opacity:0}}
+.cb-arrows{font-size:20px;letter-spacing:4px;animation:cbArr .9s ease-out forwards}.cb-arrows.up{color:#3cff9e}.cb-arrows.dn{color:#ff6a8a}@keyframes cbArr{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,var(--dy,-120%))}}.cb-arrows.dn{--dy:40%}
+.cb-shield{width:42%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.05) 50%,rgba(0,229,255,.45));border:2px solid #9ef0ff;animation:cbSh .9s ease-out forwards}@keyframes cbSh{0%{transform:translate(-50%,-50%) scale(.6);opacity:0}30%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0}}
+/* météos */
+.cb-wx{position:absolute;inset:0;z-index:2;pointer-events:none;transition:background .6s}
+.cb-wx.wx-pluie{background:repeating-linear-gradient(105deg,transparent 0 14px,rgba(158,220,255,.28) 14px 15px) 0 0/200px 200px;animation:cbRain .35s linear infinite}@keyframes cbRain{to{background-position:-40px 200px}}
+.cb-wx.wx-canicule{background:radial-gradient(80% 60% at 80% 0%,rgba(255,140,40,.38),transparent 70%);animation:cbHeat 2s ease-in-out infinite}@keyframes cbHeat{50%{opacity:.6}}
+.cb-wx.wx-tempete{background:radial-gradient(circle,#fff 1px,transparent 2px) 0 0/34px 34px,radial-gradient(circle,rgba(255,255,255,.7) 1px,transparent 2px) 17px 9px/48px 48px;animation:cbSnow 1.2s linear infinite}@keyframes cbSnow{to{background-position:-34px 34px,0 57px}}
+.cb-wx.wx-nuit{background:radial-gradient(circle,#fff .8px,transparent 1.5px) 0 0/60px 60px,linear-gradient(180deg,rgba(40,0,90,.55),rgba(0,0,0,.3));animation:cbHeat 3s ease-in-out infinite}
+.cb-wx.wx-orage{background:linear-gradient(180deg,rgba(20,30,80,.5),transparent);animation:cbStorm 3s steps(1) infinite}@keyframes cbStorm{0%,88%,100%{box-shadow:none}90%,94%{box-shadow:inset 0 0 0 9999px rgba(255,255,210,.35)}}
+.cb-wx.wx-aurore{background:linear-gradient(115deg,transparent 20%,rgba(60,255,158,.25) 35%,rgba(255,43,214,.2) 50%,transparent 65%) 0 0/300% 100%;animation:cbAur 6s ease-in-out infinite alternate}@keyframes cbAur{to{background-position:100% 0}}
+@media (max-height:700px){.cb-menu{min-height:150px;padding-top:6px}.cb-mb,.cb-ib,.cb-tb{padding:7px 9px}.cb-log{height:46px}}
+@media (prefers-reduced-motion:reduce){.cb-aura,.cb-wx{animation:none!important}}
+.cb-menu.busy .cb-tabs,.cb-menu.busy .cb-mvs,.cb-menu.busy .cb-its,.cb-menu.busy .cb-tm,.cb-menu.busy .cb-go{opacity:.45;pointer-events:none;filter:saturate(.6)}

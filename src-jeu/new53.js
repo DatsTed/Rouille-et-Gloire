@@ -55,7 +55,7 @@ function cbDamage(B,u,o,m,opt){ opt=opt||{}; const cat=m.c, crit=!!opt.crit, f=m
   return {d:eff===0?0:Math.max(1,Math.floor(d)),eff}; }
 /* ---- entrée en piste / changement ---- */
 function cbEnter(B,s){ const f=cbAct(B,s), S2=B.sides[s], o=cbAct(B,1-s); if(!f||f.hp<=0) return; f.turns=0; f.firstUsed=false;
-  cbLog(B,(s?S2.nm+' envoie ':'À toi, ')+f.nm+' !',{k:'enter',s});
+  cbLog(B,(s?S2.nm+' envoie ':'À toi, ')+f.nm+' !',{k:'enter',s,i:S2.act});
   if(S2.hz&&!cbHas(f,'vent')){ const d=Math.max(1,Math.floor(f.mhp/8)); f.hp=Math.max(0,f.hp-d); cbLog(B,f.nm+' roule sur les gravillons (−'+d+').',{k:'dmg',s,n:d}); }
   if(f.tal==='intimid'&&o&&o.hp>0){ cbLog(B,f.nm+' : Klaxon intimidant !',{k:'tal',s}); cbBoost(B,1-s,{atk:-1},s); }
   const T=CB_TAL[f.tal]; if(T&&T.k==='wxset') cbSetWx(B,T.wx,f); }
