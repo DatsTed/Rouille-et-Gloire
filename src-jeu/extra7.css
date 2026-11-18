@@ -158,3 +158,10 @@ body.cbon{overflow:hidden}
 .cbshop{display:flex;flex-direction:column;gap:6px;margin:8px 0 12px}.cbs-r{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
 .cbs-ic{font-size:24px;flex:none}.cbs-r>div:nth-child(2){flex:1;min-width:0}.cbs-r b{font-size:13px}.cbs-r small{display:block;font-size:11px;color:var(--muted)}.cbs-b{display:flex;flex-direction:column;gap:4px;flex:none}
 .cb-rw{margin:8px 0;padding:8px 10px;border-radius:12px;background:rgba(255,210,74,.12);color:#ffd24a;font-size:13px}.cb-rw.lose{background:rgba(255,77,109,.12);color:#ff8aa0}
+/* v1.5b : drapeau centré, fiches plus compactes ; celle du joueur reste sur le sol, alignée avec sa voiture */
+.cb-quit{display:grid;place-items:center;padding:0;line-height:1}
+.cb-box{padding:6px 9px}.cb-nm{font-size:12px}.cb-tys{margin:3px 0}.cb-tys>span[style]{width:18px;height:18px;font-size:11px}
+.cb-hpn{margin-top:1px;font-size:10px}.cb-stg{margin-top:3px}
+.cb-box.me{bottom:auto;top:calc(64% + 8px);right:3%;width:44%;max-height:calc(36% - 14px);overflow:hidden}
+.cb-car.me{width:min(48%,340px)}.cb-car.foe{width:min(42%,300px)}
+.cb-log{height:auto;min-height:56px;max-height:66px;padding:6px 12px 8px}
