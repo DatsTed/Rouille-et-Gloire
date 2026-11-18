@@ -165,3 +165,66 @@ body.cbon{overflow:hidden}
 .cb-box.me{bottom:auto;top:calc(64% + 8px);right:3%;width:44%;max-height:calc(36% - 14px);overflow:hidden}
 .cb-car.me{width:min(48%,340px)}.cb-car.foe{width:min(42%,300px)}
 .cb-log{height:auto;min-height:56px;max-height:66px;padding:6px 12px 8px}
+
+/* ---- v1.5c : mini-cinématiques des attaques ultimes et légendaires ---- */
+.cbleg{position:absolute;inset:0;z-index:9;pointer-events:none;overflow:hidden}
+.cbleg>*{position:absolute;animation-duration:var(--d);animation-fill-mode:both;animation-timing-function:ease-out}
+.lg-dim{inset:0;background:radial-gradient(circle at var(--ax) var(--ay),rgba(0,0,0,.25),rgba(3,2,12,.82) 60%);animation-name:lgDim}
+@keyframes lgDim{0%{opacity:0}10%,86%{opacity:1}100%{opacity:0}}
+.lg-glow{left:var(--ax);top:var(--ay);width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--tc) 70%,#fff),color-mix(in srgb,var(--tc) 35%,transparent) 40%,transparent 70%);animation-name:lgGlow}
+@keyframes lgGlow{0%{opacity:0;transform:scale(.3)}20%{opacity:.9;transform:scale(.9)}35%{transform:scale(1.15)}45%{opacity:1;transform:scale(1)}70%{opacity:.4}100%{opacity:0}}
+.lg-ban{left:0;right:0;top:34%;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;animation-name:lgBan;z-index:3}
+.lg-ban small{font:800 10px "Chakra Petch",sans-serif;letter-spacing:.3em;color:#ffd24a;text-shadow:0 0 10px #ffd24a}
+.lg-ban b{font:900 clamp(20px,7vw,30px) "Chakra Petch",sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#fff;text-shadow:0 0 14px var(--tc),0 0 34px var(--tc),0 3px 0 #000;padding:2px 18px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+@keyframes lgBan{0%{opacity:0;transform:translateX(-60%) skewX(-18deg)}10%{opacity:1;transform:translateX(4%) skewX(-8deg)}16%{transform:none}38%{opacity:1;transform:none}48%{opacity:0;transform:translateX(40%) skewX(14deg)}100%{opacity:0}}
+.cbleg.leg .lg-ban b{background:linear-gradient(90deg,transparent,rgba(60,30,0,.6),transparent)}
+.lg-flash{inset:0;background:#fff;opacity:0;z-index:2}
+.lg-boom{left:var(--bx);top:var(--by);width:170px;height:170px;margin:-85px 0 0 -85px;border-radius:50%;opacity:0;background:radial-gradient(circle,#fff 0,color-mix(in srgb,var(--tc) 80%,#fff) 25%,color-mix(in srgb,var(--tc) 40%,transparent) 55%,transparent 72%)}
+.lg-boom.big{width:260px;height:260px;margin:-130px 0 0 -130px}
+/* moments d'impact : A ≈ 46 %, B ≈ 58 %, C ≈ 72 %, D ≈ 32 % */
+.st-beam .lg-flash,.st-spikes .lg-flash,.st-vortex .lg-flash,.st-wave .lg-flash{animation-name:lgFA}.st-meteor .lg-flash{animation-name:lgFB}.st-sphere .lg-flash{animation-name:lgFC}.st-bolt .lg-flash{animation-name:lgFD}
+@keyframes lgFA{0%,44%{opacity:0}47%{opacity:.85}60%,100%{opacity:0}}@keyframes lgFB{0%,56%{opacity:0}59%{opacity:.9}72%,100%{opacity:0}}@keyframes lgFC{0%,70%{opacity:0}73%{opacity:.95}86%,100%{opacity:0}}@keyframes lgFD{0%,30%{opacity:0}33%{opacity:.8}40%{opacity:0}50%{opacity:.6}56%,100%{opacity:0}}
+.st-beam .lg-boom,.st-spikes .lg-boom,.st-vortex .lg-boom,.st-wave .lg-boom{animation-name:lgBA}.st-meteor .lg-boom{animation-name:lgBB}.st-sphere .lg-boom{animation-name:lgBC}.st-bolt .lg-boom{animation-name:lgBD}
+@keyframes lgBA{0%,44%{opacity:0;transform:scale(.2)}50%{opacity:1;transform:scale(1.1)}80%{opacity:.6;transform:scale(1.5)}100%{opacity:0;transform:scale(1.9)}}
+@keyframes lgBB{0%,56%{opacity:0;transform:scale(.2)}62%{opacity:1;transform:scale(1.15)}88%{opacity:.5;transform:scale(1.6)}100%{opacity:0;transform:scale(2)}}
+@keyframes lgBC{0%,70%{opacity:0;transform:scale(.2)}76%{opacity:1;transform:scale(1.2)}92%{opacity:.5;transform:scale(1.7)}100%{opacity:0;transform:scale(2.1)}}
+@keyframes lgBD{0%,30%{opacity:0;transform:scale(.3)}36%{opacity:1;transform:scale(1)}70%{opacity:.7;transform:scale(1.3)}100%{opacity:0;transform:scale(1.7)}}
+/* rayon chargé */
+.lg-orb{left:var(--ax);top:var(--ay);width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;background:radial-gradient(circle,#fff 20%,var(--tc) 55%,transparent 72%);box-shadow:0 0 30px var(--tc),0 0 60px var(--tc);animation-name:lgOrb}
+@keyframes lgOrb{0%{transform:scale(0)}38%{transform:scale(1.3)}44%{transform:scale(1.6)}50%{transform:scale(.9)}82%{transform:scale(.8);opacity:1}92%,100%{transform:scale(0);opacity:0}}
+.lg-in{left:var(--ax);top:var(--ay);width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff;box-shadow:0 0 10px var(--tc);animation-name:lgIn;animation-delay:calc(var(--i)*-.03*var(--d));--r:calc(90px + var(--i)*9px)}
+@keyframes lgIn{0%{opacity:0;transform:rotate(calc(var(--i)*36deg)) translateX(var(--r))}10%{opacity:1}40%{opacity:1;transform:rotate(calc(var(--i)*36deg + 200deg)) translateX(0)}41%,100%{opacity:0}}
+.lg-beam{left:var(--ax);top:var(--ay);width:var(--len);height:34px;margin-top:-17px;transform-origin:0 50%;transform:rotate(var(--ang)) scaleX(0);border-radius:17px;background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 70%,#fff),var(--tc));box-shadow:0 0 24px var(--tc),0 0 60px var(--tc);animation-name:lgBeam}
+.lg-beam span{position:absolute;left:0;right:0;top:35%;bottom:35%;border-radius:8px;background:#fff;box-shadow:0 0 12px #fff}
+@keyframes lgBeam{0%,43%{transform:rotate(var(--ang)) scaleX(0) scaleY(.4);opacity:1}49%{transform:rotate(var(--ang)) scaleX(1) scaleY(1.2)}60%{transform:rotate(var(--ang)) scaleX(1) scaleY(.85)}72%{transform:rotate(var(--ang)) scaleX(1) scaleY(1.1)}84%{transform:rotate(var(--ang)) scaleX(1) scaleY(.3);opacity:1}92%,100%{transform:rotate(var(--ang)) scaleX(1) scaleY(0);opacity:0}}
+/* sphère géante (énergie rassemblée) */
+.lg-sph{left:var(--ax);top:calc(var(--ay) - 90px);width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fff,color-mix(in srgb,var(--tc) 60%,#9ef0ff) 35%,color-mix(in srgb,var(--tc) 50%,#5a2bff) 70%,transparent 74%);box-shadow:0 0 40px #9ef0ff,0 0 90px var(--tc);animation-name:lgSph}
+@keyframes lgSph{0%{transform:scale(0)}60%{transform:translate(0,0) scale(4.2)}66%{transform:translate(0,0) scale(4.6)}74%{transform:translate(var(--dx),calc(var(--dy) + 90px)) scale(3.6);opacity:1}78%,100%{transform:translate(var(--dx),calc(var(--dy) + 90px)) scale(.5);opacity:0}}
+.lg-str{left:var(--ax);top:calc(var(--ay) - 90px);width:3px;height:60px;margin:-30px 0 0 -1.5px;border-radius:3px;background:linear-gradient(transparent,#fff);transform-origin:50% 50%;animation-name:lgStr;animation-delay:calc(var(--i)*.03*var(--d))}
+@keyframes lgStr{0%{opacity:0;transform:rotate(calc(var(--i)*25.7deg)) translateY(-260px)}8%{opacity:1}30%{opacity:.9;transform:rotate(calc(var(--i)*25.7deg)) translateY(-20px)}32%,100%{opacity:0}}
+/* météore */
+.lg-sky{inset:0;background:linear-gradient(180deg,rgba(255,70,20,.45),rgba(80,0,20,.3) 60%,transparent);animation-name:lgDim}.lg-sky.dark{background:linear-gradient(180deg,rgba(10,10,40,.8),rgba(20,20,60,.5))}
+.lg-met{left:var(--bx);top:var(--by);width:90px;height:90px;margin:-45px 0 0 -45px;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff,#ffd24a 25%,var(--tc) 55%,transparent 72%);box-shadow:0 0 40px var(--tc),0 0 80px #ff2b00;animation-name:lgMet}
+.lg-met span{position:absolute;left:50%;top:50%;width:260px;height:44px;margin-top:-22px;transform-origin:0 50%;transform:rotate(-48deg);border-radius:22px;background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 80%,#fff),transparent);filter:blur(3px)}
+.lg-met.small{width:36px;height:36px;margin:-18px 0 0 -18px;animation-name:lgMetS;animation-delay:calc(var(--i)*.07*var(--d))}.lg-met.small span{width:130px;height:16px;margin-top:-8px}
+@keyframes lgMet{0%,14%{opacity:0;transform:translate(260px,-320px) scale(.4)}20%{opacity:1}58%{transform:translate(0,0) scale(1.2);opacity:1}62%,100%{opacity:0;transform:scale(2)}}
+@keyframes lgMetS{0%,20%{opacity:0;transform:translate(calc(140px + var(--i)*40px),-300px)}26%{opacity:1}56%{transform:translate(calc(var(--i)*30px - 60px),20px);opacity:1}60%,100%{opacity:0}}
+/* raz-de-marée */
+.lg-wave{left:-10%;right:-10%;bottom:-5%;height:85%;animation-name:lgWave}
+.cbleg.foe .lg-wave{animation-name:lgWaveF}
+.lg-wave span{position:absolute;left:0;right:0;bottom:0;border-radius:50% 50% 0 0/38% 38% 0 0;background:linear-gradient(180deg,#e8fbff,var(--tc) 30%,#0a4a8a);opacity:.85}
+.lg-wave span:nth-child(1){height:100%}.lg-wave span:nth-child(2){height:78%;opacity:.7;left:-8%}.lg-wave span:nth-child(3){height:55%;opacity:.6;left:8%;background:linear-gradient(180deg,#fff,#9ef0ff)}
+@keyframes lgWave{0%,18%{transform:translateX(-115%) scaleY(.4)}50%{transform:translateX(0) scaleY(1)}82%{transform:translateX(30%) scaleY(.9);opacity:1}100%{transform:translateX(115%) scaleY(.3);opacity:0}}
+@keyframes lgWaveF{0%,18%{transform:translateX(115%) scaleY(.4)}50%{transform:translateX(0) scaleY(1)}82%{transform:translateX(-30%) scaleY(.9);opacity:1}100%{transform:translateX(-115%) scaleY(.3);opacity:0}}
+/* foudre */
+.lg-bolt{left:calc(var(--bx) - 30px + var(--i)*16px - 24px);top:-5%;width:44px;height:calc(var(--by) + 5%);fill:#fff;filter:drop-shadow(0 0 8px var(--tc)) drop-shadow(0 0 20px var(--tc));opacity:0;animation-name:lgBolt;animation-delay:calc(var(--i)*.09*var(--d))}
+@keyframes lgBolt{0%,28%{opacity:0}30%{opacity:1}36%{opacity:.2}40%{opacity:1}48%,100%{opacity:0}}
+/* pics de glace / de roche */
+.lg-spk{left:calc(var(--bx) - 105px + var(--i)*35px);top:calc(var(--by) + 40px);width:34px;height:calc(90px + (var(--i) - 3)*(var(--i) - 3)*-6px + 40px);margin-left:-17px;transform-origin:50% 100%;transform:translateY(-100%) scaleY(0);clip-path:polygon(50% 0,100% 100%,0 100%);background:linear-gradient(180deg,#fff,var(--tc) 45%,color-mix(in srgb,var(--tc) 40%,#000));filter:drop-shadow(0 0 10px var(--tc));animation-name:lgSpk;animation-delay:calc(var(--i)*.025*var(--d))}
+@keyframes lgSpk{0%,34%{transform:translateY(-100%) scaleY(0)}44%{transform:translateY(-100%) scaleY(1.15)}50%{transform:translateY(-100%) scaleY(1)}82%{opacity:1;transform:translateY(-100%) scaleY(1)}100%{opacity:0;transform:translateY(-100%) scaleY(.9)}}
+/* vortex */
+.lg-vor{left:var(--bx);top:var(--by);width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;background:conic-gradient(from 0deg,transparent,var(--tc),transparent 30%,#fff,transparent 55%,var(--tc),transparent 80%);-webkit-mask:radial-gradient(circle,transparent 18%,#000 20%,#000 60%,transparent 70%);mask:radial-gradient(circle,transparent 18%,#000 20%,#000 60%,transparent 70%);filter:drop-shadow(0 0 16px var(--tc));animation-name:lgVor}
+.lg-vor.two{width:140px;height:140px;margin:-70px 0 0 -70px;animation-name:lgVor2}
+@keyframes lgVor{0%,12%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1.1) rotate(720deg)}80%{opacity:.8;transform:scale(1.25) rotate(1300deg)}100%{opacity:0;transform:scale(1.6) rotate(1600deg)}}
+@keyframes lgVor2{0%,15%{opacity:0;transform:scale(.2) rotate(0)}45%{opacity:1;transform:scale(1) rotate(-900deg)}100%{opacity:0;transform:scale(1.4) rotate(-1700deg)}}
+.cb-mb.leg{border-color:#ffd24a;box-shadow:0 0 16px rgba(255,210,74,.5);background:linear-gradient(160deg,color-mix(in srgb,var(--tc) 34%,#3a2a05),#1a1405)}.cb-mb.leg b::after{content:" ⭐";color:#ffd24a}

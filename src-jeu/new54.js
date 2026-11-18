@@ -68,7 +68,7 @@ function cbMenu(){ const el=$('cbMenu'); if(!el||!CBV) return; const B=CBV.B, f=
   let body='';
   if(CBV.tab==='mv'){ const o=cbAct(B,1);
     body=`<div class="cb-mvs">${f.mv.map((x,i)=>{ const m=CB_MV[x.id], T=CB_TYPES[m.t], ok=cbUsable(B,0,i), e=m.c==='sta'?1:cbEff(m.t,o.ty), hint=m.c==='sta'?'':e===0?'aucun effet':e>=2?'super efficace':e<1?'peu efficace':'';
-      return `<button class="cb-mb ${m.e?'ult':''}" style="--tc:${T.c}" data-cb="mv" data-v="${i}" ${ok?'':'disabled'}><b>${T.ic} ${m.n}</b><small>${m.c==='phy'?'Phy':m.c==='spe'?'Spé':'Statut'}${m.p>1?' · '+m.p:''} · ${m.e?'⚡'+m.e:x.pp+'/'+x.max+' PP'}</small>${hint?`<em class="${e>=2?'se':e<1?'nve':''}">${hint}</em>`:''}</button>`; }).join('')}</div>`; }
+      return `<button class="cb-mb ${m.e?'ult':''} ${m.e>=100?'leg':''}" style="--tc:${T.c}" data-cb="mv" data-v="${i}" ${ok?'':'disabled'}><b>${T.ic} ${m.n}</b><small>${m.c==='phy'?'Phy':m.c==='spe'?'Spé':'Statut'}${m.p>1?' · '+m.p:''} · ${m.e?'⚡'+m.e:x.pp+'/'+x.max+' PP'}</small>${hint?`<em class="${e>=2?'se':e<1?'nve':''}">${hint}</em>`:''}</button>`; }).join('')}</div>`; }
   if(CBV.tab==='it'){ const bag=B.sides[0].bag, ids=Object.keys(bag).filter(k=>bag[k]>0&&CB_IT[k]);
     body=ids.length?`<div class="cb-its">${ids.map(k=>{ const it=CB_IT[k], tgt=it.revive?B.sides[0].team.findIndex(x=>x.hp<=0):undefined, ok=cbItemOk(B,0,k,tgt);
       return `<button class="cb-ib" data-cb="it" data-v="${k}" ${ok?'':'disabled'}><b>${it.ic} ${it.n} ×${bag[k]}</b><small>${it.d}</small></button>`; }).join('')}</div><p class="cb-note">${B.sides[0].itUsed}/${CB_IT_MAX} objets utilisés ce combat</p>`:'<p class="cb-note">Ton sac de combat est vide.</p>'; }
@@ -89,7 +89,7 @@ async function cbRun(evs){ if(!CBV) return; CBV.busy=true; cbMenu(); const B=CBV
       case 'start': await W(500); break;
       case 'enter': CBV.shown[e.s]=e.i; CBV.disp.set(B.sides[e.s].team[e.i],CBV.disp.get(B.sides[e.s].team[e.i])); cbDraw(); cbAnim(e.s,'cb-in',700); cbSfx('cast','meca'); await W(750); break;
       case 'out': cbAnim(e.s,'cb-out',500); await W(450); break;
-      case 'move': lastMove=e; cbAnim(e.s,'cb-lunge',520); cbSfx('cast',e.t); if(e.c&&e.c!=='sta'){ const T=CB_TYPES[e.t]||CB_TYPES.meca; cbFxAt(e.s,'cb-proj '+(e.c==='phy'?'phy':'spe')+(e.ult?' ult':''),T.ic,700).style.setProperty('--tc',T.c); if(e.ult){ $('cbAr').classList.add('cb-ultf'); setTimeout(()=>{ const a=$('cbAr'); a&&a.classList.remove('cb-ultf'); },700); } }
+      case 'move': lastMove=e; if(e.ult&&typeof cbLegend==='function'){ cbAnim(e.s,'cb-glow',700); await cbLegend(e); break; } cbAnim(e.s,'cb-lunge',520); cbSfx('cast',e.t); if(e.c&&e.c!=='sta'){ const T=CB_TYPES[e.t]||CB_TYPES.meca; cbFxAt(e.s,'cb-proj '+(e.c==='phy'?'phy':'spe')+(e.ult?' ult':''),T.ic,700).style.setProperty('--tc',T.c); if(e.ult){ $('cbAr').classList.add('cb-ultf'); setTimeout(()=>{ const a=$('cbAr'); a&&a.classList.remove('cb-ultf'); },700); } }
         else cbFxAt(e.s,'cb-aurafx','',800).style.setProperty('--tc',(CB_TYPES[e.t]||CB_TYPES.meca).c); await W(e.ult?900:560); break;
       case 'dmg': { const f=B.sides[e.s].team[CBV.shown[e.s]]; CBV.disp.set(f,Math.max(0,CBV.disp.get(f)-(e.n||0))); cbAnim(e.s,'cb-hit',450); if(e.n) cbFxAt(e.s,'cb-num'+(e.crit?' crit':'')+(e.eff>=2?' se':''),'−'+e.n,1000);
         cbSfx(e.crit?'crit':'hit'); if(e.crit) { $('cbAr').classList.add('cb-shake'); setTimeout(()=>{ const a=$('cbAr'); a&&a.classList.remove('cb-shake'); },400); } cbDraw(); await W(e.st?380:520); break; }
