@@ -1,0 +1,22 @@
+/* ===== v1.5 · Éveil cosmique : fiches et combats ===== */
+.cbsec{border:1px solid rgba(143,107,255,.45);border-radius:16px;padding:12px;background:linear-gradient(160deg,rgba(143,107,255,.12),rgba(0,229,255,.05));box-shadow:0 0 22px rgba(143,107,255,.15)}
+.cbsec h3{margin-top:0}
+.cbhd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.cblv{font:700 13px/1 "Chakra Petch",system-ui,sans-serif;padding:5px 9px;border-radius:10px;background:#8f6bff;color:#fff}
+.cbrec{font-size:11px;color:var(--muted);padding-left:4px}
+.cbty{display:inline-flex;align-items:center;gap:3px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;color:#0b1020;background:var(--tc)}
+.cbxp{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}.cbxp i{display:block;height:100%;background:linear-gradient(90deg,#8f6bff,#00e5ff);border-radius:6px}
+.cbtal{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:8px}.cbtal small{color:var(--muted);font-size:11px}
+.cbst{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 34px 40px;align-items:center;gap:6px;font-size:12px;margin:3px 0}
+.cbst i{height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}.cbst em{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#00e5ff,#3cff9e)}
+.cbst b{text-align:right}.cbst small{font-size:10px;text-align:right}
+.cbmvs,.cbslots{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.cbmv{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:12px;border:1px solid color-mix(in srgb,var(--tc,#fff) 55%,transparent);background:color-mix(in srgb,var(--tc,#fff) 12%,transparent);text-align:left;min-width:0}
+.cbmv b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cbmv small{font-size:10px;color:var(--muted)}
+.cbmv.ult{box-shadow:0 0 12px color-mix(in srgb,var(--tc) 50%,transparent)}.cbmv.empty{--tc:#555a80;opacity:.6}
+.cbslot,.cbl{padding:0;border:0;background:none;border-radius:12px;text-align:left;color:inherit}
+.cbslot.arm .cbmv{animation:cbarm 1s ease-in-out infinite}@keyframes cbarm{50%{transform:scale(.97);filter:brightness(1.3)}}
+.cblearn{display:grid;gap:6px}.cbl{display:flex;flex-direction:column;gap:3px}.cbl .cbd{font-size:10.5px;color:var(--muted);padding:0 4px 4px}
+.cbl.on .cbmv{outline:2px solid #fff}.cbl.eq{opacity:.55}.cbl.nw .cbmv::after{content:"NOUVEAU";font-size:9px;font-weight:800;color:#ffd24a}
+.cblearn.soon{opacity:.5}.cbsel{font-size:12px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.06)}
+.cbnew{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#ffd24a;color:#0b1020;font-size:10px;font-weight:800}
