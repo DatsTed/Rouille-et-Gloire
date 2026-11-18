@@ -27,7 +27,19 @@
 ## Ce qui n'est pas vérifié
 Le rendu 3D réel (décor du labo, circuits), l'audio à l'oreille, le toucher sur téléphone et l'équilibrage sur une longue session.
 
-## v1.4 (new50.js, voix50.js, extra6.css)
+## v1.5 : Éveil cosmique et mode Combat (new51 à new56, extra7.css)
+Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam`, `S.cbStat`, `S.cbT` ; rien ne touche aux caractéristiques de course (testé).
+- `new51` catalogue (données pures) : `CB_TYPES` (10 types dont Méca), `CB_CHART`/`cbEff` (efficacités), `CB_STATS`, `CB_TPROF` (profils), `CB_ST`/`CB_VOL` (altérations), `CB_WX` (6 météos), `CB_MV_ROWS` → `CB_MV` (112 attaques, effets dans `fx`, description générée par `cbDesc`), `CB_TAL` (38 talents) / `CB_TAL_BY`, `CB_IT` (17 objets), `CB_ENERGY`.
+- `new52` fiches : `CB_CARTY` (types par modèle), `cbOf(c)` (création paresseuse : IV 0-31, talent, niveau, 4 attaques), `cbStats`, `cbGainXP`, section « Fiche de combat » de la fiche véhicule, écran « Gérer les attaques » (`cbmoves`). Visible seulement si `S.niveau10CinematicSeen===true`.
+- `new53` moteur pur : `cbBattle`, `cbTurn(B,[a0,a1])`, `cbReplace`, `cbAI(B,s,d)` (difficulté 0-3), `cbAutoBattle`. `B.ev` = événements pour l'écran, `B.log` = journal. `CB_DIV=62` règle la longueur des duels.
+- `new54` écran de duel `cbStartDuel({team,foes,d,names,trainer,wx,onEnd,onClose,rewardHTML})` (`#cbov`, plein écran, un `#upd` caché bloque les tutos du jeu pendant le duel).
+- `new55` éveil : fenêtre `lv10` au niveau 10 (« Plus tard » = 20 min), cinématique `czStart` (3D, sous-titres `CZ_VO`, sons synthétisés), écran `cbunlock`, bouton « Revoir l’éveil » dans Base.
+- `new56` : règles patrouille (`carRoll`, `carPrize`, `polFix`, `POL_P=0,2 %`) + Arène (`ACT.arena`), pilotes `CB_PIL`, coupes `CB_CUPS`, équipe (`cbteam`), boutique (`cbshop`), tournoi `S.cbT`.
+- `patch5.py` : vélo retiré (voiture + `MODEL_IDS` ; balises `mdl-velo`/`bin-velo` supprimées de `orig.html`), vélos remboursés 600 cr à la migration, plus de patrouille offerte, patrouille exclue de la casse et de la concession.
+- Voix off supprimées (`voix50.js`, `voix55.js`) ; le code de lecture reste mais ne fait rien sans données.
+- Tests : `t_cmb_data`, `t_cmb_car`, `t_cmb_sim` (mécaniques + simulation, argument = nombre de duels), `t_cmb_ui`, `t_lv10`, `t_cmb_cup`. Sous Windows, lancer Python avec `-X utf8`.
+
+## v1.4 (new50.js, extra6.css)
 - Barre du bas à 6 onglets (Base revenu, retiré des sous-onglets de l'Atelier).
 - Missions : paliers `lv2…lv30` (catégorie « Paliers », avec m38/m9/m39), `claimBar()` remis en haut.
 - Garage 3D : `hubSecret` neutralisé (plus de cloison), `farm().found` mis à 1 dès que le labo est débloqué ; 🎒 masqué hors des cartes GROW (classe `body.inlab50`).
