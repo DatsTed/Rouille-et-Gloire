@@ -1,0 +1,38 @@
+plugins { id 'com.android.application' }
+
+def vcode = (project.findProperty('vcode') ?: '1').toString().toInteger()
+def updateUrl = (project.findProperty('updateUrl') ?: '').toString()
+
+android {
+    namespace 'com.rouilleetgloire.game'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.rouilleetgloire.game'
+        minSdk 24
+        targetSdk 34
+        versionCode vcode
+        versionName "0.11." + vcode
+        buildConfigField "String", "UPDATE_URL", "\"" + updateUrl + "\""
+    }
+    signingConfigs {
+        release {
+            storeFile file('../rg-release.jks')
+            storePassword 'rouille2026'
+            keyAlias 'rg'
+            keyPassword 'rouille2026'
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+        }
+    }
+    buildFeatures { buildConfig true }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint { abortOnError false; checkReleaseBuilds false }
+}
+dependencies { implementation 'androidx.webkit:webkit:1.11.0' }

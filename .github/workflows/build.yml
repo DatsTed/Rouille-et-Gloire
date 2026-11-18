@@ -29,24 +29,23 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Décompresser le projet
+      - name: Copier le jeu dans l'APK
         run: |
-          unzip -q projet.zip -d src
-          mkdir -p src/android/app/src/main/assets/www
-          cp src/game/index.html src/android/app/src/main/assets/www/index.html
+          mkdir -p android/app/src/main/assets/www
+          cp game/index.html android/app/src/main/assets/www/index.html
 
       - name: Compiler l'APK signé
         run: |
           OWNER="${GITHUB_REPOSITORY_OWNER,,}"
           REPO="${GITHUB_REPOSITORY#*/}"
-          gradle -p src/android assembleRelease -PupdateUrl="https://${OWNER}.github.io/${REPO}/" -Pvcode="${GITHUB_RUN_NUMBER}"
+          gradle -p android assembleRelease -PupdateUrl="https://${OWNER}.github.io/${REPO}/" -Pvcode="${GITHUB_RUN_NUMBER}"
 
       - name: Préparer le site
         run: |
           mkdir -p site
-          cp src/game/* site/
-          cp src/game/index.html site/game.html
-          cp src/android/app/build/outputs/apk/release/app-release.apk site/RouilleEtGloire.apk
+          cp game/* site/
+          cp game/index.html site/game.html
+          cp android/app/build/outputs/apk/release/app-release.apk site/RouilleEtGloire.apk
           echo "{\"v\":${GITHUB_RUN_NUMBER}}" > site/version.json
 
       - uses: actions/upload-pages-artifact@v3

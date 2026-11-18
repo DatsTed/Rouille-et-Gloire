@@ -1,0 +1,11 @@
+# Fichiers générés par la chaîne de build (src-jeu/)
+src-jeu/main.js
+src-jeu/out.html
+__pycache__/
+
+# Sorties Gradle
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/www/
+android/local.properties
