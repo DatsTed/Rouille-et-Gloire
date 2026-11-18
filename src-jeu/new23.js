@@ -45,7 +45,7 @@ GAMES.pin=function(api){
   const cv=document.createElement('canvas'); cv.className='arccv'; st.appendChild(cv); const ctx=cv.getContext('2d'); let K=1;
   const live=document.createElement('div'); live.className='pinlive'; st.parentNode.insertBefore(live,st);
   const fit=()=>{ const r=st.getBoundingClientRect(), s=Math.min(r.width/W,r.height/H)||1, dpr=Math.min(2,window.devicePixelRatio||1); cv.style.width=(W*s)+'px'; cv.style.height=(H*s)+'px'; cv.width=Math.round(W*s*dpr); cv.height=Math.round(H*s*dpr); K=s*dpr; };
-  bar.innerHTML=`<div class="pinctl"><button id="pL" class="arcb">◀</button><button id="pP" class="arcb pl">LANCER<small>maintiens</small></button><button id="pR" class="arcb">▶</button></div>`;
+  bar.innerHTML=`<div class="pinctl solo"><span class="pinz">Touche à gauche</span><button id="pP" class="arcb pl">LANCER<small>maintiens</small></button><span class="pinz">Touche à droite</span></div>`;
   fit(); const ro=window.ResizeObserver?new ResizeObserver(fit):null; if(ro) ro.observe(st);
   const segs=[]; const sg=(x1,y1,x2,y2,e,k)=>{ const s={x1,y1,x2,y2,e:e||.5,k:k||0}; segs.push(s); return s; };
   { const cx=180,cy=170,ar=168; let px=12,py=170; for(let i=1;i<=18;i++){ const a=Math.PI+i/18*Math.PI, x=cx+ar*Math.cos(a), y=cy+ar*Math.sin(a); sg(px,py,x,y,.4); px=x; py=y; } }
@@ -257,12 +257,19 @@ GAMES.pin=function(api){
   let raf=0, last=0, hacc=0; const loop=ts=>{ if(!last) last=ts; const dt=Math.min(.033,(ts-last)/1000); last=ts; if(!over) sim(dt); PM.pulse*=.88; { let sp=0; for(const b of balls) if(b.st==='play') sp=Math.max(sp,Math.hypot(b.vx,b.vy)); const tI=Math.min(1,.12+sp/950+(mode?.25:0)+(turbo>0?.25:0)+(balls.length>1?.15:0)); PM.I+=(tI-PM.I)*.07; PM.mode=mode; PM.turbo=turbo>0; PM.multi=balls.length>1; } draw(); hacc+=dt; if(hacc>.1){ hacc=0; hud(); } raf=requestAnimationFrame(loop); }; hud(); raf=requestAnimationFrame(loop);
   const hold=(id,fn)=>{ const e=bar.querySelector(id); const dn=ev=>{ ev.preventDefault(); fn(true); }, up=ev=>{ ev.preventDefault(); fn(false); }; e.addEventListener('pointerdown',dn); e.addEventListener('pointerup',up); e.addEventListener('pointerleave',up); e.addEventListener('pointercancel',up); };
   const fl=i=>on=>{ if(tiltT>0) on=false; FL[i].on=on; if(on) arcTone(180,.05,'square',.05); };
-  hold('#pL',fl(0)); hold('#pR',fl(1)); hold('#pP',on=>{ if(on){ charging=true; } else { charging=false; launch(); } });
+  hold('#pP',on=>{ if(on){ charging=true; } else { charging=false; launch(); } });
+  /* flippers : toucher la moitié gauche ou droite de l'écran (plusieurs doigts gérés), sauf sur les boutons */
+  { const ov=document.getElementById('arcov')||bar.parentNode; if(ov){ if(ov._pinT){ const o=ov._pinT; ov.removeEventListener('pointerdown',o.pd); ['pointerup','pointercancel','lostpointercapture'].forEach(k=>ov.removeEventListener(k,o.pu)); }
+      const act=new Map(), cnt=[0,0];
+      const pd=ev=>{ if(ev.target.closest&&ev.target.closest('button,a,input')) return; ev.preventDefault(); const s=ev.clientX<window.innerWidth/2?0:1; act.set(ev.pointerId,{s,y:ev.clientY,t:ev.timeStamp}); if(cnt[s]++===0) fl(s)(true); };
+      const pu=ev=>{ const a=act.get(ev.pointerId); if(!a) return; act.delete(ev.pointerId); cnt[a.s]=Math.max(0,cnt[a.s]-1); if(!cnt[a.s]) fl(a.s)(false);
+        if(ev.type==='pointerup'&&a.y-ev.clientY>70&&ev.timeStamp-a.t<320){ try{ nudge(); }catch(_){} } };
+      ov.addEventListener('pointerdown',pd); ['pointerup','pointercancel','lostpointercapture'].forEach(k=>ov.addEventListener(k,pu)); ov._pinT={pd,pu}; ov.style.touchAction='none'; } }
   const kd=e=>{ if(e.repeat) return; if(e.code==='ArrowLeft'||e.code==='KeyA') fl(0)(true); if(e.code==='ArrowRight'||e.code==='KeyD') fl(1)(true); if(e.code==='Space'){ charging=true; e.preventDefault(); } };
   const ku=e=>{ if(e.code==='ArrowLeft'||e.code==='KeyA') fl(0)(false); if(e.code==='ArrowRight'||e.code==='KeyD') fl(1)(false); if(e.code==='Space'){ charging=false; launch(); } };
   document.addEventListener('keydown',kd); document.addEventListener('keyup',ku);
   const nudge=()=>{ if(over||nudgeCD>0||!balls.some(b=>b.st==='play')) return; nudgeCD=.9; tiltN++; balls.forEach(b=>{ if(b.st==='play'){ b.vy-=150; b.vx+=(Math.random()-.5)*180; } }); shake=.7; arcTone(90,.12,'square',.08); if(tiltN>=3.2){ tiltT=2.6; tiltN=0; say('TILT !'); arcTone(70,.5,'sawtooth',.1); } };
-  cv.addEventListener('pointerdown',nudge);
+  /* secousse : un coup de doigt rapide vers le haut (toucher la table actionne les flippers) */
   window.__pin={sim,get balls(){return balls;},get B(){return balls[0]||{x:0,y:0,vx:0,vy:0};},FL,segs,part,get score(){return score;},get ball(){return ball;},get over(){return over;},get st(){return balls[0]?balls[0].st:'none';},get mult(){return mult;},get mode(){return mode;},get radar(){return radar;},get caps(){return caps;},get turbo(){return turbo;},get nballs(){return balls.length;},get tab(){return tabI;},get hole(){return hole;},ramps,dbanks,get rampMax(){return rampMax;},loadTable,switchTable,TBL,bumps,mills,wells,portals,spins,boosts,tgt,
     launch:()=>{ power=.9; launch(); },launchP:p=>{ power=p; launch(); },nudge,get combo(){return combo;},hitC,get tilt(){return tiltT;},flip:(i,on)=>{ FL[i].on=on; },radarAdd,startChasse,capture,mission:k=>mission(balls[0]),setScore:v=>{ score=v; },lose,door,hud,N,NEED};
   return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); live.remove(); PM.end(); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); window.__pin=null; };
