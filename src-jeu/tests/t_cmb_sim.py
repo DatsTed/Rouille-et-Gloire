@@ -54,11 +54,12 @@ SIM = r"""(N)=>{ const E=[], ids=CARS.map(c=>c.id), R=cbRng(42); const pick=a=>a
   const mk=(mid,lv)=>{ const ty=cbTypesOf(mid), iv={}; CB_SK.forEach(k=>iv[k]=Math.floor(R()*32)); const pool=CB_TAL_BY[ty[0]]; let mv=null;
     if(R()<.5){ const L=cbLearnable(ty,lv).map(m=>m.id); mv=[]; while(mv.length<4&&mv.length<L.length){ const x=pick(L); if(!mv.includes(x)) mv.push(x); } }
     return {mid,lv,iv,tal:pick(pool),mv}; };
+  const ULTN=new Set(Object.values(CB_MV).filter(m=>m.e).map(m=>m.n)); let ults=0, cars=0;
   const win={}, play={}, tw={}, tp={}, used={}; let turns=0, timeouts=0, t0=performance.now(), d3=0, d3n=0, ko=0;
   for(let i=0;i<N;i++){ const lv=5+Math.floor(R()*41), n=1+Math.floor(R()*3), A=[], Bt=[]; for(let k=0;k<n;k++){ A.push(mk(pick(ids),lv)); Bt.push(mk(pick(ids),lv)); }
     let B; try{ const dd=i%5===0?[3,0]:[3,3]; B=cbAutoBattle({teams:[A,Bt],seed:i+1,ai:[{d:dd[0]},{d:dd[1]}],bags:[{kit:2,nitrorec:1},{kit:2,nitrorec:1}]}); }catch(e){ E.push('duel '+i+' : '+e.message+' '+(e.stack||'').split('\n')[1]); continue; }
     if(B.over<0){ timeouts++; continue; } turns+=B.t;
-    B.log.forEach(t=>{ const m=t.match(/ utilise (.+) !$/); if(m) used[m[1]]=(used[m[1]]||0)+1; });
+    B.log.forEach(t=>{ const m=t.match(/ utilise (.+) !$/); if(m){ used[m[1]]=(used[m[1]]||0)+1; if(ULTN.has(m[1])) ults++; } }); cars+=B.sides[0].team.length+B.sides[1].team.length;
     if(i%5===0){ d3n++; if(B.over===0) d3++; continue; }
     if(n===1){ const w=B.over, a=A[0].mid, b=Bt[0].mid; [a,b].forEach(x=>play[x]=(play[x]||0)+1); win[w?b:a]=(win[w?b:a]||0)+1;
       const ta=cbTypesOf(a)[0], tb=cbTypesOf(b)[0]; [ta,tb].forEach(x=>tp[x]=(tp[x]||0)+1); tw[w?tb:ta]=(tw[w?tb:ta]||0)+1; }
@@ -66,7 +67,7 @@ SIM = r"""(N)=>{ const E=[], ids=CARS.map(c=>c.id), R=cbRng(42); const pick=a=>a
   const wr=Object.keys(play).map(k=>[M[k].nom,Math.round(100*(win[k]||0)/play[k]),play[k]]).sort((a,b)=>b[1]-a[1]);
   const twr=Object.keys(tp).map(k=>[CB_TYPES[k].n,Math.round(100*(tw[k]||0)/tp[k])]).sort((a,b)=>b[1]-a[1]);
   const names=Object.values(CB_MV).map(m=>m.n), never=names.filter(n=>!used[n]);
-  return {E,ms:Math.round(performance.now()-t0),avgTurns:+(turns/Math.max(1,N-timeouts)).toFixed(1),timeouts,iaForte:Math.round(100*d3/Math.max(1,d3n)),wr,twr,never}; }"""
+  return {E,ultPerCar:+(ults/Math.max(1,cars)).toFixed(2),ms:Math.round(performance.now()-t0),avgTurns:+(turns/Math.max(1,N-timeouts)).toFixed(1),timeouts,iaForte:Math.round(100*d3/Math.max(1,d3n)),wr,twr,never}; }"""
 async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(); pg = await b.new_page()
@@ -78,6 +79,7 @@ async def main():
         r = await pg.evaluate(SIM, N)
         print('simulation : %d duels en %d ms, %.1f tours en moyenne, %d sans fin' % (N, r['ms'], r['avgTurns'], r['timeouts']))
         print('IA forte contre IA faible : %d %% de victoires' % r['iaForte'])
+        print('ultimes lancées : %.2f par voiture engagée' % r['ultPerCar'])
         print('victoires par modèle (même niveau, 1 contre 1) :', ', '.join('%s %d%%' % (x[0], x[1]) for x in r['wr']))
         print('victoires par type principal :', ', '.join('%s %d%%' % (x[0], x[1]) for x in r['twr']))
         print('attaques jamais utilisées par l’IA (%d) :' % len(r['never']), ', '.join(r['never']))

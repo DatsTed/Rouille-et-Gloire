@@ -20,7 +20,7 @@ RULES = r"""()=>{ const E=[];
   return {E,rate}; }"""
 SETUP = """(lv)=>{ S=fresh(); S.age18=true; S.intro=true; S.seenVer=GAME_VER; S.lvl=20; S.niveau10CinematicSeen=true; S.tx={}; Object.keys(TUTX||{}).forEach(k=>S.tx[k]=1); S.unlQ=[]; S.cr=200000;
   ['rossa','aurion','fury'].forEach(mid=>S.cars.push({uid:S.nuid++,mid,etat:100,xp:0,lvl:1,up:{},inv:0,mods:{}}));
-  S.cars.forEach(c=>{ const s=cbOf(c); s.iv={hp:31,atk:31,def:31,spa:31,spd:31,vit:31}; cbGainXP(c,cbNeed(lv)-s.xp); s.mv=cbAutoMoves(s.ty,s.lv); });
+  S.cars.forEach(c=>{ const s=cbOf(c); s.iv={hp:31,atk:31,def:31,spa:31,spd:31,vit:31}; cbSetLv(c,lv); s.mv=cbAutoMoves(s.ty,s.lv); });
   S.cbTeam=S.cars.slice(-3).map(c=>c.uid); S.cbBag={kit:5,superkit:3}; try{closeSheet()}catch(e){} save(); }"""
 PLAY = """()=>{ if(CBV){ if(CBV.busy){ CBV.fast=true; return 'busy'; } const B=CBV.B; if(B.over!=null){ const b=document.querySelector('[data-cb=close]'); b&&b.click(); return 'close'; }
    if(B.need&&B.need.includes(0)){ const b=document.querySelector('[data-cb=rep]:not([disabled])'); b&&b.click(); return 'rep'; }

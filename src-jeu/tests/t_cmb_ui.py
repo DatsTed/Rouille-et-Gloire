@@ -1,12 +1,12 @@
-# v1.5 · écran de duel (new54) : un duel complet joué par l'interface, sur 2 tailles d'écran.
+﻿# v1.5 · écran de duel (new54) : un duel complet joué par l'interface, sur 2 tailles d'écran.
 # Vérifie : pas d'erreur, tout tient sur l'écran, menu utilisable, objets, changement, fin, XP sauvegardée, fermeture propre.
 import asyncio, os, sys
 from playwright.async_api import async_playwright
 URL = 'file:///' + os.path.abspath('out.html').replace('\\', '/')
 SETUP = """()=>{ S=fresh(); S.age18=true; S.intro=true; S.seenVer=GAME_VER; S.niveau10CinematicSeen=true; try{closeSheet()}catch(e){}
   ['rossa','aurion','fury'].forEach(mid=>S.cars.push({uid:S.nuid++,mid,etat:100,xp:0,lvl:1,up:{},inv:0,mods:{}}));
-  S.cars.forEach(c=>{ const s=cbOf(c); cbGainXP(c,cbNeed(22)-s.xp); }); S.cbBag={kit:2,superkit:1}; save();
-  window.__xp0=S.cars.slice(-3).map(c=>cbOf(c).xp);
+  S.cars.forEach(c=>{ const s=cbOf(c); cbSetLv(c,22); }); S.cbBag={kit:2,superkit:1}; save();
+  window.__xp0=S.cars.slice(-3).map(c=>c.lvl*1e6+c.xp);
   cbStartDuel({team:S.cars.slice(-3).map(c=>c.uid),foes:[{mid:'kombi',lv:12},{mid:'steppe',lv:12}],d:1,names:['Toi','Rival']}); }"""
 STEP = """()=>{ if(!CBV) return 'x'; if(CBV.busy){ CBV.fast=true; return 'busy'; } const B=CBV.B; if(B.over!=null) return 'over';
   if(B.need&&B.need.includes(0)){ const b=document.querySelector('[data-cb=rep]:not([disabled])'); b&&b.click(); return 'rep'; }
@@ -28,7 +28,7 @@ async def run(p, w, h):
         st = await pg.evaluate(STEP); seen.add(st)
         if st in ('over', 'x'): break
         await pg.wait_for_timeout(250)
-    r = await pg.evaluate("()=>CBV?{over:CBV.B.over,t:CBV.B.t,res:!!CBV.res,xp:S.cars.slice(-3).map(c=>cbOf(c).xp),xp0:window.__xp0,end:!!document.querySelector('.cb-end'),bag:S.cbBag}:null")
+    r = await pg.evaluate("()=>CBV?{over:CBV.B.over,t:CBV.B.t,res:!!CBV.res,xp:S.cars.slice(-3).map(c=>c.lvl*1e6+c.xp),xp0:window.__xp0,end:!!document.querySelector('.cb-end'),bag:S.cbBag}:null")
     if not r or r['over'] is None: E.append('duel pas terminé %s' % r)
     else:
         if not r['end']: E.append('écran de fin absent')

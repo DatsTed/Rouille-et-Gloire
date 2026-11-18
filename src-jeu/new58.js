@@ -4,7 +4,8 @@
 const AR={tab:'cups'};
 function vArena(){ if(!cbAwake()) return `<div class="head"><h2>Arène</h2></div><p class="note">L’Arène s’ouvre après l’éveil cosmique (niveau ${CB_LV}).</p>`;
   const st=cbSt(), t=cbTeam().map(u=>car(u)).filter(Boolean), bag=cbBag(), tl=cbTeamLv(), nb=Object.keys(st.cups).length;
-  const tabs=`<div class="subtabs topsw">${[['cups','🏆 Tournois'],['team','🚗 Équipe'],['shop','🛒 Boutique']].map(x=>`<button data-a="artab" data-id="${x[0]}" ${AR.tab===x[0]?'aria-current="true"':''}>${x[1]}</button>`).join('')}</div>`;
+  /* « arsw » et pas « topsw » : une ancienne couche efface les .topsw à chaque rendu */
+  const tabs=`<div class="subtabs arsw">${[['cups','🏆 Tournois'],['team','🚗 Équipe'],['shop','🛒 Boutique']].map(x=>`<button data-a="artab" data-id="${x[0]}" ${AR.tab===x[0]?'aria-current="true"':''}>${x[1]}</button>`).join('')}</div>`+(AR.tab!=='cups'?`<button class="btn alt wide ar-back" data-a="artab" data-id="cups">← Retour aux tournois</button>`:'');
   const head=`<div class="head"><h2>Arène</h2><p>${st.w} V · ${st.l} D · ${nb}/${CB_CUPS.length} coupes</p></div>`;
   const teamRow=`<div class="ar-sec"><div class="ar-h"><b>🚗 Ton équipe · niv. ${tl}</b><button class="btn alt sm" data-a="artab" data-id="team">Modifier</button></div>
     <div class="ar-team">${t.map(c=>{ const s=cbOf(c); return `<button class="ar-car" data-a="car" data-id="${c.uid}"><span class="ar-ty">${s.ty.map(x=>CB_TYPES[x].ic).join('')}</span><b>${M[c.mid].nom}</b><small>Niv. ${s.lv} · ⚡ ${CB_MV[cbUltOf(s.ty,s.lv)].n}</small></button>`; }).join('')}</div></div>`;
@@ -37,6 +38,9 @@ ACT.cbteamopen=()=>{ AR.tab='team'; ACT.arena(); }; ACT.cbshop=()=>{ AR.tab='sho
 { const _os=openSheet; openSheet=function(s){ if(s&&s.t==='arena'){ AR.tab='cups'; try{ closeSheet(); }catch(_){} return ACT.arena(); } if(s&&(s.t==='cbteam'||s.t==='cbshop')){ AR.tab=s.t==='cbteam'?'team':'shop'; return ACT.arena(); } return _os.apply(this,arguments); }; }
 arenaNav=function(){};   /* l'onglet s'allume comme les autres, d'après la page affichée */
 
+/* ---------- 1b. un seul niveau par voiture : on reprend le meilleur des deux pour les sauvegardes existantes ---------- */
+try{ if(S&&!S.lvUnified){ (S.cars||[]).forEach(c=>{ const s=S.cmb&&S.cmb[c.uid]; if(s&&s.lv>(c.lvl||1)){ c.lvl=Math.min(50,s.lv); c.xp=0; } }); S.lvUnified=1; save(); } }catch(e){ console.warn('niveaux',e); }
+
 /* ---------- 2. duel en 3D : vrais modèles, vue 3/4 en hauteur, voitures face à face ---------- */
 const CB3={on:false,sc:null,cam:null,g:[null,null],key:['',''],A:[{},{}],t:0,lights:[null,null],rings:[null,null]};
 const CB3_P=[{x:-3.0,z:2.0},{x:3.8,z:-4.0}];
@@ -47,6 +51,22 @@ function cb3dScene(){
   /* sol : grille néon */
   const gt=ctex(256,256,(x,W,H)=>{ x.fillStyle='#14122e'; x.fillRect(0,0,W,H); x.strokeStyle='rgba(0,229,255,.28)'; x.lineWidth=2; for(let i=0;i<=8;i++){ x.beginPath(); x.moveTo(i*32,0); x.lineTo(i*32,H); x.stroke(); x.beginPath(); x.moveTo(0,i*32); x.lineTo(W,i*32); x.stroke(); } },[14,14]);
   const gr=new THREE.Mesh(new THREE.CircleGeometry(60,48),new THREE.MeshLambertMaterial({map:gt})); gr.rotation.x=-Math.PI/2; sc.add(gr);
+  /* piste de l'arène : bitume, traces de pneus, fissures, marquages néon (lumineux) et emblème au centre */
+  const N=1024, cx=(CB3_P[0].x+CB3_P[1].x)/2, cz=(CB3_P[0].z+CB3_P[1].z)/2, SZ=26, toPx=(x,z)=>[(x-cx)/SZ*N+N/2,(z-cz)/SZ*N+N/2];
+  let sd=7; const rn=()=>{ sd=(sd*16807)%2147483647; return sd/2147483647; };
+  const at=ctex(N,N,(x,W,H)=>{ const g=x.createRadialGradient(W/2,H/2,0,W/2,H/2,W/2); g.addColorStop(0,'#2b2a3f'); g.addColorStop(.75,'#211f33'); g.addColorStop(1,'rgba(20,18,46,0)'); x.fillStyle=g; x.fillRect(0,0,W,H);
+    for(let i=0;i<9000;i++){ const r=rn(); x.fillStyle=`rgba(${r<.5?200:20},${r<.5?200:20},${r<.5?230:40},${.04+rn()*.08})`; x.fillRect(rn()*W,rn()*H,1+rn()*2.5,1+rn()*2.5); }
+    for(let i=0;i<14;i++){ x.strokeStyle=`rgba(5,5,12,${.18+rn()*.25})`; x.lineWidth=10+rn()*14; x.lineCap='round'; x.beginPath(); const a0=rn()*6.3, R=120+rn()*300; x.arc(W/2+(rn()-.5)*200,H/2+(rn()-.5)*200,R,a0,a0+.8+rn()*1.6); x.stroke(); }
+    x.strokeStyle='rgba(8,8,16,.55)'; x.lineWidth=2; for(let i=0;i<10;i++){ let px=rn()*W, py=rn()*H; x.beginPath(); x.moveTo(px,py); for(let k=0;k<6;k++){ px+=(rn()-.5)*80; py+=(rn()-.5)*80; x.lineTo(px,py); } x.stroke(); }
+    CB3_P.forEach(p=>{ const [px,py]=toPx(p.x,p.z); const g2=x.createRadialGradient(px,py,40,px,py,200); g2.addColorStop(0,'rgba(0,0,0,.35)'); g2.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g2; x.beginPath(); x.arc(px,py,200,0,7); x.fill(); }); });
+  const lt=ctex(N,N,(x,W,H)=>{ x.fillStyle='#000'; x.fillRect(0,0,W,H); x.lineCap='round';
+    x.strokeStyle='#00e5ff'; x.lineWidth=7; x.beginPath(); x.arc(W/2,H/2,W*.46,0,7); x.stroke();
+    x.strokeStyle='#ff2bd6'; x.lineWidth=5; x.setLineDash([40,26]); x.beginPath(); x.arc(W/2,H/2,W*.41,0,7); x.stroke(); x.setLineDash([]);
+    const [ax,ay]=toPx(CB3_P[0].x,CB3_P[0].z), [bx,by]=toPx(CB3_P[1].x,CB3_P[1].z); x.strokeStyle='rgba(252,238,10,.85)'; x.lineWidth=6; x.setLineDash([30,24]); x.beginPath(); x.moveTo(ax,ay); x.lineTo(bx,by); x.stroke(); x.setLineDash([]);
+    x.strokeStyle='rgba(195,155,255,.9)'; x.lineWidth=5; x.beginPath(); x.arc(W/2,H/2,64,0,7); x.stroke(); x.save(); x.translate(W/2,H/2); x.strokeStyle='rgba(195,155,255,.95)'; x.lineWidth=8; x.lineCap='round'; [-1,1].forEach(sg=>{ x.save(); x.rotate(sg*Math.PI/4); x.beginPath(); x.moveTo(0,-40); x.lineTo(0,30); x.stroke(); x.beginPath(); x.moveTo(-12,20); x.lineTo(12,20); x.stroke(); x.restore(); }); x.restore();
+    x.fillStyle='rgba(0,229,255,.8)'; for(let i=0;i<36;i++){ const a=i/36*Math.PI*2; x.save(); x.translate(W/2+Math.cos(a)*W*.435,H/2+Math.sin(a)*W*.435); x.rotate(a); x.fillRect(-3,-12,6,24); x.restore(); } });
+  [at,lt].forEach(t=>{ t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=4; });
+  const ap=new THREE.Mesh(new THREE.PlaneGeometry(SZ,SZ),new THREE.MeshLambertMaterial({map:at,transparent:true,emissive:0xffffff,emissiveMap:lt,emissiveIntensity:.9,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2})); ap.rotation.x=-Math.PI/2; ap.position.set(cx,.02,cz); sc.add(ap);
   /* plateformes */
   CB3_P.forEach((p,s)=>{ const d=new THREE.Mesh(new THREE.CylinderGeometry(2.25,2.4,.18,40),new THREE.MeshLambertMaterial({color:0x232060})); d.position.set(p.x,.09,p.z); sc.add(d);
     const r=new THREE.Mesh(new THREE.TorusGeometry(2.28,.07,8,60),new THREE.MeshBasicMaterial({color:s?0xff2bd6:0x00e5ff})); r.rotation.x=Math.PI/2; r.position.set(p.x,.2,p.z); sc.add(r); CB3.rings[s]=r;

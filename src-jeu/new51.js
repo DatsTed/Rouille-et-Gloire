@@ -293,4 +293,4 @@ const CB_IT={
   depann:  {n:'Kit de remorquage',ic:'🚚',revive:.5,px:3500,d:'Remet en état une voiture K.O. (50 % du blindage).'}
 };
 const CB_IT_MAX=4;
-const CB_ENERGY={start:20,turn:8,hit:6,deal:12,max:100};                  /* jauge d'ultime : +8 par tour, +12 quand on touche, +6 quand on est touché */
+const CB_ENERGY={start:25,turn:9,hit:13,deal:15,max:100};                 /* jauge d'ultime : 25 au départ, +9 par tour, +15 quand on touche, +13 quand on est touché (≈ 1 ultime par voiture et par duel) */

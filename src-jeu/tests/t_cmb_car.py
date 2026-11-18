@@ -12,7 +12,7 @@ A = r"""()=>{ const E=[]; S=fresh(); S.age18=false; S.intro=true;
   S.cars.forEach(c=>{ const s=cbOf(c), k=c.mid;
     if(!s.ty.length||s.ty.some(t=>!CB_TYPES[t])) E.push(k+' types'); if(!CB_TAL[s.tal]) E.push(k+' talent');
     CB_SK.forEach(x=>{ const v=s.iv[x]; if(!(v>=0&&v<=31&&v===Math.floor(v))) E.push(k+' iv '+x); ivs.push(v); });
-    if(!(s.lv>=5&&s.lv<=20)) E.push(k+' niveau '+s.lv); if(cbLvOfXp(s.xp)!==s.lv) E.push(k+' xp/niveau');
+    if(s.lv!==(c.lvl||1)) E.push(k+' niveau de combat différent du niveau de la voiture');
     if(!(s.mv.length>=1&&s.mv.length<=4)||new Set(s.mv).size!==s.mv.length) E.push(k+' attaques '+s.mv);
     s.mv.forEach(id=>{ const m=CB_MV[id]; if(!m||(m.t!=='meca'&&!s.ty.includes(m.t))||m.lv>s.lv) E.push(k+' attaque illégale '+id); });
     if(!s.mv.some(id=>CB_MV[id].c!=='sta')) E.push(k+' aucune attaque offensive');
@@ -20,13 +20,15 @@ A = r"""()=>{ const E=[]; S=fresh(); S.age18=false; S.intro=true;
     const b=cbBase(c.mid), tot=CB_SK.reduce((a,x)=>a+b[x],0); if(tot<380||tot>700) E.push(k+' base totale '+tot); });
   if(new Set(ivs).size<10) E.push('IV peu variés');
   if(cbOf(S.cars[0])!==cbOf(S.cars[0])) E.push('fiche non stable');
-  /* montée de niveau + nouvelles attaques */
-  const c=S.cars.find(x=>x.mid==='rossa'), s=cbOf(c), lv0=s.lv, r=cbGainXP(c,cbNeed(30)-s.xp);
-  if(r.l1!==30||s.lv!==30) E.push('gain XP '+JSON.stringify(r)); if(!r.fresh.length) E.push('aucune attaque nouvelle entre '+lv0+' et 30');
-  if(!(s.mv.length===4)) E.push('4 attaques attendues'); if(cbStats(c).hp<=cbStats(c,lv0).hp) E.push('stats qui ne montent pas');
-  cbGainXP(c,1e9); if(s.lv!==CB_LVMAX) E.push('niveau max');
-  /* cloisonnement : rien ne change côté course */
+  /* cloisonnement : créer les fiches ne change rien côté course */
   const race1=JSON.stringify(S.cars.map(c=>[st(c),c.etat,c.lvl,c.xp])); if(race0!==race1) E.push('les caractéristiques de course ont changé');
+  /* un seul niveau : l'XP de combat fait monter la voiture, l'XP de course aussi */
+  const c=S.cars.find(x=>x.mid==='rossa'), s=cbOf(c), lv0=c.lvl; let need=0; for(let l=lv0;l<30;l++) need+=60*l; const r=cbGainXP(c,need-(c.xp||0));
+  if(c.lvl!==30||s.lv!==30||r.l1!==30) E.push('gain XP '+JSON.stringify(r)+' niv. voiture '+c.lvl); if(!r.fresh.length) E.push('aucune attaque nouvelle entre '+lv0+' et 30');
+  if(!(s.mv.length===4)) E.push('4 attaques attendues'); if(cbStats(c).hp<=cbStats(c,lv0).hp) E.push('stats qui ne montent pas');
+  addCarXP(c,60*30); if(cbOf(c).lv!==31) E.push('l’XP de course ne monte pas le niveau de combat');
+  cbGainXP(c,1e9); if(s.lv!==CB_LVMAX||c.lvl!==CB_LVMAX) E.push('niveau max');
+  { const n=S.cars.find(x=>x.mid==='kombi'); cbSetLv(n,20); const st20=JSON.stringify(st(n)); cbSetLv(n,40); if(JSON.stringify(st(n))!==st20) E.push('le niveau au-delà de 20 change les courses'); }
   /* interface : fiche + gestion des attaques */
   ACT.car({id:String(c.uid)}); const sec=$('sheet').querySelector('.cbsec'); if(!sec) E.push('section combat absente'); else if(sec.querySelectorAll('.cbst').length!==6) E.push('6 stats attendues');
   ACT.cbmv({id:String(c.uid)}); if(sheet.t!=='cbmoves') E.push('gestion des attaques');

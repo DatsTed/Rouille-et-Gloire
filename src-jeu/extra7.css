@@ -248,3 +248,4 @@ body.cbon{overflow:hidden}
 .cbultl{display:flex;flex-direction:column;gap:4px;margin:0 0 8px}.cbultl small{font-size:11px;color:var(--muted)}
 .ar-resume{border-color:#ffd24a;background:linear-gradient(120deg,#3a2a05,#1b1d45)}
 .arena{margin-top:10px}
+.arsw{margin:0 0 10px}.subtabs.arsw button{font-size:11px;white-space:nowrap;padding:9px 4px;min-width:0}.ar-back{margin:0 0 10px}

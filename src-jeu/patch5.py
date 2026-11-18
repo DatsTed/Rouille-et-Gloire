@@ -99,4 +99,9 @@ rep("pool=CARS.filter(m=>m.t>=r[0]&&m.t<=r[1]);","pool=CARS.filter(m=>m.t>=r[0]&
 rep("CARS.filter(m=>m.t<=cl+1)","CARS.filter(m=>m.t<=cl+1&&m.id!=='patrouille')",2)
 rep("const m=M[d.id]; if(!m||S.cr<m.val||m.t>S.bat.concession+1) return;","const m=M[d.id]; if(!m||m.id==='patrouille'||S.cr<m.val||m.t>S.bat.concession+1) return;")
 rep("atelier:vAtelier,equipe:vEquipe})[view]()","atelier:vAtelier,equipe:vEquipe,arena:vArena})[view]()")
+# --- v1.6 : un seul niveau par voiture (courses + combats), jusqu'à 50 ; le bonus de course reste plafonné à l'effet du niveau 20
+rep("c.xp+=n; while(c.lvl<20&&c.xp>=60*c.lvl){","c.xp+=n; while(c.lvl<50&&c.xp>=60*c.lvl){")
+rep("Niveau ${c.lvl}${c.lvl<20?` (${c.xp} / ${60*c.lvl} XP)`:' (max)'}","Niveau ${c.lvl}${c.lvl<50?` (${c.xp} / ${60*c.lvl} XP)`:' (max)'}")
+rep("return v*(1+.015*(c.lvl-1));","return v*(1+.015*(Math.min(c.lvl,20)-1));")
+rep("lv=1+.015*(c.lvl-1)","lv=1+.015*(Math.min(c.lvl,20)-1)")
 open('main.js','w',encoding='utf-8').write(s); print('ok',len(s))

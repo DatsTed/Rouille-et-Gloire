@@ -27,6 +27,14 @@
 ## Ce qui n'est pas vérifié
 Le rendu 3D réel (décor du labo, circuits), l'audio à l'oreille, le toucher sur téléphone et l'équilibrage sur une longue session.
 
+## v1.6b : niveau unique et équilibrage
+- Un seul niveau par voiture (`c.lvl`, 1 à 50, 60 × niveau XP par palier) : monté en course (`addCarXP`) ou en combat (`cbGainXP` → `addCarXP`). En course, le bonus reste plafonné à l'effet du niveau 20 (`patch5.py`). Migration `S.lvUnified` : on garde le meilleur des deux anciens niveaux.
+- Stats de combat : 55 % profil des types + 45 % vraies caractéristiques (poids, puissance, vitesse, maniabilité, fiabilité, adhérence) dans `cbBase`.
+- XP de combat `cbXpFor` = (20 + 6 × niveau adverse) × 1,4 en tournoi ; coupes conseillées aux niveaux 5, 10, 16, 24, 32.
+- Jauge d'ultime `CB_ENERGY` : 25 au départ, +9 par tour, +15 en touchant, +13 en encaissant (≈ 0,5 ultime par voiture engagée côté IA).
+- Les 4 attaques suivent le niveau tant que le joueur ne les a pas modifiées (`s.custom`).
+- Arène : sous-onglets en classe `arsw` (les `.topsw` sont effacés à chaque rendu par new47), bouton « Retour aux tournois » ; sol de l'arène 3D texturé.
+
 ## v1.6 (new57, new58)
 - `new57` : 6 attaques légendaires (100 d'Énergie) + `cbLegend(e)`, mini-cinématiques DOM de 2,2 à 2,7 s (styles beam, sphere, meteor, wave, bolt, spikes, vortex) jouées pour toute attaque à Énergie.
 - Ultime attitrée : `cbUltOf(types,niveau)` (ultime du 1er type, légendaire à partir de son niveau). Les attaques à Énergie ne vont plus dans les 4 emplacements ; action `{k:'mv',ult:true}` quand `f.energy>=CB_ENERGY.max` ; jauge +8 par tour, +12 en touchant, +6 en étant touché. Bouton « ⚡ ULTIME » dans le duel, l'IA s'en sert (`cbAI`).

@@ -14,9 +14,13 @@ const cbTypesOf=mid=>CB_CARTY[mid]||((M[mid]&&M[mid].t>=4)?['meca','acier']:['me
 /* XP totale nécessaire pour atteindre un niveau (courbe « moyenne ») */
 const cbNeed=l=>Math.round(.8*Math.pow(Math.max(1,l),3));
 const cbLvOfXp=x=>{ let l=1; while(l<CB_LVMAX&&cbNeed(l+1)<=x) l++; return l; };
+/* stats de base : 55 % le profil des types, 45 % les vraies caractéristiques de la voiture
+   (poids → blindage et châssis, puissance → attaques, vitesse et maniabilité → reprise, fiabilité et adhérence → isolation) */
 function cbBase(mid){
-  const m=M[mid]||{t:1,kg:1200}, ty=cbTypesOf(mid), p1=CB_TPROF[ty[0]], p2=CB_TPROF[ty[1]||ty[0]], kgF=clamp((m.kg||1200)/1300,.7,1.5), tier=1+.035*((m.t||1)-1), o={};
-  CB_SK.forEach(k=>{ let v=p1[k]*.62+p2[k]*.38; if(k==='hp') v*=Math.pow(kgF,.2); if(k==='def') v*=Math.pow(kgF,.15); if(k==='vit') v/=Math.pow(kgF,.2); o[k]=Math.round(v*tier); });
+  const m=M[mid]||{t:1,kg:1200,ch:120,vmax:160,adh:40,man:40,fia:50,sty:40}, ty=cbTypesOf(mid), p1=CB_TPROF[ty[0]], p2=CB_TPROF[ty[1]||ty[0]], o={};
+  const kg=clamp(m.kg||1200,600,2400), ch=clamp(m.ch||120,60,1100), sq=Math.sqrt(ch);
+  const car={hp:56+kg/32, atk:48+sq*2.6, def:42+kg/46+(m.fia||50)*.35, spa:52+sq*1.9+(m.sty||40)*.2, spd:46+(m.fia||50)*.45+(m.adh||40)*.25, vit:28+clamp(m.vmax||160,60,360)*.22+(m.man||40)*.3};
+  CB_SK.forEach(k=>{ const t=p1[k]*.62+p2[k]*.38; o[k]=Math.round(t*.55+car[k]*.45); });
   return o; }
 function cbAutoMoves(ty,lv){
   const L=cbLearnable(ty,lv), off=L.filter(m=>m.c!=='sta'&&!(m.fx.selfko)), pick=[];
@@ -28,9 +32,11 @@ function cbAutoMoves(ty,lv){
   return pick.slice(0,4); }
 function cbNew(c){
   const m=M[c.mid]||{t:1}, ty=cbTypesOf(c.mid), iv={}; CB_SK.forEach(k=>iv[k]=Math.floor(Math.random()*32));
-  const pool=CB_TAL_BY[ty[0]]||CB_TAL_BY.meca, lv=clamp(5+2*((m.t||1)-1)+Math.floor(((c.lvl||1)-1)/2),5,20);
-  return {v:1,ty,iv,tal:pool[Math.floor(Math.random()*pool.length)],lv,xp:cbNeed(lv),mv:cbAutoMoves(ty,lv),nw:[],w:0,l:0}; }
+  const pool=CB_TAL_BY[ty[0]]||CB_TAL_BY.meca, lv=clamp(c.lvl||1,1,CB_LVMAX);   /* un seul niveau : celui de la voiture (courses + combats) */
+  return {v:1,ty,iv,tal:pool[Math.floor(Math.random()*pool.length)],lv,xp:0,mv:cbAutoMoves(ty,lv),nw:[],w:0,l:0}; }
 function cbOf(c){ if(!c) return null; if(!S.cmb) S.cmb={}; let s=S.cmb[c.uid]; if(!s||s.v!==1){ s=S.cmb[c.uid]=cbNew(c); }
+  s.lv=clamp(c.lvl||1,1,CB_LVMAX);
+  if(!s.custom&&s.autoLv!==s.lv){ s.mv=cbAutoMoves(s.ty,s.lv); s.autoLv=s.lv; s.nw=[]; }   /* tant que le joueur n'a rien changé, les 4 attaques suivent le niveau */
   if(s.mv.some(id=>!CB_MV[id]||CB_MV[id].e)){ s.mv=s.mv.filter(id=>CB_MV[id]&&!CB_MV[id].e); if(!s.mv.length) s.mv=cbAutoMoves(s.ty,s.lv); }   /* anciennes fiches : les ultimes quittent les emplacements */
   return s; }
 /* statistiques réelles (formule type Pokémon, sans points d'effort) */
@@ -38,8 +44,10 @@ function cbStats(c,lvOver){ const s=cbOf(c), b=cbBase(c.mid), L=lvOver||s.lv, o=
   CB_SK.forEach(k=>{ const r=Math.floor((2*b[k]+s.iv[k])*L/100); o[k]=k==='hp'?r+L+10:r+5; }); return o; }
 const cbIvGrade=v=>v>=31?['Parfait','#ffd24a']:v>=26?['Excellent','#3cff9e']:v>=16?['Bon','#00e5ff']:v>=6?['Moyen','#a5adcf']:['Faible','#ff6a8a'];
 /* XP de combat : montée de niveau, nouvelles attaques proposées */
-function cbGainXP(c,n){ const s=cbOf(c), l0=s.lv; s.xp=Math.min(cbNeed(CB_LVMAX),s.xp+Math.max(0,Math.round(n))); s.lv=cbLvOfXp(s.xp);
-  const fresh=Object.values(CB_MV).filter(m=>(m.t==='meca'||s.ty.includes(m.t))&&m.lv>l0&&m.lv<=s.lv).map(m=>m.id);
+const carNeedXP=l=>60*l;                                                  /* même courbe que les courses : 60 × niveau pour passer au suivant */
+function cbSetLv(c,l){ c.lvl=clamp(l,1,CB_LVMAX); c.xp=0; cbOf(c); }
+function cbGainXP(c,n){ const s=cbOf(c), l0=c.lvl||1; addCarXP(c,Math.max(0,Math.round(n))); s.lv=clamp(c.lvl,1,CB_LVMAX);
+  const fresh=Object.values(CB_MV).filter(m=>!m.e&&(m.t==='meca'||s.ty.includes(m.t))&&m.lv>l0&&m.lv<=s.lv).map(m=>m.id);
   fresh.forEach(id=>{ if(s.mv.includes(id)) return; if(s.mv.length<4) s.mv.push(id); else if(!s.nw.includes(id)) s.nw.push(id); });
   return {l0,l1:s.lv,fresh}; }
 const cbTyChip=t=>{ const T=CB_TYPES[t]; return T?`<span class="cbty" style="--tc:${T.c}">${T.ic} ${T.n}</span>`:''; };
@@ -50,12 +58,12 @@ const cbMvChip=(id,extra)=>{ const m=CB_MV[id]; if(!m) return ''; const T=CB_TYP
 
 /* ---- section « Fiche de combat » dans la fiche véhicule (après l'éveil seulement) ---- */
 function cbCarHTML(c){
-  const s=cbOf(c), st=cbStats(c), b=cbBase(c.mid), T=CB_TAL[s.tal]||{}, nx=s.lv>=CB_LVMAX?1:(s.xp-cbNeed(s.lv))/Math.max(1,cbNeed(s.lv+1)-cbNeed(s.lv));
+  const s=cbOf(c), st=cbStats(c), b=cbBase(c.mid), T=CB_TAL[s.tal]||{}, nx=s.lv>=CB_LVMAX?1:clamp((c.xp||0)/carNeedXP(s.lv),0,1);
   const ivTot=CB_SK.reduce((a,k)=>a+s.iv[k],0);
   const rows=CB_SK.map(k=>{ const g=cbIvGrade(s.iv[k]); return `<div class="cbst"><span>${CB_STATS[k].ic} ${CB_STATS[k].n}</span><i title="Potentiel du modèle : ${b[k]}"><em style="width:${clamp(b[k]/140*100,4,100)}%"></em></i><b>${st[k]}</b><small style="color:${g[1]}" title="IV ${s.iv[k]}/31">IV ${s.iv[k]}</small></div>`; }).join('');
   return `<div class="sec cbsec"><h3>⚔️ Fiche de combat</h3>
     <div class="cbhd"><span class="cblv">Niv. ${s.lv}</span>${s.ty.map(cbTyChip).join('')}<span class="cbrec">${s.w||0} V · ${s.l||0} D</span></div>
-    <div class="cbxp"><i style="width:${(nx*100).toFixed(1)}%"></i></div><p class="note sm" style="margin:2px 0 8px">${s.lv>=CB_LVMAX?'Niveau maximum':fmt(cbNeed(s.lv+1)-s.xp)+' XP de combat avant le niveau '+(s.lv+1)}</p>
+    <div class="cbxp"><i style="width:${(nx*100).toFixed(1)}%"></i></div><p class="note sm" style="margin:2px 0 8px">${s.lv>=CB_LVMAX?'Niveau maximum':fmt(carNeedXP(s.lv)-(c.xp||0))+' XP avant le niveau '+(s.lv+1)+' · gagnée en course ou en combat'}</p>
     <div class="cbtal"><b>🧬 ${T.n||'—'}</b><small>${T.d||''}</small></div>
     ${rows}<p class="note sm">Barres : potentiel du modèle · chiffres : valeur au niveau ${s.lv}.</p><p class="note sm">Potentiel (IV) : <b>${ivTot}/186</b> · ${cbIvGrade(Math.round(ivTot/6))[0]}. Les IV sont fixés à l’acquisition de la voiture.</p>
     <div class="cbmvs">${s.mv.map(id=>cbMvChip(id)).join('')}</div>
@@ -80,6 +88,6 @@ Object.assign(ACT,{
   cbmv(d){ const c=car(+d.id); if(!c) return; const s=cbOf(c); openSheet({t:'cbmoves',uid:c.uid,sel:null}); s.nw=[]; save(); },
   cbpick(d){ if(!sheet||sheet.t!=='cbmoves') return; sheet.sel=sheet.sel===d.id?null:d.id; renderSheet(); },
   cbslot(d){ if(!sheet||sheet.t!=='cbmoves') return; const s=cbOf(car(sheet.uid)), i=+d.id, id=sheet.sel; if(!id) return toast('Choisis d’abord une attaque dans la liste');
-    const j=s.mv.indexOf(id); if(j>=0&&j!==i){ s.mv[j]=s.mv[i]; } s.mv[i]=id; s.mv=s.mv.filter(Boolean); sheet.sel=null; save(); renderSheet(); try{ ui('click'); }catch(e){} },
+    const j=s.mv.indexOf(id); if(j>=0&&j!==i){ s.mv[j]=s.mv[i]; } s.mv[i]=id; s.mv=s.mv.filter(Boolean); s.custom=1; sheet.sel=null; save(); renderSheet(); try{ ui('click'); }catch(e){} },
   cbback(d){ openSheet({t:'car',uid:+d.id}); }
 });

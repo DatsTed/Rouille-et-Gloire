@@ -267,6 +267,7 @@ function cbAI(B,s,dOverride){ const S2=B.sides[s], d=dOverride!=null?dOverride:(
 function cbAIReplace(B,s){ const S2=B.sides[s], o=cbAct(B,1-s), alive=S2.team.map((f,i)=>i).filter(i=>S2.team[i].hp>0);
   return alive.map(i=>{ const f=S2.team[i]; const pow=Math.max(0,...f.mv.map(x=>CB_MV[x.id].c==='sta'?0:cbEff(CB_MV[x.id].t,o.ty))), thr=Math.max(0,...o.mv.map(x=>CB_MV[x.id].c==='sta'?0:cbEff(CB_MV[x.id].t,f.ty))); return {i,v:pow*2-thr+f.hp/f.mhp}; }).sort((a,b)=>b.v-a.v)[0].i; }
 /* XP de combat gagnée contre une voiture de niveau L (dresseur = tournoi) */
-const cbXpFor=(L,trainer)=>Math.round(28*L*(trainer?1.5:1));
+/* XP de voiture gagnée en combat, du même ordre qu'une course : ~6 victoires par niveau, tournoi ×1,4 */
+const cbXpFor=(L,trainer)=>Math.round((20+6*L)*(trainer?1.4:1));
 /* combat automatique complet (tests, simulations) */
 function cbAutoBattle(o){ const B=cbBattle(Object.assign({},o,{ai:o.ai||[{d:3},{d:3}]})); let g=0; while(B.over==null&&g++<200){ if(B.need){ B.need.slice().forEach(s=>cbReplace(B,s,cbAIReplace(B,s))); continue; } cbTurn(B,[cbAI(B,0),cbAI(B,1)]); } if(B.over==null) B.over=-1; return B; }

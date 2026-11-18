@@ -1,4 +1,4 @@
-/* ===== v1.5 · 6/6 : règles des voitures (patrouille, vélo) + Arène cosmique : tournois, pilotes rivaux, équipe, boutique =====
+﻿/* ===== v1.5 · 6/6 : règles des voitures (patrouille, vélo) + Arène cosmique : tournois, pilotes rivaux, équipe, boutique =====
    Les duels utilisent le moteur (new53) et l'écran (new54) ; récompenses dans l'économie du jeu (cr, jetons, objets, voitures). */
 
 /* ---- 0. Brenner Patrouille : seulement dans le Paquet Voiture, ultra rare, une seule par garage ---- */
@@ -49,11 +49,11 @@ const CB_PIL={
 };
 /* ---- 2. coupes (difficulté croissante) ---- */
 const CB_CUPS=[
-  {id:'c1',nm:'Coupe Étincelle',ic:'🥉',lv:8,d:1,iv:10,team:2,rounds:['mama','rosa','lina'],round:900,rw:{cr:8000,it:{kit:3,nitrorec:1}},d0:'Le premier tournoi des voitures éveillées.'},
-  {id:'c2',nm:'Coupe Tempête',ic:'🌀',lv:14,d:2,iv:14,team:2,rounds:['tom','kenji','volt'],round:1800,rw:{cr:20000,tok:5,it:{superkit:2,turbox:1,degivre:1}},d0:'Météo déchaînée et pilotes techniques.'},
-  {id:'c3',nm:'Coupe Néon',ic:'🥈',lv:20,d:2,iv:18,team:3,rounds:['ines','lumen','brenner','kenji'],round:3500,rw:{cr:45000,tok:10,it:{revision:1,superkit:2,nitrorec:2}},d0:'Les meilleurs pilotes de la ville, en équipes de trois.'},
-  {id:'c4',nm:'Coupe Éclipse',ic:'🥇',lv:28,d:3,iv:24,team:3,rounds:['corbeau','volt','lina','max'],round:7000,rw:{cr:90000,tok:20,it:{depann:1,revision:2,surchx:1,chassisx:1}},d0:'Quand la nuit tombe, les pilotes d’élite sortent.'},
-  {id:'c5',nm:'Coupe Cosmique',ic:'🌌',lv:36,d:3,iv:30,team:3,rounds:['max','corbeau','brenner','lumen','astra'],round:14000,rw:{cr:200000,tok:40,it:{revision:3,depann:2},car:['solus','aurion','volta']},d0:'La finale ultime. Astra l’Éveillée vous attend.'}
+  {id:'c1',nm:'Coupe Étincelle',ic:'🥉',lv:5,d:1,iv:10,team:2,rounds:['mama','rosa','lina'],round:900,rw:{cr:8000,it:{kit:3,nitrorec:1}},d0:'Le premier tournoi des voitures éveillées.'},
+  {id:'c2',nm:'Coupe Tempête',ic:'🌀',lv:10,d:2,iv:14,team:2,rounds:['tom','kenji','volt'],round:1800,rw:{cr:20000,tok:5,it:{superkit:2,turbox:1,degivre:1}},d0:'Météo déchaînée et pilotes techniques.'},
+  {id:'c3',nm:'Coupe Néon',ic:'🥈',lv:16,d:2,iv:18,team:3,rounds:['ines','lumen','brenner','kenji'],round:3500,rw:{cr:45000,tok:10,it:{revision:1,superkit:2,nitrorec:2}},d0:'Les meilleurs pilotes de la ville, en équipes de trois.'},
+  {id:'c4',nm:'Coupe Éclipse',ic:'🥇',lv:24,d:3,iv:24,team:3,rounds:['corbeau','volt','lina','max'],round:7000,rw:{cr:90000,tok:20,it:{depann:1,revision:2,surchx:1,chassisx:1}},d0:'Quand la nuit tombe, les pilotes d’élite sortent.'},
+  {id:'c5',nm:'Coupe Cosmique',ic:'🌌',lv:32,d:3,iv:30,team:3,rounds:['max','corbeau','brenner','lumen','astra'],round:14000,rw:{cr:200000,tok:40,it:{revision:3,depann:2},car:['solus','aurion','volta']},d0:'La finale ultime. Astra l’Éveillée vous attend.'}
 ];
 const cbSt=()=>{ if(!S.cbStat) S.cbStat={w:0,l:0,cups:{},tr:0}; return S.cbStat; };
 const cupOpen=i=>i===0||!!cbSt().cups[CB_CUPS[i-1].id];
