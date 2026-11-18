@@ -5801,7 +5801,13 @@ GAMES.pin=function(api){
   fit(); const ro=window.ResizeObserver?new ResizeObserver(fit):null; if(ro) ro.observe(st);
   const segs=[]; const sg=(x1,y1,x2,y2,e,k)=>{ const s={x1,y1,x2,y2,e:e||.5,k:k||0}; segs.push(s); return s; };
   { const cx=180,cy=170,ar=168; let px=12,py=170; for(let i=1;i<=18;i++){ const a=Math.PI+i/18*Math.PI, x=cx+ar*Math.cos(a), y=cy+ar*Math.sin(a); sg(px,py,x,y,.4); px=x; py=y; } }
-  sg(12,170,12,455); sg(348,170,348,594); sg(318,594,348,594); sg(318,215,318,594); sg(12,455,94,540,.3); sg(318,455,226,540,.3);
+  sg(12,170,12,455); sg(348,170,348,594); sg(318,594,348,594); sg(318,215,318,594);
+  /* guides du bas : ils s'incurvent pour arriver exactement dans le prolongement du flipper au repos (même angle, même hauteur de surface),
+     la bille glisse ainsi du guide au flipper sans marche ni rebond */
+  { const R0=6.5, FW=6, rest=.6; [[12,455,98,545,1],[318,455,222,545,-1]].forEach(([x0,y0,px,py,s])=>{
+      const nx=s*Math.sin(rest), ny=-Math.cos(rest), E=[px+nx*FW,py+ny*FW], pts=[E]; let p=E;
+      [34,38,42].forEach(a=>{ const r=a*Math.PI/180, dx=s*Math.cos(r), dy=Math.sin(r); p=[p[0]-dx*20,p[1]-dy*20]; pts.unshift(p); });
+      pts.unshift([x0,y0]); for(let i=0;i<pts.length-1;i++) sg(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],i<pts.length-3?.25:.08); }); }
   const door=sg(348,196,318,222,.3); door.off=true; door.door=1;
   const slL={x1:50,y1:392,x2:98,y2:462,e:1.05,k:360,hit:0}, slR={x1:268,y1:392,x2:222,y2:462,e:1.05,k:360,hit:0}; segs.push(slL,slR);
   const bumps=[], posts=[], spins=[], boosts=[], portals=[], wells=[], mills=[], ramps=[], dbanks=[]; let rampN=0, rampT=0, rampMax=0; const hole={x:172,y:310,r:15,open:true,sp:0,cool:0};
@@ -5852,7 +5858,9 @@ GAMES.pin=function(api){
     for(let k=segs.length-1;k>=0;k--) if(segs[k].tb) segs.splice(k,1);
     bumps.length=posts.length=spins.length=boosts.length=portals.length=wells.length=mills.length=tgt.length=lanes.length=ramps.length=dbanks.length=0;
     T.bumps.forEach(a=>{ const q={x:a[0],y:a[1],r:a[2]||17,hit:0,x0:a[0],y0:a[1]}; if(a[3]) q.mv=a[3]; bumps.push(q); });
-    (T.posts||[]).forEach(a=>posts.push({x:a[0],y:a[1],r:6})); T.tgt.forEach(a=>tgt.push({x:a[0],y:a[1],r:8,on:0})); T.lanes.forEach(a=>lanes.push({x:a[0],y:a[1],on:0}));
+    (T.posts||[]).forEach(a=>posts.push({x:a[0],y:a[1],r:6}));
+    /* petite quille fixe en haut à gauche, contre l'arc : la bille lancée ne glisse plus toujours le long de la paroi jusqu'en bas à gauche */
+    { const a=212*Math.PI/180; posts.push({x:180+156*Math.cos(a),y:170+156*Math.sin(a),r:5,q:1}); } T.tgt.forEach(a=>tgt.push({x:a[0],y:a[1],r:8,on:0})); T.lanes.forEach(a=>lanes.push({x:a[0],y:a[1],on:0}));
     (T.spins||[]).forEach(a=>spins.push({x:a[0],y:a[1],r:15,ang:0,cd:0,n:0})); (T.boosts||[]).forEach(a=>{ const m=Math.hypot(a[2],a[3])||1; boosts.push({x:a[0],y:a[1],r:15,dx:a[2]/m,dy:a[3]/m,cd:0,glow:0}); });
     (T.portals||[]).forEach((a,k)=>portals.push({x:a[0],y:a[1],r:13,k,cd:0})); (T.wells||[]).forEach(a=>wells.push({x:a[0],y:a[1],r:a[2],k:a[3]}));
     (T.mills||[]).forEach(a=>{ const sgm=sg(a[0]-a[2],a[1],a[0]+a[2],a[1],.95); sgm.tb=1; sgm.mill=1; mills.push({x:a[0],y:a[1],L:a[2],sp:a[3],s:sgm}); });
@@ -5917,7 +5925,10 @@ GAMES.pin=function(api){
     for(const q of boosts){ if(q.cd<=0&&Math.hypot(b.x-q.x,b.y-q.y)<q.r){ q.cd=.4; q.glow=1; const sp=Math.max(Math.hypot(b.vx,b.vy),780); b.vx=q.dx*sp; b.vy=q.dy*sp; add(40); hitC(q.x,q.y,40); arcTone(1100,.1,'sawtooth',.07); } }
     for(const p of portals){ if(p.cd<=0&&Math.hypot(b.x-p.x,b.y-p.y)<p.r){ const o=portals[p.k^1]; if(o){ const sp=Math.hypot(b.vx,b.vy)||1; p.cd=o.cd=.7; b.x=o.x+b.vx/sp*(o.r+R+2); b.y=o.y+b.vy/sp*(o.r+R+2); add(150); hitC(o.x,o.y,150); burst(p.x,p.y,'#4aa8ff',10); burst(o.x,o.y,'#ff9a1a',10); arcTone(1300,.12,'sine',.09); if(Math.random()<.5) radarAdd(1); } } }
     { const dx=b.x-hole.x, dy=b.y-hole.y, d=Math.hypot(dx,dy);
-      if(hole.open&&hole.cool<=0){ if(d<hole.r*.62){ b.st='warp'; b.wt=.9; b.vx=b.vy=0; arcTone(200,.5,'sine',.1); return; } }
+      if(hole.open&&hole.cool<=0){
+        /* aimant léger, comme un vrai trou de flipper : légère attraction autour du trou et petit freinage sur le bord */
+        const MR=hole.r*2.3; if(d<MR&&d>.5){ const pull=(1-d/MR)*850*h; b.vx-=dx/d*pull; b.vy-=dy/d*pull; if(d<hole.r){ const f=Math.pow(.95,h*60); b.vx*=f; b.vy*=f; } }
+        if(d<hole.r*.62||(d<hole.r*.85&&Math.hypot(b.vx,b.vy)<560)){ b.st='warp'; b.wt=.9; b.vx=b.vy=0; arcTone(200,.5,'sine',.1); return; } }
       }
     for(let i=0;i<2;i++){ const f=FL[i], [tx,ty]=tip(f); const [cx,cy,tt]=closest(b.x,b.y,f.px,f.py,tx,ty); let dx=b.x-cx, dy=b.y-cy, d=Math.hypot(dx,dy); const m=R+6; if(d<m){ if(d<1e-4){ dx=0; dy=-1; d=1; } const nx=dx/d, ny=dy/d, s=tt*f.L, cvx=(f.s>0?-Math.sin(f.th):Math.sin(f.th))*s*f.w, cvy=Math.cos(f.th)*s*f.w; b.x=cx+nx*m; b.y=cy+ny*m; const rel=(b.vx-cvx)*nx+(b.vy-cvy)*ny; if(rel<0){ b.vx-=1.32*rel*nx; b.vy-=1.32*rel*ny; } } }
     if(b.x>319&&b.y>560&&b.vy>=0&&Math.hypot(b.vx,b.vy)<400){ if(balls.length===1||!balls.some(o=>o.st==='plunger')){ b.x=333; b.y=572; b.vx=b.vy=0; b.st='plunger'; power=0; door.off=true; } else b.dead=1; return; }
