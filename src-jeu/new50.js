@@ -39,6 +39,9 @@ hubSecret=function(){ HUB.sec=null; };
 { const _g=goalNext; goalNext=function(){ const r=_g.apply(this,arguments); if(r&&/cloison/i.test(r[1]||'')) return ['🌿','Ton labo clandestin est ouvert : va dans Atelier › Labo','labo','Ouvrir ›']; return r; }; }
 try{ const u=UNL.find(x=>x[2]==='Labo clandestin'); if(u) u[3]='Ton labo t’attend dans Atelier › Labo : culture, séchage, vente… et les courses clandestines, le karma et la police. Un tuto complet t’y attend.'; }catch(e){}
 { const _ul=ulSheet; ulSheet=function(){ const r=_ul.apply(this,arguments); try{ if(r){ const b=$('sheet').querySelector('[data-a="ulgo"][data-id="hub"]'); if(b){ b.dataset.id='labo'; b.textContent='🌿 Ouvrir le labo'; } } }catch(e){} return r; }; }
+/* labo en page : Croiser / Variétés / Tout planter juste au-dessus des emplacements de plantation */
+{ const _dl=decorLab47; decorLab47=function(){ const r=_dl.apply(this,arguments); try{ const el=$('sheet'), t=el&&el.querySelector(':scope>.labtools'); if(t){ const g=el.querySelector(':scope>.rgrid'), tb=el.querySelector(':scope>.rtabs');
+  if(g){ if(t.nextElementSibling!==g) g.before(t); } else if(tb&&tb.nextElementSibling!==t) tb.after(t); t.classList.add('lt50'); } }catch(e){} return r; }; }
 /* sac à dos : seulement dans le labo (pas dans le garage, la plage, etc.) */
 { const _hf=hubFrame; hubFrame=function(){ try{ document.body.classList.toggle('inlab50',!!(HUB.map&&GROW[HUB.map])); }catch(e){} return _hf.apply(this,arguments); }; }
 

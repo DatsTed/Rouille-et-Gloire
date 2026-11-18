@@ -23,8 +23,19 @@ body{background:radial-gradient(900px 420px at 50% -10%,rgba(0,229,255,.07),tran
 .x-slots button,.x-rar button{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px}
 .x-rar button b{line-height:1.15}
 
+/* plus de boutons ni de cases carrés : tout est arrondi comme les onglets du haut */
+#top .worldbtn,#top .mutebtn{border-radius:12px}
+.rchips>button,.x-rar>button,.x-slots>button,.x-go,.x-empty,.rstats>div,.lab-lv,.rit,.urow,.opl>div,.shiftp>button{border-radius:14px}
+.rhero,#sheet>.rcard{border-radius:16px}
+#sheet button.x,.inv>button.x,.rwrap>.bagbtn,.rlink,.inv-top>span,.growhud>span{border-radius:12px}
+body.labpage #sheet>.rhero{margin-right:0}
+
 /* garage 3D : le sac à dos n'apparaît que dans le labo */
 body:not(.inlab50) .hubw .bagbtn[data-a="inv"]{display:none!important}
+
+/* labo en page : pas de croix (on passe d'un menu à l'autre par les onglets) ; outils au-dessus des plants */
+body.labpage #sheet>button.x{display:none!important}
+#sheet>.labtools.lt50{margin:10px 0}
 
 /* missions : paliers de niveau */
 .pal50{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;margin-right:10px;font:700 14px/1 "Chakra Petch",system-ui,sans-serif;color:var(--muted);border:2px solid var(--line);background:rgba(255,255,255,.03)}
