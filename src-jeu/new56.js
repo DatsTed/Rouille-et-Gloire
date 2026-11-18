@@ -135,3 +135,15 @@ Object.assign(ACT,{
 });
 /* l'entraînement compte dans les statistiques de l'Arène */
 { const _tr=ACT.cbtrain; ACT.cbtrain=function(){ try{ if(sheet) closeSheet(); }catch(_){} const r=_tr.apply(this,arguments); try{ if(CBV){ const o=CBV.o, prev=o.onEnd; o.onEnd=(res,B)=>{ const st=cbSt(); if(res.win) st.w++; else st.l++; st.tr++; save(); if(prev) prev(res,B); }; o.onClose=()=>openSheet({t:'arena'}); } }catch(e){} return r; }; }
+
+/* ---- 5. onglet « Arène » dans la barre du bas, entre Marché et Missions, dès que l'éveil est confirmé ---- */
+(()=>{ if(!TABS.some(t=>t[0]==='arena')){ const i=TABS.findIndex(t=>t[0]==='missions'); TABS.splice(i<0?TABS.length:i,0,['arena','⚔️','Arène']); } })();
+{ const _ok=tabOk; tabOk=function(id){ if(id==='arena') return cbAwake(); return _ok.apply(this,arguments); }; }
+{ const _tb=ACT.tab; ACT.tab=function(d){ if(d&&d.id==='arena'){ ACT.arena(); return; } return _tb.apply(this,arguments); }; }
+/* l'onglet s'allume quand une page de l'Arène est ouverte */
+function arenaNav(){ try{ const b=document.querySelector('#nav button[data-id="arena"]'); if(!b) return; const on=!!(sheet&&['arena','cbtalk','cbcup','cbteam','cbshop'].includes(sheet.t)); if(on){ document.querySelectorAll('#nav button[aria-current]').forEach(x=>x.removeAttribute('aria-current')); b.setAttribute('aria-current','page'); } else if(b.getAttribute('aria-current')) b.removeAttribute('aria-current'); }catch(e){} }
+{ const _r=render; render=function(){ const r=_r.apply(this,arguments); arenaNav(); return r; }; }
+{ const _rs=renderSheet; renderSheet=function(){ const r=_rs.apply(this,arguments); arenaNav(); return r; }; }
+{ const _cs=closeSheet; closeSheet=function(){ const was=sheet&&['arena','cbtalk','cbcup','cbteam','cbshop'].includes(sheet.t), r=_cs.apply(this,arguments);
+  try{ if(was){ const nav=document.getElementById('nav'); if(nav){ let g=view; if(GRP_AT.includes(view)) g='atelier'; else if(GRP_MK.includes(view)) g='marche'; else if(view==='prep'||view==='result'||view==='race') g='epreuves';
+    nav.querySelectorAll('button').forEach(b=>{ if(b.dataset.id===g) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }); } } }catch(e){} return r; }; }
