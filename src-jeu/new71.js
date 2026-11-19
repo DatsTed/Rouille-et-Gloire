@@ -39,7 +39,7 @@ function pin3dMake(S3,host,topCv){
   sun.position.set(-160,420,200); fill.position.set(60,700,-100); ballL.position.set(0,26,100); sc.add(amb,sun,fill,ballL);
   /* ---------- caméra : tout le plateau tient dans le cadre ---------- */
   const PITCH=54*PI/180; let ASP=.6, CAMZ=0;
-  const corners=[[-8,-6,0],[368,-6,0],[-8,606,0],[368,606,0],[12,40,16],[348,40,16],[-6,-18,120],[366,-18,120],[-6,640,0],[366,640,0]];
+  const corners=[[-8,-6,0],[368,-6,0],[-8,606,0],[368,606,0],[12,40,16],[348,40,16],[-6,-18,172],[366,-18,172],[-6,640,0],[366,640,0]];
   let camD=900;
   const camFor=(d,tz)=>{ cam.position.set(0,Math.sin(PITCH)*d,tz+Math.cos(PITCH)*d); cam.lookAt(0,0,tz); cam.updateMatrixWorld(); cam.updateProjectionMatrix(); };
   const ndcOf=p=>new T3.Vector3(X(p[0]),p[2],Z(p[1])).project(cam);
@@ -115,16 +115,20 @@ function pin3dMake(S3,host,topCv){
     const wallM=std(0x1a1238,.8,.45,{map:brushTex,envMapIntensity:.3}), darkM=std(0x0b0720,.6,.6);
     [-1,1].forEach(s=>{ box(46,40,700,s*209,19,Z(305),wallM); box(2.4,1.6,700,s*186.5,40.4,Z(305),basic(TH.a)); box(1.6,26,700,s*186,24,Z(305),basic(TH.a,{transparent:true,opacity:.18})); });
     backMat=basic(0xffffff,{map:null});
-    box(470,120,24,0,60,Z(-30),[darkM,darkM,darkM,darkM,backMat,darkM]); box(470,1.6,2,0,120.8,Z(-18),basic(TH.b)); box(470,1.6,2,0,.8,Z(-18),basic(TH.a));
+    box(470,172,24,0,86,Z(-30),[darkM,darkM,darkM,darkM,backMat,darkM]); box(470,1.6,2,0,172.8,Z(-18),basic(TH.b)); box(470,1.6,2,0,.8,Z(-18),basic(TH.a));
     box(470,26,56,0,13,Z(636),darkM); box(470,1.6,2.2,0,26.8,Z(609),basic(TH.b));
     const door=texCanvas(512,96,(x,w,h)=>{ x.fillStyle='#0b0720'; x.fillRect(0,0,w,h); x.strokeStyle=TH.a; x.lineWidth=3; x.strokeRect(4,4,w-8,h-8); x.fillStyle='#ffd400'; x.font='900 30px system-ui,sans-serif'; x.textAlign='center'; x.fillText('HIGH & ROUILLÉ',w/2,44); x.fillStyle='#fff'; x.font='700 17px system-ui'; x.fillText('FLIPPER · 3 BILLES',w/2,72); [60,452].forEach(a=>{ x.fillStyle='#000'; x.fillRect(a-14,26,28,44); x.fillStyle=TH.b; x.fillRect(a-3,32,6,32); }); });
     const dm=flat(new T3.PlaneGeometry(250,47),basic(0xffffff,{map:door}),27.2); dm.position.set(0,27.2,Z(636)); perm.add(dm); }
-  const paintBack=()=>{ const T=S3.T; const c=document.createElement('canvas'); c.width=940; c.height=300; const x=c.getContext('2d'); const g=x.createLinearGradient(0,0,0,300); g.addColorStop(0,'#150a30'); g.addColorStop(1,'#05030c'); x.fillStyle=g; x.fillRect(0,0,940,300);
-    x.strokeStyle=TH.a; x.lineWidth=5; x.globalAlpha=.8; x.strokeRect(10,10,920,280); x.globalAlpha=.25; x.lineWidth=2; for(let k=0;k<9;k++){ x.beginPath(); x.moveTo(0,40+k*30); x.lineTo(940,40+k*30); x.stroke(); } x.globalAlpha=1;
-    const rg=x.createRadialGradient(470,150,10,470,150,360); rg.addColorStop(0,mixc(T.bg,'#000000',.2).replace('rgb','rgba').replace(')',',.45)')); rg.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=rg; x.fillRect(0,0,940,300);
-    x.textAlign='center'; x.shadowColor=T.bg; x.shadowBlur=26; x.fillStyle='#fff'; x.font='900 96px system-ui,sans-serif'; x.fillText(T.ic+' '+T.n,470,150); x.shadowBlur=0; x.fillStyle=TH.b; x.font='700 28px system-ui'; x.fillText('HIGH & ROUILLÉ · PINBALL',470,215);
-    x.fillStyle='rgba(255,255,255,.7)'; x.font='700 20px system-ui'; x.fillText('RAMPES · BUMPERS · CHASSE · TURBO',470,255);
-    const t=new T3.CanvasTexture(c); t.encoding=T3.sRGBEncoding; t.anisotropy=4; if(backMat.map) backMat.map.dispose(); backMat.map=t; backMat.needsUpdate=true; };  /* flippers */
+  /* face du bac arrière = l'écran à matrice de points (new73), mis à jour environ 30 fois par seconde */
+  const faceCv=document.createElement('canvas'); faceCv.width=1024; faceCv.height=373; const fg=faceCv.getContext('2d'), bez=document.createElement('canvas'); bez.width=1024; bez.height=373;
+  const paintBez=()=>{ const T=S3.T, b=bez.getContext('2d'), gr=b.createLinearGradient(0,0,0,373); gr.addColorStop(0,'#1a1036'); gr.addColorStop(1,'#07040f'); b.fillStyle=gr; b.fillRect(0,0,1024,373); b.strokeStyle=TH.a; b.lineWidth=6; b.globalAlpha=.9; b.strokeRect(8,8,1008,357); b.globalAlpha=1; b.strokeStyle=TH.b; b.lineWidth=2; b.strokeRect(20,20,984,333);
+    const rg=b.createRadialGradient(512,64,10,512,64,420); rg.addColorStop(0,mixc(T.bg,'#000000',.2).replace('rgb','rgba').replace(')',',.5)')); rg.addColorStop(1,'rgba(0,0,0,0)'); b.fillStyle=rg; b.fillRect(24,24,976,110);
+    b.textAlign='center'; b.shadowColor=T.bg; b.shadowBlur=24; b.fillStyle='#fff'; b.font='900 70px system-ui,sans-serif'; b.fillText(T.ic+' '+T.n,512,92); b.shadowBlur=0; b.fillStyle=TH.b; b.font='700 24px system-ui'; b.fillText('HIGH & ROUILLÉ · PINBALL',512,126);
+    b.fillStyle='#000'; b.fillRect(30,134,964,229); };
+  const dmdTex=new T3.CanvasTexture(faceCv); dmdTex.encoding=T3.sRGBEncoding; dmdTex.anisotropy=4; own.push(dmdTex);
+  const dmd=dmdMake(S3); let dmdIntro=false, dmdAcc=0, dmdPrev=0, dmdFirst=true;
+  const paintBack=()=>{ paintBez(); backMat.map=dmdTex; backMat.needsUpdate=true; if(!dmdIntro){ dmdIntro=true; dmd.event('TABLE : '+S3.T.n); } };
+  const dmdTick=()=>{ const now=performance.now(), dt=dmdPrev?Math.min(.1,(now-dmdPrev)/1000):0; dmdPrev=now; dmdAcc+=dt; if(!dmdFirst&&dmdAcc<1/30) return; dmdFirst=false; dmd.frame(dmdAcc,S3.hud); dmdAcc=0; fg.drawImage(bez,0,0); fg.drawImage(dmd.canvas,32,138,960,224); dmdTex.needsUpdate=true; };  /* flippers */
   const flipMeshes=[]; { const L=56; const gG=()=>{ const s=new T3.Shape(), r0=7.2, r1=4.4; s.moveTo(0,-r0); s.lineTo(L,-r1); s.absarc(L,0,r1,-PI/2,PI/2,false); s.lineTo(0,r0); s.absarc(0,0,r0,PI/2,PI*1.5,false);
       const g=new T3.ExtrudeGeometry(s,{depth:6,bevelEnabled:true,bevelThickness:1.6,bevelSize:1.3,bevelSegments:2,curveSegments:12}); g.rotateX(-PI/2); const p=g.attributes.position, cols=new Float32Array(p.count*3), a=new T3.Color(0xff2d2d), b=new T3.Color(0xffd400), c=new T3.Color(0x1fe06a), q=new T3.Color();
       for(let i=0;i<p.count;i++){ const u=Math.max(0,Math.min(1,p.getX(i)/L)); if(u<.5) q.copy(a).lerp(b,u*2); else q.copy(b).lerp(c,(u-.5)*2); cols[i*3]=q.r; cols[i*3+1]=q.g; cols[i*3+2]=q.b; } g.setAttribute('color',new T3.BufferAttribute(cols,3)); return g; };
@@ -193,7 +197,7 @@ function pin3dMake(S3,host,topCv){
     paintBack(); fitCam(); }
   /* ---------- image par image ---------- */
   const tmpC=new T3.Color(); let jx=0, jz=0;
-  function render(shake){ const t=S3.t, T=S3.T, tb=S3.turbo>0;
+  function render(shake){ const t=S3.t, T=S3.T, tb=S3.turbo>0; dmdTick();
     { const now=performance.now(); if(tPrev){ const d=now-tPrev; if(d>45&&d<400) slow++; nF++; if(nF===90){ if(slow>55&&DPR>1.05){ DPR=1; ren.setPixelRatio(1); ren.setSize(Math.round(parseFloat(dom.style.width)),Math.round(parseFloat(dom.style.height)),false); } nF=0; slow=0; } } tPrev=now; }
     amb.color.set(tb?0xb05098:0x6a60a0); sun.intensity=.8; fill.intensity=.25+(tb?.35:0);
     dyn.bump.forEach(o=>{ const b=o.b, c=tb?TH.b:TH.c[o.k%TH.c.length]; o.g.position.set(X(b.x),0,Z(b.y)); tmpC.set(c); o.capM.color.copy(tmpC).multiplyScalar(.55); o.capM.emissive.copy(tmpC); o.capM.emissiveIntensity=.35+b.hit*1.6; o.ringM.color.set(c); o.cap.scale.y=.8+b.hit*.25; o.gl.material.color.set(c); o.gl.material.opacity=.3+b.hit*.6; });
@@ -237,5 +241,5 @@ function pin3dMake(S3,host,topCv){
   /* point de la table (x,y,hauteur z) → coordonnées 360×600 de la surcouche 2D ; le 3e nombre = pixels par unité de table à cet endroit */
   function proj(x,y,z){ pv.set(X(x),z||0,Z(y)).project(cam); pv2.set(X(x)+10,z||0,Z(y)).project(cam); const a=(pv.x+1)/2*CW, b=(1-pv.y)/2*CH, a2=(pv2.x+1)/2*CW; return [a,b,Math.abs(a2-a)/10]; }
   function dispose(){ try{ disposeTree(perm); disposeTree(tbl); own.forEach(t=>t.dispose()); if(fieldTex) fieldTex.dispose(); ren.dispose(); try{ ren.forceContextLoss(); }catch(_){} dom.remove(); }catch(e){} }
-  return {resize,setTable,render,proj,dispose,get cam(){ return cam; },get ok(){ return true; },get info(){ return ren.info; },get scene(){ return sc; }};
+  return {resize,setTable,render,proj,dispose,get cam(){ return cam; },get ok(){ return true; },get info(){ return ren.info; },get scene(){ return sc; },dmdEvent:m=>dmd.event(m),dmdPts:p=>dmd.pts(p)};
 }

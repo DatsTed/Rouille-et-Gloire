@@ -75,4 +75,4 @@ PM.fx=function(kind){ if(!PM.on||PM.muted) return; const c=PM.ctx, t=c.currentTi
   else if(kind==='nice'){ [0,7].forEach((n,i)=>PM.lead(t+i*.06,76+n,.25,.1,'square',5000)); }
   else if(kind==='skill'){ [0,5,9,14].forEach((n,i)=>PM.lead(t+i*.05,69+n,.3,.1,'sawtooth',5000)); }
   else if(kind==='over'){ [12,7,3,0].forEach((n,i)=>PM.lead(t+i*.14,60+n,.5,.12,'sawtooth',1800)); } };
-ACT.pmmute=()=>{ PM.muted=!PM.muted; PM.setVol(); const b=document.querySelector('.pmm'); if(b) b.textContent=PM.muted?'🔇':'🔊'; };
+ACT.pmmute=()=>{ PM.muted=!PM.muted; PM.setVol(); document.querySelectorAll('.pmm').forEach(b=>{ b.textContent=PM.muted?'🔇':'🔊'; }); };

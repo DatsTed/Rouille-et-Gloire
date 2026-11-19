@@ -156,3 +156,9 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - La fin d'une rampe place la bille dans le garage (`b.st='hold'`, éjection + récompense par `mission`), au lieu de la relancer.
 - 3D : hauteur de rampe 0,5 aux deux bouts, largeur qui s'évase à l'entrée, anneau lumineux = zone de capture ; sol et plateau en dalles (`tileTex`).
 - Mesures : `tests/t_rampes.py` (le bot prend la rampe ; avant : 0 fois sur 6 tables, maintenant 1 à 5 fois par bille) et `tests/t_chaleur.py` (carte de passage de la bille). Vérifications de disposition dans `t_pin3d.py`.
+
+## v2.11 : écran à points et ponts repensés (new73, new71, new23)
+- `dmdMake(S3)` (new73) : grille 120×28 points, bande du haut permanente (bille `B1/3`, score qui défile, multiplicateur `mult × 2 si multibille`), bande du bas = radar / turbo / état (chasse, turbo, multibille, combo, sauvegarde, rang, légende) ou animation d'événement (`evDraw[...]`, file d'attente de 4). Les événements viennent de `say()` (texte analysé par `event(m)`), les points de `pop()`. Rendu en points lumineux sur une `CanvasTexture` appliquée à la face du bac arrière (`dmdTick` dans `render`, 30 images/s).
+- `S3.hud` expose l'état lu par l'écran ; `draw3` ne dessine plus que les étincelles, la légende du trou et la jauge du piston. `.pinlive`, `.pinside` et le score de l'en-tête sont masqués en 3D (le repli 2D les garde) ; bouton son `.pinmute`.
+- Ponts (`layoutTable`) : bases `ML`/`MR` (choisies parmi des emplacements libres sur les côtés, y ≈ 256) ; garage en bas au centre (`[180,414]`…) ; trajet en deux Bézier. La sortie éjecte la bille tantôt à gauche tantôt à droite (évite les boucles infinies vues avec le bot).
+- Mesure : `t_rampes` (bot parfait) 1 pont toutes les 5 à 15 s selon la table ; `t_pin3d` vérifie la disposition, l'écran et les 17 types d'événements.

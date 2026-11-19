@@ -10,7 +10,9 @@ JS3 = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms)), P=_
   if(R3.scene.children.length<5) E.push('scène vide');
   /* v2.9 : plus de boutons, lancer en maintenant le côté droit, pastilles à droite, pas de flash, trous plus faciles */
   if(getComputedStyle(document.getElementById('arcbar')).display!=='none'||document.querySelector('#pP')) E.push('la barre de boutons est encore là');
-  if(!document.querySelector('.pinside .psg')||document.querySelectorAll('.pinside .pp i').length<9) E.push('pastilles radar / turbo absentes à droite');
+  if(getComputedStyle(document.querySelector('.pinside')).display!=='none'||getComputedStyle(document.querySelector('.pinlive')).display!=='none') E.push('radar / turbo / classement encore affichés hors de l’écran du bac arrière');
+  if(typeof R3.dmdEvent!=='function'||!document.querySelector('.pinmute')) E.push('écran du bac arrière ou bouton son absent'); else { ['SKILL SHOT !','MULTIBILLE !','JACKPOT +5 000','TURBO !!','BALL SAVE !','TILT !','NICE ! COMBO ×5','RADAR +2','LA PIÈCE S’ENFUIT…','🔧 TABLE : GARAGE','CAPTURÉ : Pièce','BANQUE ABATTUE +1 500','MULTI ×2 !','DÉPASSÉ BRANDT !','BILLE 2','PONT DU GARAGE +500','ENCHAÎNEMENT ×3 !'].forEach(m=>R3.dmdEvent(m)); R3.dmdPts('+500'); }
+  await wait(1500);
   if(/PM\.pulse\*\.045|PM\.pulse\*14/.test(GAMES.pin.toString())||/pulse/.test(pin3dMake.toString())) E.push('effet de flash encore présent');
   { const ov=document.getElementById('arcov'), ev=(t,x,y,id)=>ov.dispatchEvent(new PointerEvent(t,{pointerId:id,clientX:x,clientY:y,bubbles:true,cancelable:true})); if(P.st!=='plunger') E.push('la bille devrait être au piston');
     ev('pointerdown',innerWidth-30,600,41); await wait(500); if(P.st!=='plunger') E.push('la bille part avant le relâchement'); ev('pointerup',innerWidth-30,600,41); await wait(250); if(P.st!=='play') E.push('maintenir le côté droit ne lance pas la bille ('+P.st+')'); }
@@ -22,12 +24,12 @@ JS3 = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms)), P=_
     if(!(a[0]>100&&a[0]<260&&a[1]>150&&a[1]<450)) E.push('centre de la table hors du cadre '+a);
     if(!(top[1]<a[1]&&bot[1]>a[1])) E.push('haut/bas inversés'); if(!(l[0]<r[0])) E.push('flippers inversés');
     if(!((tr[0]-tl[0])<(br[0]-bl[0]))) E.push('pas de perspective (haut aussi large que le bas)');
-    [tl,tr,bl,br,top,bot].forEach(p=>{ if(p[0]<-5||p[0]>365||p[1]<-5||p[1]>605) E.push('coin hors du cadre '+p.map(Math.round)); }); }
+    [tl,tr,bl,br,top,bot].forEach(p=>{ { const cv=document.querySelector('.arccv'), cw=cv.clientWidth, ch=cv.clientHeight; if(p[0]<-5||p[0]>cw+5||p[1]<-5||p[1]>ch+5) E.push('coin hors du cadre '+p.map(Math.round)+' / '+cw+'x'+ch); } }); }
   for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); for(let k=0;k<30;k++) P.sim(1/60); await wait(120); if(calls()<10) E.push('table '+i+' : rien dessiné'); if(P.tab!==i) E.push('table '+i+' non chargée'); }
   /* v2.10 : disposition des tables */
   { const sl=[[50,392,98,462],[268,392,222,462]], ds=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
     for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); const nm=P.TBL[i].n, sa=P.sauc, ho=P.hole;
-      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1]; if(Math.hypot(q[0]-sa.x,q[1]-sa.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my<340) E.push(nm+' : embouchure trop haute'); });
+      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1]; if(Math.hypot(q[0]-sa.x,q[1]-sa.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my>320||sa.y<r.my+80) E.push(nm+' : base trop basse ou sortie pas assez basse'); });
       P.posts.filter(p=>!p.q).forEach(p=>{ const d=Math.min(...sl.map(s=>ds(p.x,p.y,s[0],s[1],s[2],s[3]))); if(d<32) E.push(nm+' : clou à '+Math.round(d)+' px d’une barre rebondissante'); });
       if(Math.hypot(ho.x-180,ho.y-300)<80) E.push(nm+' : le trou de table est au milieu'); if(Math.hypot(ho.x-sa.x,ho.y-sa.y)<50) E.push(nm+' : trou et garage collés'); }
     const b=P.balls[0]; P.loadTable(0); }

@@ -67,8 +67,8 @@ GAMES.pin=function(api){
   const mkb=()=>({x:333,y:572,vx:0,vy:0,st:'plunger',trail:[],la:false,ht:0,stuck:0});
   let balls=[mkb()], score=0, ball=1, mult=1, power=0, charging=false, save=pbPerk.save(LV), usedSave=false, msg='', msgT=0, over=false, t=0;
   let combo=0, comboT=0, shake=0, tiltT=0, tiltN=0, nudgeCD=0, ballBumps=0, lastRank=99; const pops=[]; let radar=LV>=6?1:0, turboG=0, turbo=0, bumpN=0, mode=null, chT=0, mbSave=0, jack=0; const caps=[], fx=[];
-  const say=m=>{ msg=m; msgT=1.6; }; const sfx=(k,a)=>{ try{ if(PM.sfx) PM.sfx(k,a); }catch(_){} };
-  const pop=(x,y,t,c)=>pops.push({x,y,t,c:c||'#fff',l:.9});
+  const say=m=>{ msg=m; msgT=1.6; if(R3&&R3.dmdEvent) R3.dmdEvent(m); }; const sfx=(k,a)=>{ try{ if(PM.sfx) PM.sfx(k,a); }catch(_){} };
+  const pop=(x,y,t,c)=>{ pops.push({x,y,t,c:c||'#fff',l:.9}); if(R3&&R3.dmdPts) R3.dmdPts(t); };
   const hitC=(x,y,pts)=>{ if(comboT>0) combo++; else combo=1; comboT=1.5; if(pts) pop(x,y-12,'+'+fmt(Math.round(pts*mult*(balls.length>1?2:1))),TH.b); const T={5:[500,'NICE !'],10:[1500,'WOW !'],20:[4000,'INSANE !'],35:[9000,'GODLIKE !']}[combo]; if(T){ add(T[0]); say(T[1]+' COMBO ×'+combo); shake=1; PM.fx('nice'); burst(x,y,TH.a,24); } };
   const add=n=>{ score+=Math.round(n*mult*(balls.length>1?2:1)); };
   const burst=(x,y,c,n)=>{ for(let i=0;i<n;i++){ const a=Math.random()*6.28, v=60+Math.random()*220; fx.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5+Math.random()*.5,c}); } };
@@ -111,18 +111,17 @@ GAMES.pin=function(api){
     const clear=(x,y,r)=>occ.reduce((m,o)=>Math.min(m,Math.hypot(x-o[0],y-o[1])-o[2]-r),1e9);
     const dseg=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
     const pick=(cands,r,extra)=>{ let best=cands[0], bs=-1e9; for(const c of cands){ const s=Math.min(clear(c[0],c[1],r),extra?extra(c):1e9); if(s>=6) return c; if(s>bs){ bs=s; best=c; } } return best; };
-    const two=(T.ramps||[]).length>1, M1=[124,384], M2=[216,384], M0=[172,388], mouths=two?[M1,M2]:[M0];
-    const G=pick([[80,152],[86,112],[72,128],[100,100]],15), far=(c,p,d)=>Math.hypot(c[0]-p[0],c[1]-p[1])-d;
-    const H=pick([[276,114],[46,336],[292,296],[60,222]],17,c=>Math.min(far(c,G,60),...mouths.map(m=>far(c,m,60))));
+    const two=(T.ramps||[]).length>1, ML=pick([[46,256],[62,214],[60,300],[46,336]],26), MR=pick([[292,262],[288,306],[286,226]],26), M0=clear(ML[0],ML[1],26)>=clear(MR[0],MR[1],26)?ML:MR, mouths=two?[ML,MR]:[M0];
+    const G=pick([[180,414],[150,420],[210,420],[180,386]],15), far=(c,p,d)=>Math.hypot(c[0]-p[0],c[1]-p[1])-d;
+    const H=pick([[276,114],[46,336],[292,300],[60,150]],17,c=>Math.min(far(c,G,60),...mouths.map(m=>far(c,m,60))));
     T.sauc=G; T.hole=H;
     const sl=[[50,392,98,462],[268,392,222,462]], okP=c=>Math.min(Math.min(...sl.map(s=>dseg(c[0],c[1],s[0],s[1],s[2],s[3])))-40,far(c,G,40),far(c,H,40),...mouths.map(m=>far(c,m,46)));
-    T.posts=[pick([[86,300],[70,350],[118,262],[132,330]],6,okP),pick([[254,300],[272,350],[222,262],[208,330]],6,okP)];
+    T.posts=[pick([[96,300],[118,262],[100,340],[132,300]],6,okP),pick([[244,300],[222,262],[240,340],[208,300]],6,okP)];
     const bez=(p0,p1,p2,p3,n)=>{ const o=[]; for(let i=0;i<=n;i++){ const u=i/n, v=1-u; o.push([v*v*v*p0[0]+3*v*v*u*p1[0]+3*v*u*u*p2[0]+u*u*u*p3[0],v*v*v*p0[1]+3*v*v*u*p1[1]+3*v*u*u*p2[1]+u*u*u*p3[1]]); } return o; };
     const cat=(...segs)=>{ const o=[]; segs.forEach(s=>s.forEach((p,i)=>{ if(o.length&&!i) return; o.push(p); })); return o; };
+    const left=(M,G)=>cat(bez(M,[M[0]-6,M[1]+46],[M[0]+14,M[1]+78],[88,350],4),bez([88,350],[112,376],[G[0]-34,G[1]-14],G,4)), right=(M,G)=>cat(bez(M,[M[0]+6,M[1]+44],[M[0]-14,M[1]+74],[262,350],4),bez([262,350],[240,376],[G[0]+34,G[1]-14],G,4));
     (T.ramps||[]).forEach((a,k)=>{ let c;
-      if(!two) c=cat(bez(M0,[150,326],[70,330],[62,262],4),bez([62,262],[58,216],[G[0]-12,G[1]+40],G,4));
-      else if(k===0) c=cat(bez(M1,[100,340],[58,312],[58,250],4),bez([58,250],[58,214],[G[0]-12,G[1]+40],G,4));
-      else c=cat(bez(M2,[240,330],[290,310],[286,236],4),bez([286,236],[284,170],[262,128],[232,116],3),bez([232,116],[200,100],[120,92],G,4));
+      if(!two) c=M0===ML?left(ML,G):right(MR,G); else c=k===0?left(ML,G):right(MR,G);
       a.c=c.map(p=>[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10]); a.mr=23; a.min=210; a.cs=.62; });
   };
   function loadTable(i){
@@ -145,11 +144,13 @@ GAMES.pin=function(api){
   }
   loadTable(0);
   /* rendu 3D (new71) : même physique, autre dessin ; s'il est indisponible on garde le dessin 2D ci-dessous */
+  let rankUp=null;
   const S3={segs,bumps,posts,tgt,lanes,sauc,hole,wells,portals,spins,boosts,mills,ramps,dbanks,FL,slL,slR,door,part,TH,R,TBL,
     get balls(){ return balls; }, get T(){ return T; }, get tabI(){ return tabI; }, get t(){ return t; }, get power(){ return power; }, get turbo(){ return turbo; },
-    get mode(){ return mode; }, get pulse(){ return PM.pulse; }, get tilt(){ return tiltT; }, get nextTab(){ return TBL[(tabI+1)%tabsOpen()]; }, get tabsOpen(){ return tabsOpen(); }, tip };
+    get mode(){ return mode; }, get pulse(){ return PM.pulse; }, get tilt(){ return tiltT; }, get nextTab(){ return TBL[(tabI+1)%tabsOpen()]; }, get hud(){ return {score,ball,N,mult:mult*(balls.length>1?2:1),nballs:balls.length,radar,NEED,turboG,turbo,mode,chT,hp:part.hp,hpMax:part.max,combo,comboT,save,over,power,waiting:balls.some(b=>b.st==='plunger'),rankUp,tab:T.n}; }, get tabsOpen(){ return tabsOpen(); }, tip };
   try{ R3=(typeof pin3dMake==='function')?pin3dMake(S3,st,cv):null; }catch(e){ console.warn('flipper 3D indisponible',e); R3=null; }
-  if(R3){ fit(); R3.setTable(); }
+  if(R3){ fit(); R3.setTable(); live.style.display='none'; side.style.display='none'; const sc0=document.getElementById('arcsc'); if(sc0) sc0.style.display='none';
+    const mb=document.createElement('button'); mb.className='pmm pinmute'; mb.dataset.a='pmmute'; mb.setAttribute('aria-label','Son'); mb.textContent=PM.muted?'🔇':'🔊'; st.appendChild(mb); }
   const updMovers=h=>{ for(const q of bumps) if(q.mv){ q.x=q.x0+q.mv[0]*Math.sin(t*q.mv[2]); q.y=q.y0+q.mv[1]*Math.sin(t*q.mv[2]); }
     for(const m of mills){ const a=t*m.sp; m.s.x1=m.x-Math.cos(a)*m.L; m.s.y1=m.y-Math.sin(a)*m.L; m.s.x2=m.x+Math.cos(a)*m.L; m.s.y2=m.y+Math.sin(a)*m.L; m.a=a; }
     for(const s of spins){ s.cd-=h; s.ang+=h*(s.cd>0?14:2); } for(const b of boosts){ b.cd-=h; b.glow=Math.max(0,b.glow-h*3); } for(const p of portals) p.cd-=h; for(const r of ramps){ r.cd-=h; r.glow=Math.max(0,r.glow-h*2); } for(const B of dbanks){ if(B.rt>0){ B.rt-=h; if(B.rt<=0){ B.ss.forEach(q=>q.off=false); arcTone(520,.12,'triangle',.07); } } } if(rampT>0){ rampT-=h; if(rampT<=0) rampN=0; } hole.sp+=h*(hole.open?3:.6); hole.cool-=h; hole.open=!part.on&&mode!=='chasse'&&tabsOpen()>1;
@@ -182,7 +183,7 @@ GAMES.pin=function(api){
     save_(); return out.join(''); }
   function rampDone(r){ r.n++; rampN++; rampT=7; rampMax=Math.max(rampMax,rampN); const pts=r.pts*Math.min(5,rampN); add(pts); hitC(r.p[r.p.length-1][0],r.p[r.p.length-1][1],pts); say(rampN>1?'ENCHAÎNEMENT ×'+rampN+' !':r.nm+' +'+fmt(Math.round(pts*mult))); arcTone(800+rampN*120,.18,'triangle',.1); sfx('rampend',rampN); burst(r.p[r.p.length-1][0],r.p[r.p.length-1][1],r.col,12); if(rampN%2===0) radarAdd(1); if(rampN>=3&&rampN%3===0&&!mode){ mission(null); } }
   function stepBall(b,h){
-    if(b.st==='hold'){ b.ht-=h; b.x=sauc.x; b.y=sauc.y; if(b.ht<=0){ sfx('eject'); mission(b); b.st='play'; b.vx=-250; b.vy=-440; sauc.cool=.9; } return; }
+    if(b.st==='hold'){ b.ht-=h; b.x=sauc.x; b.y=sauc.y; if(b.ht<=0){ sfx('eject'); mission(b); b.st='play'; b.vx=(Math.random()<.5?-1:1)*(150+Math.random()*130); b.vy=-(420+Math.random()*80); sauc.cool=.9; } return; }
     if(b.st==='warp'){ b.wt-=h; b.x+=(hole.x-b.x)*Math.min(1,h*10); b.y+=(hole.y-b.y)*Math.min(1,h*10); if(b.wt<=0) switchTable(b); return; }
     if(b.st==='ramp'){ const r=ramps[b.rp]; if(!r){ b.st='play'; return; } b.rs+=b.rsp*h; const e=b.rs>=r.len; const L=e?r.len:b.rs; let i=1; while(i<r.cum.length-1&&r.cum[i]<L) i++; const a=r.p[i-1], c=r.p[i], sl=(r.cum[i]-r.cum[i-1])||1, u=Math.max(0,Math.min(1,(L-r.cum[i-1])/sl)); b.x=a[0]+(c[0]-a[0])*u; b.y=a[1]+(c[1]-a[1])*u;
       if(e){ b.x=sauc.x; b.y=sauc.y; b.vx=b.vy=0; b.st='hold'; b.ht=1.1; b.la=false; b.trail.length=0; sauc.glow=1; sauc.cool=1.2; r.cd=.5; add(200); arcTone(300,.15,'square',.08); sfx('kick'); rampDone(r); }
@@ -279,23 +280,19 @@ GAMES.pin=function(api){
   /* surcouche 2D au-dessus de la 3D : étincelles, points qui montent, combo, messages, jauge du piston, légende du trou */
   const draw3=()=>{ R3.render(shake); ctx.setTransform(K,0,0,K,0,0); ctx.clearRect(0,0,OW,OH);
     bumps.forEach(b=>{ b.hit=Math.max(0,b.hit-.08); }); [slL,slR].forEach(s=>{ s.hit=Math.max(0,s.hit-.12); }); part.hit=Math.max(0,part.hit-.07); sauc.glow=Math.max(0,sauc.glow-.03); if(shake>0) shake=Math.max(0,shake-.07);
-    const ps=Math.max(.8,Math.min(1.5,OW/412)); ctx.textAlign='center'; ctx.lineCap='round';
+    ctx.textAlign='center'; ctx.lineCap='round';
     fx.forEach(p=>{ const q=R3.proj(p.x,p.y,10); ctx.globalAlpha=Math.max(0,p.l*2); ctx.fillStyle=p.c; ctx.fillRect(q[0]-2,q[1]-2,4,4); }); ctx.globalAlpha=1;
     { const o=hole.open, q=R3.proj(hole.x,hole.y+hole.r+11,0); ctx.fillStyle=o?'#00e5ff':'#ff6b6b'; ctx.font='700 '+Math.round(8*q[2]*1.05+2)+'px system-ui'; ctx.fillText(o?'▶ '+TBL[(tabI+1)%tabsOpen()].n:(tabsOpen()<2?'niv. '+PB_TB_LV[1]:'FERMÉ'),q[0],q[1]); }
     if(balls.some(b=>b.st==='plunger')){ const a=R3.proj(341,595,0), b2=R3.proj(341,500,0), x0=a[0]+12*a[2], hh=a[1]-b2[1];
       ctx.fillStyle='rgba(255,255,255,.14)'; ctx.fillRect(x0,b2[1],6,hh); ctx.fillStyle='rgba(60,255,158,.75)'; ctx.fillRect(x0,a[1]-hh*.2,6,hh*.15);
-      ctx.fillStyle=power>=.8&&power<=.95?'#3cff9e':TH.b; ctx.fillRect(x0,a[1]-hh*power,6,hh*power);
-      if(!charging&&!over){ ctx.globalAlpha=.55+.35*Math.sin(t*5); ctx.fillStyle='#fff'; ctx.font='800 '+Math.round(12*ps)+'px system-ui'; ctx.textAlign='right'; ctx.fillText('MAINTIENS À DROITE POUR LANCER',OW-16,OH-18); ctx.textAlign='center'; ctx.globalAlpha=1; } }
-    ctx.font='800 '+Math.round(13*ps)+'px system-ui'; pops.forEach(p=>{ const q=R3.proj(p.x,p.y,18); ctx.globalAlpha=Math.max(0,Math.min(1,p.l*1.6)); ctx.fillStyle=p.c; ctx.fillText(p.t,q[0],q[1]); }); ctx.globalAlpha=1;
-    if(combo>=3&&comboT>0){ ctx.globalAlpha=Math.min(1,comboT*1.5); ctx.fillStyle=TH.b; ctx.font='900 '+Math.round(20*ps)+'px system-ui'; ctx.textAlign='right'; ctx.fillText('COMBO ×'+combo,OW-70,44); ctx.globalAlpha=1; ctx.textAlign='center'; }
-    if(save>0&&balls.some(b=>b.st==='play')){ ctx.fillStyle='rgba(255,212,0,.85)'; ctx.font='700 '+Math.round(11*ps)+'px system-ui'; ctx.fillText('BALL SAVE '+Math.ceil(save),OW/2,OH-14); }
-    if(msgT>0){ ctx.globalAlpha=Math.min(1,msgT*2); ctx.fillStyle='#fff'; ctx.shadowColor='#ff2bd6'; ctx.shadowBlur=18; ctx.font='900 '+Math.round(24*ps)+'px system-ui,sans-serif'; ctx.fillText(msg,OW/2,OH*.62); ctx.globalAlpha=1; ctx.shadowBlur=0; } };  const rivals=ARCR.pin; let lastL='';
+      ctx.fillStyle=power>=.8&&power<=.95?'#3cff9e':TH.b; ctx.fillRect(x0,a[1]-hh*power,6,hh*power); } };
+  const rivals=ARCR.pin; let lastL='';
   const hud=()=>{ api.score(score,`Bille ${Math.min(ball,N)}/${N} · ×${mult}`);
     const all=rivals.map(r=>({n:r[0],s:r[1]})).concat([{n:'TOI',s:score,me:1}]).sort((a,b)=>b.s-a.s), i=all.findIndex(x=>x.me), up=all[i-1], dn=all[i+1];
     const cell=(x,k)=>x?`<div class="pl ${x.me?'me':''}"><b>#${all.indexOf(x)+1}</b><span>${x.n}</span><em>${fmt(x.s)}</em></div>`:`<div class="pl none">${k}</div>`;
     const pips=(n,m,c)=>Array.from({length:m},(_,k)=>`<i class="${k<n?'on':''}" style="--c:${c}"></i>`).join('');
     const modeH=mode==='chasse'?`<div class="pmode ch">🔎 CHASSE ${Math.ceil(chT)} s · ${'♥'.repeat(Math.max(0,part.hp))}<small>${'♡'.repeat(part.max-part.hp)}</small></div>`:turbo>0?`<div class="pmode tb">🔥 TURBO ${Math.ceil(turbo)} s · bumpers ×3</div>`:balls.length>1?`<div class="pmode mb">🎱 MULTIBILLE · points ×2</div>`:`<div class="pmode">${T.ic} ${T.n} · 🕳 ${hole.open?'ouvert':'fermé'} · NIV ${P.lv}</div>`;
-    if(i<lastRank&&lastRank<99&&dn){ say('DÉPASSÉ '+dn.n.toUpperCase()+' !'); PM.fx('nice'); } lastRank=i;
+    rankUp=up?up.n+' '+fmt(up.s):null; if(i<lastRank&&lastRank<99&&dn){ say('DÉPASSÉ '+dn.n.toUpperCase()+' !'); PM.fx('nice'); } lastRank=i;
     const musH=`<span class="plg mus">♪ ${PMS[SK].n} ${Math.round(PM.bpm())}<button class="pmm" data-a="pmmute">${PM.muted?'🔇':'🔊'}</button></span>`;
     const h=`<div class="plr">${cell(up,'🥇 Tu es 1er !')}${cell(all[i],'')}${cell(dn,'—')}</div><div class="plm">${musH}${modeH}</div>`;
     if(h!==lastL){ live.innerHTML=h; lastL=h; }
@@ -319,7 +316,7 @@ GAMES.pin=function(api){
   /* secousse : un coup de doigt rapide vers le haut (toucher la table actionne les flippers) */
   window.__pin={sim,posts,sauc,get r3(){return R3;},get balls(){return balls;},get B(){return balls[0]||{x:0,y:0,vx:0,vy:0};},FL,segs,part,get score(){return score;},get ball(){return ball;},get over(){return over;},get st(){return balls[0]?balls[0].st:'none';},get mult(){return mult;},get mode(){return mode;},get radar(){return radar;},get caps(){return caps;},get turbo(){return turbo;},get nballs(){return balls.length;},get tab(){return tabI;},get hole(){return hole;},ramps,dbanks,get rampMax(){return rampMax;},loadTable,switchTable,TBL,bumps,mills,wells,portals,spins,boosts,tgt,
     launch:()=>{ power=.9; launch(); },launchP:p=>{ power=p; launch(); },nudge,get combo(){return combo;},hitC,get tilt(){return tiltT;},flip:(i,on)=>{ FL[i].on=on; },radarAdd,startChasse,capture,mission:k=>mission(balls[0]),setScore:v=>{ score=v; },lose,door,hud,N,NEED};
-  return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); live.remove(); side.remove(); bar.style.display=''; if(R3){ try{ R3.dispose(); }catch(_){} R3=null; } PM.end(); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); window.__pin=null; };
+  return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); live.remove(); side.remove(); st.querySelectorAll('.pinmute').forEach(e=>e.remove()); { const sc0=document.getElementById('arcsc'); if(sc0) sc0.style.display=''; } bar.style.display=''; if(R3){ try{ R3.dispose(); }catch(_){} R3=null; } PM.end(); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); window.__pin=null; };
 };
 /* ---------- comptoir : onglets Pinball (niveau, paliers, collection) ---------- */
 const _arcSheet23=arcSheet;
