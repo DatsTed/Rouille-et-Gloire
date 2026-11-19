@@ -29,7 +29,9 @@ JS3 = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms)), P=_
   /* v2.10 : disposition des tables */
   { const sl=[[50,392,98,462],[268,392,222,462]], ds=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
     for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); const nm=P.TBL[i].n, sa=P.sauc, ho=P.hole;
-      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1]; if(Math.hypot(q[0]-sa.x,q[1]-sa.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my>320||sa.y<r.my+80) E.push(nm+' : base trop basse ou sortie pas assez basse'); });
+      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1], sg=P.saucs[r.sa||0]; if(Math.hypot(q[0]-sg.x,q[1]-sg.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my>320||(!P.TBL[i].spec&&sa.y<r.my+80)) E.push(nm+' : base trop basse ou sortie pas assez basse'); });
+      { const pts=[]; P.saucs.forEach(s=>{ if(s.on) pts.push(['garage',s.x,s.y]); }); P.ramps.forEach(r=>pts.push(['base '+r.nm,r.mx,r.my]));
+        pts.forEach(([k,x,y])=>{ P.bumps.forEach(bu=>{ const d=Math.hypot(bu.x-x,bu.y-y)-(bu.r||14); if(d<14) E.push(nm+' : '+k+' collé à un bumper ('+Math.round(d)+')'); }); (P.mills||[]).forEach(m=>{ const d=Math.hypot(m.x-x,m.y-y)-(m.r||30); if(d<8) E.push(nm+' : '+k+' dans un moulin ('+Math.round(d)+')'); }); (P.tgt||[]).forEach(g=>{ const d=Math.hypot((g.x||0)-x,(g.y||0)-y); if(d<18) E.push(nm+' : '+k+' sur une cible ('+Math.round(d)+')'); }); }); }
       P.posts.filter(p=>!p.q).forEach(p=>{ const d=Math.min(...sl.map(s=>ds(p.x,p.y,s[0],s[1],s[2],s[3]))); if(d<32) E.push(nm+' : clou à '+Math.round(d)+' px d’une barre rebondissante'); });
       if(Math.hypot(ho.x-180,ho.y-300)<80) E.push(nm+' : le trou de table est au milieu'); if(Math.hypot(ho.x-sa.x,ho.y-sa.y)<50) E.push(nm+' : trou et garage collés'); }
     const b=P.balls[0]; P.loadTable(0); }

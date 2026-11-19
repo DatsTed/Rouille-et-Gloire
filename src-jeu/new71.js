@@ -91,7 +91,7 @@ function pin3dMake(S3,host,topCv){
     x.fillStyle=TH.b; x.globalAlpha=.5; [[132,36],[180,26],[228,36]].forEach(p=>{ x.beginPath(); x.moveTo(p[0],p[1]-8); x.lineTo(p[0]+8,p[1]+4); x.lineTo(p[0]-8,p[1]+4); x.closePath(); x.fill(); }); x.globalAlpha=1;
     /* inserts lumineux autour des bumpers, du garage et du trou */
     S3.bumps.forEach((b,k)=>{ const col=TH.c[k%TH.c.length], gr=x.createRadialGradient(b.x,b.y,b.r*.6,b.x,b.y,b.r+22); gr.addColorStop(0,mixc(col,'#000000',.2).replace('rgb','rgba').replace(')',',.55)')); gr.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=gr; x.beginPath(); x.arc(b.x,b.y,b.r+22,0,7); x.fill(); x.strokeStyle=col; x.lineWidth=2.5; x.globalAlpha=.55; x.beginPath(); x.arc(b.x,b.y,b.r+8,0,7); x.stroke(); x.globalAlpha=1; });
-    { const s=S3.sauc; x.fillStyle='#000'; x.beginPath(); x.arc(s.x,s.y,s.r+3,0,7); x.fill(); x.fillStyle='#00e5ff'; x.font='700 8px system-ui'; x.fillText('GARAGE',s.x,s.y+25); x.strokeStyle='rgba(0,229,255,.5)'; x.lineWidth=2; x.beginPath(); x.arc(s.x,s.y,s.r+10,0,7); x.stroke(); }
+    S3.saucs.forEach(s=>{ if(!s.on) return; x.fillStyle='#000'; x.beginPath(); x.arc(s.x,s.y,s.r+3,0,7); x.fill(); x.fillStyle='#00e5ff'; x.font='700 8px system-ui'; x.fillText('GARAGE',s.x,s.y+25); x.strokeStyle='rgba(0,229,255,.5)'; x.lineWidth=2; x.beginPath(); x.arc(s.x,s.y,s.r+10,0,7); x.stroke(); });
     { const h=S3.hole; x.fillStyle='#000'; x.beginPath(); x.arc(h.x,h.y,h.r+2,0,7); x.fill(); }
     S3.lanes.forEach(l=>{ x.strokeStyle='rgba(255,212,0,.45)'; x.lineWidth=2; x.beginPath(); x.arc(l.x,l.y,9.5,0,7); x.stroke(); });
     S3.tgt.forEach(q=>{ x.fillStyle='rgba(0,0,0,.35)'; x.beginPath(); x.arc(q.x+2,q.y+4,q.r+3,0,7); x.fill(); });
@@ -109,7 +109,7 @@ function pin3dMake(S3,host,topCv){
     return c; }
   /* ---------- groupes : permanent / par table ---------- */
   const perm=new T3.Group(), tbl=new T3.Group(); sc.add(perm,tbl);
-  const dyn={ bump:[], tgt:[], lane:[], well:[], boost:[], portal:[], spin:[], seg:[], ramp:[], mill:[] }; let sauc3=null, hole3=null;
+  const dyn={ bump:[], tgt:[], lane:[], well:[], boost:[], portal:[], spin:[], seg:[], ramp:[], mill:[] }; let sauc3=[], hole3=null;
   /* cabinet : sol quadrillé néon, flancs hauts, bac arrière lumineux, tablier avec la porte à pièces */
   let backMat=null; const cab=[]; let roof=null, roofTop=null;
   { sc.fog=new T3.Fog(0x05030b,1200,3000);
@@ -148,14 +148,14 @@ function pin3dMake(S3,host,topCv){
   const faceTex=(ic,col)=>{ const c=document.createElement('canvas'); c.width=c.height=128; const x=c.getContext('2d'), g=x.createRadialGradient(64,64,6,64,64,64); g.addColorStop(0,'#ffffff'); g.addColorStop(.35,col); g.addColorStop(1,mixc(col,'#000000',.5)); x.fillStyle=g; x.beginPath(); x.arc(64,64,62,0,7); x.fill(); x.strokeStyle='rgba(255,255,255,.9)'; x.lineWidth=5; x.beginPath(); x.arc(64,64,54,0,7); x.stroke();
     x.font='64px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif'; x.textAlign='center'; x.textBaseline='middle'; x.fillStyle='#fff'; x.fillText(ic,64,70); const t=new T3.CanvasTexture(c); t.encoding=T3.sRGBEncoding; return t; };
   let coinHp=-1, coinRing=null;  /* ---------- construction d'une table ---------- */
-  function clearTbl(){ for(const k in dyn) dyn[k].length=0; sauc3=hole3=null; coinRing=null; coinHp=-1; while(tbl.children.length){ const c=tbl.children[0]; tbl.remove(c); disposeTree(c); } if(fieldTex){ fieldTex.dispose(); fieldTex=null; } }
-  function rampH(u){ u=Math.max(0,Math.min(1,u)); return .5+16.5*Math.pow(Math.sin(PI*u),.7); }
+  function clearTbl(){ for(const k in dyn) dyn[k].length=0; sauc3=[]; hole3=null; coinRing=null; coinHp=-1; while(tbl.children.length){ const c=tbl.children[0]; tbl.remove(c); disposeTree(c); } if(fieldTex){ fieldTex.dispose(); fieldTex=null; } }
+  function rampH(u,hs){ u=Math.max(0,Math.min(1,u)); return .5+(hs||16.5)*Math.pow(Math.sin(PI*u),.7); }
   function strip(pairs,uvs,mat){ const n=pairs.length, p=new Float32Array(n*6), uv=new Float32Array(n*4), idx=[]; pairs.forEach((q,i)=>{ p.set(q,i*6); uv.set([0,uvs[i],1,uvs[i]],i*4); if(i<n-1){ const k=i*2; idx.push(k,k+1,k+2,k+1,k+3,k+2); } });
     const g=new T3.BufferGeometry(); g.setAttribute('position',new T3.BufferAttribute(p,3)); g.setAttribute('uv',new T3.BufferAttribute(uv,2)); g.setIndex(idx); g.computeVertexNormals(); return new T3.Mesh(g,mat); }
   const chevTex={}; const chevFor=col=>{ if(!chevTex[col]){ const c=document.createElement('canvas'); c.width=64; c.height=128; const x=c.getContext('2d'); x.fillStyle='#070a1c'; x.fillRect(0,0,64,128); x.strokeStyle=col; x.lineWidth=7; x.lineCap='round'; x.lineJoin='round'; x.globalAlpha=.9; [24,88].forEach(y=>{ x.beginPath(); x.moveTo(12,y+14); x.lineTo(32,y-6); x.lineTo(52,y+14); x.stroke(); });
       const t=new T3.CanvasTexture(c); t.wrapS=t.wrapT=T3.RepeatWrapping; t.encoding=T3.sRGBEncoding; own.push(t); chevTex[col]=t; } return chevTex[col]; };
   function buildRamp(r){ const P=r.p, n=P.length, W2=7.6, g=new T3.Group(); const mouth=new T3.Group();
-    const pts=P.map((p,i)=>{ const a=P[Math.max(0,i-1)], b=P[Math.min(n-1,i+1)]; let tx=b[0]-a[0], tz=b[1]-a[1]; const l=Math.hypot(tx,tz)||1; tx/=l; tz/=l; const uu=r.cum[i]/r.len, fl=Math.max(0,1-r.cum[i]/70), fe=Math.max(0,1-(r.len-r.cum[i])/26); return {x:X(p[0]),z:Z(p[1]),nx:-tz,nz:tx,h:rampH(uu),v:r.cum[i]/22,w:7.6*(1+.95*fl*fl)+fe*3.4}; });
+    const pts=P.map((p,i)=>{ const a=P[Math.max(0,i-1)], b=P[Math.min(n-1,i+1)]; let tx=b[0]-a[0], tz=b[1]-a[1]; const l=Math.hypot(tx,tz)||1; tx/=l; tz/=l; const uu=r.cum[i]/r.len, fl=Math.max(0,1-r.cum[i]/70), fe=Math.max(0,1-(r.len-r.cum[i])/26); return {x:X(p[0]),z:Z(p[1]),nx:-tz,nz:tx,h:rampH(uu,r.hs),v:r.cum[i]/22,w:7.6*(1+.95*fl*fl)+fe*3.4}; });
     const tex=chevFor(r.col), fm=std(0xffffff,.35,.45,{map:tex,side:T3.DoubleSide,emissive:new T3.Color(r.col),emissiveIntensity:.12,emissiveMap:tex});
     g.add(strip(pts.map(q=>[q.x+q.nx*q.w,q.h,q.z+q.nz*q.w,q.x-q.nx*q.w,q.h,q.z-q.nz*q.w]),pts.map(q=>q.v),fm));
     const wallM=std(0x9aa0d8,.9,.3,{side:T3.DoubleSide}), neonM=basic(r.col,{side:T3.DoubleSide}), neons=[];
@@ -186,7 +186,7 @@ function pin3dMake(S3,host,topCv){
     S3.posts.forEach(p=>{ const g=new T3.Group(), m=new T3.Mesh(new T3.CylinderGeometry(p.r*.9,p.r,9,16),std(0xdde3ff,1,.18)); m.position.y=4.5; const d=new T3.Mesh(new T3.SphereGeometry(p.r*.9,14,8,0,PI*2,0,PI/2),std(0xffffff,1,.15)); d.position.y=9; const sh=blob(p.r*5,.7); sh.position.set(2,.3,3); g.add(m,d,sh); g.position.set(X(p.x),0,Z(p.y)); tbl.add(g); });
     S3.tgt.forEach(q=>{ const g=new T3.Group(), mt=std(0x1a3a2c,.3,.4,{emissive:0x3cff9e,emissiveIntensity:0}), m=new T3.Mesh(new T3.CylinderGeometry(q.r,q.r+1,9,22),mt); m.position.y=4.5; const rg=new T3.Mesh(new T3.TorusGeometry(q.r,1,8,24),basic(0x3cff9e)); rg.rotation.x=PI/2; rg.position.y=9.2; const gl=glow(0x3cff9e,q.r*4,.8,0); const sh=blob(q.r*3,.7); sh.position.set(2,.3,3); g.add(m,rg,gl,sh); g.position.set(X(q.x),0,Z(q.y)); tbl.add(g); dyn.tgt.push({q,mt,gl}); });
     S3.lanes.forEach(l=>{ const mt=basic(0x3a3210), m=flat(new T3.CircleGeometry(6,20),mt,.45); m.position.x=X(l.x); m.position.z=Z(l.y); const gl=glow(0xffd400,26,.8,0); gl.position.x=m.position.x; gl.position.z=m.position.z; tbl.add(m,gl); dyn.lane.push({l,mt,gl}); });
-    { const s=S3.sauc, g=new T3.Group(), rim=new T3.Mesh(new T3.TorusGeometry(s.r+2.5,2.2,10,32),std(0xcfd6ff,1,.2)); rim.rotation.x=PI/2; rim.position.y=1.6; const gl=glow(0x00e5ff,s.r*5,.9,.35); g.add(rim,gl); g.position.set(X(s.x),0,Z(s.y)); tbl.add(g); sauc3={g,gl}; }
+    S3.saucs.forEach(s=>{ if(!s.on) return; const g=new T3.Group(), rim=new T3.Mesh(new T3.TorusGeometry(s.r+2.5,2.2,10,32),std(0xcfd6ff,1,.2)); rim.rotation.x=PI/2; rim.position.y=1.6; const gl=glow(0x00e5ff,s.r*5,.9,.35); g.add(rim,gl); g.position.set(X(s.x),0,Z(s.y)); tbl.add(g); sauc3.push({g,gl,s}); });
     { const h=S3.hole, g=new T3.Group(), rm=basic(0x00e5ff), rim=new T3.Mesh(new T3.TorusGeometry(h.r+1,1.8,10,36),rm); rim.rotation.x=PI/2; rim.position.y=1.4; g.add(rim); const rings=[]; for(let k=0;k<3;k++){ const m=basic(0x00e5ff,{transparent:true,opacity:.8}), rg=new T3.Mesh(new T3.RingGeometry(4+k*3.5,5.3+k*3.5,28,1,0,3.6),m); rg.rotation.x=-PI/2; rg.position.y=.7; g.add(rg); rings.push(rg); } const gl=glow(0x00e5ff,h.r*5,.8,.5); g.add(gl); g.position.set(X(h.x),0,Z(h.y)); tbl.add(g); hole3={g,rm,rings,gl}; }
     S3.wells.forEach(w=>{ const g=new T3.Group(), gl=glow(0x8f6bff,w.r*2,.7,.55); g.add(gl); const rs=[]; for(let k=0;k<3;k++){ const m=flat(new T3.RingGeometry(10+k*13,11.6+k*13,36,1,0,3.2),basic(0xc8aaff,{transparent:true,opacity:.75,side:T3.DoubleSide,depthWrite:false}),.8); g.add(m); rs.push(m); } g.position.set(X(w.x),0,Z(w.y)); tbl.add(g); dyn.well.push({w,rs}); });
     S3.boosts.forEach(q=>{ const g=new T3.Group(), sh=new T3.Shape(); sh.moveTo(-10,5); sh.lineTo(0,-5); sh.lineTo(10,5); sh.lineTo(10,9); sh.lineTo(0,-1); sh.lineTo(-10,9); sh.closePath(); const ms=[]; for(let k=0;k<3;k++){ const mt=basic(0x3cff9e,{transparent:true,opacity:.5,depthWrite:false}), m=flat(new T3.ShapeGeometry(sh),mt,.6); m.position.z=-k*9+9; g.add(m); ms.push(mt); } const gl=glow(0x3cff9e,40,.6,.3); g.add(gl); g.rotation.y=-(Math.atan2(q.dy,q.dx)+PI/2); g.position.set(X(q.x),0,Z(q.y)); tbl.add(g); dyn.boost.push({q,ms,gl}); });
@@ -204,7 +204,7 @@ function pin3dMake(S3,host,topCv){
     dyn.bump.forEach(o=>{ const b=o.b, c=tb?TH.b:TH.c[o.k%TH.c.length]; o.g.position.set(X(b.x),0,Z(b.y)); tmpC.set(c); o.capM.color.copy(tmpC).multiplyScalar(.55); o.capM.emissive.copy(tmpC); o.capM.emissiveIntensity=.35+b.hit*1.6; o.ringM.color.set(c); o.cap.scale.y=.8+b.hit*.25; o.gl.material.color.set(c); o.gl.material.opacity=.3+b.hit*.6; });
     dyn.tgt.forEach(o=>{ o.mt.emissiveIntensity=o.q.on?1.1:0; o.mt.color.set(o.q.on?0x3cff9e:0x1a3a2c); o.gl.material.opacity=o.q.on?.7:0; });
     dyn.lane.forEach(o=>{ o.mt.color.set(o.l.on?0xffd400:0x3a3210); o.gl.material.opacity=o.l.on?.8:0; });
-    if(sauc3) sauc3.gl.material.opacity=.3+S3.sauc.glow*.7;
+    sauc3.forEach(o=>{ o.gl.material.opacity=.3+o.s.glow*.7; });
     if(hole3){ const o=S3.hole.open, c=o?0x00e5ff:0xff2d2d; hole3.rm.color.set(c); hole3.gl.material.color.set(c); hole3.gl.material.opacity=o?.5:.25; hole3.rings.forEach((r,k)=>{ r.material.color.set(c); r.rotation.z=S3.hole.sp+k*2; r.visible=o; }); }
     dyn.well.forEach(o=>o.rs.forEach((r,k)=>{ r.rotation.z=t*3+k; }));
     dyn.boost.forEach(o=>{ const ph=Math.floor(t*6)%3; o.ms.forEach((m,k)=>{ m.opacity=.25+.7*(ph===k?1:.25); m.color.set(o.q.glow>0?0xffffff:0x3cff9e); }); o.gl.material.opacity=.25+o.q.glow*.7; });
@@ -220,7 +220,7 @@ function pin3dMake(S3,host,topCv){
     /* billes */
     let bi=0, ti=0, lit=null; const bs=S3.balls;
     bs.forEach(b=>{ if(b.st==='hold'){ return; } const g=getBall(bi++); let y=RB+.6, sc2=1;
-      if(b.st==='ramp'){ const r=S3.ramps[b.rp]; if(r) y=rampH(b.rs/r.len)+RB+.9; }
+      if(b.st==='ramp'){ const r=S3.ramps[b.rp]; if(r) y=rampH(b.rs/r.len,r.hs)+RB+.9; }
       else if(b.st==='warp'){ sc2=Math.max(.1,b.wt/.9); y=RB*sc2; }
       g.visible=true; g.position.set(X(b.x),y,Z(b.y)); g.userData.m.scale.setScalar(sc2); g.userData.m.rotation.x=(b.x+b.y)*.05; g.userData.sh.position.y=-y+.35; g.userData.sh.scale.set(24,24,1);
       b.trail.forEach((p,i)=>{ const m=trailPool[ti++]; if(!m) return; const k=(i+1)/b.trail.length; m.visible=true; m.position.set(X(p[0]),b.st==='ramp'?y:RB,Z(p[1])); m.scale.setScalar(RB*.8*k); m.material.opacity=.38*k; });

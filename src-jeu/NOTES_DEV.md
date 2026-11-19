@@ -167,3 +167,8 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - Caméra : angle fixe 58° + étirement vertical `KY` (1 à 1,7) calculé par `fitAt` pour que les coins du plateau (haut du bac arrière, bas du drain) touchent les bords de l'écran quel que soit le format ; l'écran à points reste lisible (pas de bande vide). Tablier du bas retiré, bac arrière de la largeur du plateau (382), face 1024×463 avec titre au-dessus de l'écran.
 - Chasse : minuteur dans la bande du haut (`H.mode==='chasse'`, remplace B x/y) + décompte central.
 - Mode « vue de dessus » : `R3.setPlan(true)` (caméra à plat, sans bac arrière ni ponts) et `R3.drawPlan` (grille tous les 50 en coordonnées de la table) ; sert à fabriquer des captures annotables pour dessiner les ponts à la main.
+
+## v2.13 : ponts dessinés à la main (new23, new71)
+- TBL[i].spec (tables 1 à 5) : tracés SP1 (Garage, Turbo Tunnel) et SP2 (Néon Drift, Spa Rush ; Casse Auto = SP2[0]) relevés sur les dessins de Ted ; chaque pont = {c:points, hs:hauteur, pts}, premier point = base (embouchure), dernier point = son garage. Tables 6 à 8 : ancien placement automatique.
+- Deux garages possibles : SA=[sauc,sauc2] (sauc2.on), amp.sa = index du garage d'arrivée, all.sa = garage où la bille est retenue. ampH(u,hs) (new71) : hauteur propre à chaque pont. T.sauc2 / S3.saucs / __pin.saucs.
+- Turbo Tunnel : bumper du haut déplacé en (206,120) pour dégager la base du pont bleu.
