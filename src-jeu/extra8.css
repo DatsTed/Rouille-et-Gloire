@@ -64,3 +64,12 @@ body.racing .race:not(.fin)>.rmap{flex:1 1 0;min-height:0;height:auto!important;
 #sheet.plantv>.rhero,#sheet.plantv>.rtabs:not(.sub),#sheet.plantv>.labtools,#sheet.plantv>.topsw{display:none}
 #sheet.plantv>.btn[data-a="rback"]{margin-top:2px}
 .qtybar button{min-width:44px}
+
+/* ===== v2.9 : flipper plein écran, radar et turbo sur le côté droit ===== */
+#arcov .arc-st{flex:1 1 auto}
+.pinside{position:absolute;right:8px;top:22%;display:flex;flex-direction:column;gap:16px;z-index:4;pointer-events:none;align-items:center}
+.psg{display:flex;flex-direction:column;align-items:center;gap:5px;padding:7px 6px;border-radius:12px;background:rgba(8,4,20,.55);border:1px solid rgba(255,255,255,.12)}
+.psg small{font-size:9px;font-weight:800;letter-spacing:.1em;color:rgba(255,255,255,.75)}
+.psg .pp{display:flex;flex-direction:column-reverse;gap:5px}
+.psg .pp i{display:block;width:14px;height:14px;border-radius:4px;border:1.5px solid var(--c);opacity:.5;background:transparent}
+.psg .pp i.on{background:var(--c);opacity:1;box-shadow:0 0 6px var(--c)}

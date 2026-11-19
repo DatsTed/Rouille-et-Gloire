@@ -134,3 +134,19 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - Fiche plante : classe `plantv` sur `#sheet` (CSS extra8) masque `.rhero`, `.rtabs` principal, `.labtools`, `.topsw`.
 - Boutique : `RY.qty` accepte 1/5/10/50 (new27).
 - Test : `tests/t_lab26.py` (section v2.7) ; il échoue si `new70` est retiré.
+
+## v2.8 : le flipper en 3D (new71)
+- `pin3dMake(S3,host,topCv)` (new71) dessine le flipper avec Three.js ; la physique et les règles restent dans `GAMES.pin` (new23). `S3` est un objet de lecture (segments, bumpers, flippers, billes…) construit dans la fermeture de `GAMES.pin` ; `R3` (null si 3D indisponible : pas de THREE / WebGL, `window.__pin3dOff`) est appelé par `draw()` → `draw3()`, qui ne dessine plus que la surcouche 2D (étincelles, points, combo, messages, jauge du piston, légende du trou) en passant par `R3.proj(x,y,z)`.
+- Monde : X = x−180, Z = y−300, Y vers le haut. Caméra en perspective (`PITCH` 54°) ajustée pour que tout le plateau tienne (`fitCam`). Le plateau est une texture peinte (840×1320) par table (`paintField`) ; les rails fixes sont fusionnés en deux maillages ; les éléments mobiles (bumpers, cibles, moulins, portes, rampes…) sont mis à jour à chaque image dans `render`.
+- Les décroissances (`hit`, `glow`, `shake`) faites autrefois par le dessin 2D sont refaites dans `draw3`.
+- Qualité : `S.q==='low'` (ou `__lq`) → pas d'antialias et densité ≤ 1,1 ; la densité passe à 1 si l'image est lente (45 ms) pendant 90 images.
+- Tests : `tests/t_pin3d.py` (3D + repli 2D) ; les tests historiques `t_pin3`, `t_pinfix`, `t_pinx` passent sans réseau, donc sur le repli 2D.
+
+## v2.9 : flipper plein écran, sons, moteur de la Région (new23, new71, new72)
+- Flipper : `bar` masquée (plus de boutons) ; la surcouche 2D (`cv`) et la 3D couvrent toute la scène (`OW`×`OH`), `R3.proj` renvoie des pixels CSS. Lancer : appui sur le côté droit avec une bille au piston → `charging`, relâchement → `launch()` (le même pointeur actionne le flipper droit). Pastilles radar / turbo : `.pinside` (colonnes, à droite de `st`).
+- Trous : aimant et capture élargis dans `stepBall` (garage : portée 2,7 r, capture < 1,15 r et < 780 px/s ; trou de table : portée 2,9 r, capture < 0,85 r ou < 1,08 r à < 780 px/s).
+- Flash supprimé : plus de `PM.pulse` dans le dessin 2D ni dans les lumières 3D.
+- 3D : meuble (`cab`), bac arrière peint par table (`paintBack`), sol `gridTex`, textures `brushTex` / `rubberTex`, motifs de plateau par table dans `paintField`.
+- Sons : `PM.sfx(kind,arg)` et `PM.rollSet(vitesse)` (new72), appelés depuis `GAMES.pin` via `sfx()`.
+- Région : `wEngTick` (new72) crée un moteur avec `mkEng(engType(modèle))` et l'alimente avec `engUpdate` (vitesse, gaz, nitro) ; coupé à la sortie, en duel / fiche ouverte il baisse.
+- Test : `tests/t_pin3d.py` complété (plus de boutons, lancer au maintien, pastilles, garage, sons).
