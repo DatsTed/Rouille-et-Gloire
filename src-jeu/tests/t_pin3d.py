@@ -24,6 +24,14 @@ JS3 = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms)), P=_
     if(!((tr[0]-tl[0])<(br[0]-bl[0]))) E.push('pas de perspective (haut aussi large que le bas)');
     [tl,tr,bl,br,top,bot].forEach(p=>{ if(p[0]<-5||p[0]>365||p[1]<-5||p[1]>605) E.push('coin hors du cadre '+p.map(Math.round)); }); }
   for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); for(let k=0;k<30;k++) P.sim(1/60); await wait(120); if(calls()<10) E.push('table '+i+' : rien dessiné'); if(P.tab!==i) E.push('table '+i+' non chargée'); }
+  /* v2.10 : disposition des tables */
+  { const sl=[[50,392,98,462],[268,392,222,462]], ds=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
+    for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); const nm=P.TBL[i].n, sa=P.sauc, ho=P.hole;
+      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1]; if(Math.hypot(q[0]-sa.x,q[1]-sa.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my<340) E.push(nm+' : embouchure trop haute'); });
+      P.posts.filter(p=>!p.q).forEach(p=>{ const d=Math.min(...sl.map(s=>ds(p.x,p.y,s[0],s[1],s[2],s[3]))); if(d<32) E.push(nm+' : clou à '+Math.round(d)+' px d’une barre rebondissante'); });
+      if(Math.hypot(ho.x-180,ho.y-300)<80) E.push(nm+' : le trou de table est au milieu'); if(Math.hypot(ho.x-sa.x,ho.y-sa.y)<50) E.push(nm+' : trou et garage collés'); }
+    const b=P.balls[0]; P.loadTable(0); }
+  { P.loadTable(0); const r=P.ramps[0], b=P.balls[0]; b.st='play'; b.x=r.mx; b.y=r.my+14; b.vx=r.ux*400; b.vy=r.uy*400; b.la=false; b.trail=[]; let hold=false; for(let k=0;k<60*8&&!hold;k++){ P.sim(1/60); if(P.balls[0].st==='hold') hold=true; } if(!hold) E.push('la bille lancée dans l’embouchure ne finit pas dans le garage'); P.balls.forEach(q=>{ if(q.st==='hold'){ q.st='play'; q.x=180; q.y=100; q.vx=q.vy=0; } }); }
   P.loadTable(0); P.launch(); for(let k=0;k<120;k++) P.sim(1/60); await wait(120);
   /* bille sur une rampe, en warp, en saucer */
   { const b=P.balls[0]; b.st='ramp'; b.rp=0; b.rs=P.ramps[0].len*.5; b.rsp=0; b.trail=[[100,200],[104,195]]; await wait(150); b.st='warp'; b.wt=.5; await wait(120); b.st='play'; b.x=180; b.y=330; b.vx=b.vy=0; }

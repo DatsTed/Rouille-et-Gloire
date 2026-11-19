@@ -102,8 +102,31 @@ GAMES.pin=function(api){
     ramps:[{c:[[60,300],[50,250],[56,190],[90,124],[150,88],[210,88],[262,122],[290,182],[284,250],[250,300]],col:'#4aa8ff',nm:'GRAND ANNEAU',min:360,cs:.92},{c:[[172,252],[172,214],[172,176],[172,144]],col:'#ff2bd6',nm:'AXE CENTRAL',mr:10,cs:.96}]}];
   const ramSmooth=(c,n)=>{ const out=[]; for(let i=0;i<c.length-1;i++){ const p0=c[Math.max(0,i-1)],p1=c[i],p2=c[i+1],p3=c[Math.min(c.length-1,i+2)]; for(let k=0;k<n;k++){ const u=k/n,u2=u*u,u3=u2*u; out.push([.5*((2*p1[0])+(-p0[0]+p2[0])*u+(2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*u2+(-p0[0]+3*p1[0]-3*p2[0]+p3[0])*u3),.5*((2*p1[1])+(-p0[1]+p2[1])*u+(2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*u2+(-p0[1]+3*p1[1]-3*p2[1]+p3[1])*u3)]); } } out.push(c[c.length-1].slice()); return out; };
   let tabI=0, T=TBL[0]; const seen={0:1};
+  /* ---------- disposition d'une table (v2.10) : embouchures de rampes larges là où la bille passe vraiment (milieu bas, juste au-dessus des deux bumpers de rebond),
+     garage = sortie des ponts, trou de changement de table excentré et plus dur à atteindre, clous loin des barres rebondissantes ---------- */
+  const layoutTable=T=>{ if(T._lay) return; T._lay=1;
+    const occ=[]; T.bumps.forEach(a=>{ const r=a[2]||17; if(a[3]){ for(let k=-4;k<=4;k++) occ.push([a[0]+a[3][0]*k/4,a[1]+a[3][1]*k/4,r]); } else occ.push([a[0],a[1],r]); });
+    (T.tgt||[]).forEach(a=>occ.push([a[0],a[1],10])); (T.mills||[]).forEach(a=>occ.push([a[0],a[1],a[2]])); (T.boosts||[]).forEach(a=>occ.push([a[0],a[1],16])); (T.portals||[]).forEach(a=>occ.push([a[0],a[1],14])); (T.spins||[]).forEach(a=>occ.push([a[0],a[1],16]));
+    (T.drops||[]).forEach(bk=>bk.forEach(a=>occ.push([(a[0]+a[2])/2,(a[1]+a[3])/2,20]))); (T.segs||[]).forEach(a=>{ for(let k=0;k<=4;k++) occ.push([a[0]+(a[2]-a[0])*k/4,a[1]+(a[3]-a[1])*k/4,7]); });
+    const clear=(x,y,r)=>occ.reduce((m,o)=>Math.min(m,Math.hypot(x-o[0],y-o[1])-o[2]-r),1e9);
+    const dseg=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
+    const pick=(cands,r,extra)=>{ let best=cands[0], bs=-1e9; for(const c of cands){ const s=Math.min(clear(c[0],c[1],r),extra?extra(c):1e9); if(s>=6) return c; if(s>bs){ bs=s; best=c; } } return best; };
+    const two=(T.ramps||[]).length>1, M1=[124,384], M2=[216,384], M0=[172,388], mouths=two?[M1,M2]:[M0];
+    const G=pick([[80,152],[86,112],[72,128],[100,100]],15), far=(c,p,d)=>Math.hypot(c[0]-p[0],c[1]-p[1])-d;
+    const H=pick([[276,114],[46,336],[292,296],[60,222]],17,c=>Math.min(far(c,G,60),...mouths.map(m=>far(c,m,60))));
+    T.sauc=G; T.hole=H;
+    const sl=[[50,392,98,462],[268,392,222,462]], okP=c=>Math.min(Math.min(...sl.map(s=>dseg(c[0],c[1],s[0],s[1],s[2],s[3])))-40,far(c,G,40),far(c,H,40),...mouths.map(m=>far(c,m,46)));
+    T.posts=[pick([[86,300],[70,350],[118,262],[132,330]],6,okP),pick([[254,300],[272,350],[222,262],[208,330]],6,okP)];
+    const bez=(p0,p1,p2,p3,n)=>{ const o=[]; for(let i=0;i<=n;i++){ const u=i/n, v=1-u; o.push([v*v*v*p0[0]+3*v*v*u*p1[0]+3*v*u*u*p2[0]+u*u*u*p3[0],v*v*v*p0[1]+3*v*v*u*p1[1]+3*v*u*u*p2[1]+u*u*u*p3[1]]); } return o; };
+    const cat=(...segs)=>{ const o=[]; segs.forEach(s=>s.forEach((p,i)=>{ if(o.length&&!i) return; o.push(p); })); return o; };
+    (T.ramps||[]).forEach((a,k)=>{ let c;
+      if(!two) c=cat(bez(M0,[150,326],[70,330],[62,262],4),bez([62,262],[58,216],[G[0]-12,G[1]+40],G,4));
+      else if(k===0) c=cat(bez(M1,[100,340],[58,312],[58,250],4),bez([58,250],[58,214],[G[0]-12,G[1]+40],G,4));
+      else c=cat(bez(M2,[240,330],[290,310],[286,236],4),bez([286,236],[284,170],[262,128],[232,116],3),bez([232,116],[200,100],[120,92],G,4));
+      a.c=c.map(p=>[Math.round(p[0]*10)/10,Math.round(p[1]*10)/10]); a.mr=23; a.min=210; a.cs=.62; });
+  };
   function loadTable(i){
-    tabI=i; T=TBL[i];
+    tabI=i; T=TBL[i]; layoutTable(T);
     for(let k=segs.length-1;k>=0;k--) if(segs[k].tb) segs.splice(k,1);
     bumps.length=posts.length=spins.length=boosts.length=portals.length=wells.length=mills.length=tgt.length=lanes.length=ramps.length=dbanks.length=0;
     T.bumps.forEach(a=>{ const q={x:a[0],y:a[1],r:a[2]||17,hit:0,x0:a[0],y0:a[1]}; if(a[3]) q.mv=a[3]; bumps.push(q); });
@@ -162,7 +185,7 @@ GAMES.pin=function(api){
     if(b.st==='hold'){ b.ht-=h; b.x=sauc.x; b.y=sauc.y; if(b.ht<=0){ sfx('eject'); mission(b); b.st='play'; b.vx=-250; b.vy=-440; sauc.cool=.9; } return; }
     if(b.st==='warp'){ b.wt-=h; b.x+=(hole.x-b.x)*Math.min(1,h*10); b.y+=(hole.y-b.y)*Math.min(1,h*10); if(b.wt<=0) switchTable(b); return; }
     if(b.st==='ramp'){ const r=ramps[b.rp]; if(!r){ b.st='play'; return; } b.rs+=b.rsp*h; const e=b.rs>=r.len; const L=e?r.len:b.rs; let i=1; while(i<r.cum.length-1&&r.cum[i]<L) i++; const a=r.p[i-1], c=r.p[i], sl=(r.cum[i]-r.cum[i-1])||1, u=Math.max(0,Math.min(1,(L-r.cum[i-1])/sl)); b.x=a[0]+(c[0]-a[0])*u; b.y=a[1]+(c[1]-a[1])*u;
-      if(e){ const q=r.p[r.p.length-1], q0=r.p[r.p.length-4]||r.p[0], dx=q[0]-q0[0], dy=q[1]-q0[1], dm=Math.hypot(dx,dy)||1, sp=Math.max(380,Math.min(760,b.rsp)); b.vx=dx/dm*sp; b.vy=dy/dm*sp; b.st='play'; b.la=false; r.cd=.5; b.trail.length=0; rampDone(r); }
+      if(e){ b.x=sauc.x; b.y=sauc.y; b.vx=b.vy=0; b.st='hold'; b.ht=1.1; b.la=false; b.trail.length=0; sauc.glow=1; sauc.cool=1.2; r.cd=.5; add(200); arcTone(300,.15,'square',.08); sfx('kick'); rampDone(r); }
       else{ b.trail.push([b.x,b.y]); if(b.trail.length>9) b.trail.shift(); } return; }
     if(b.st!=='play') return;
     b.vy+=G*h; b.x+=b.vx*h; b.y+=b.vy*h; const sp=Math.hypot(b.vx,b.vy); if(sp>1300){ b.vx*=1300/sp; b.vy*=1300/sp; }
@@ -294,7 +317,7 @@ GAMES.pin=function(api){
   document.addEventListener('keydown',kd); document.addEventListener('keyup',ku);
   const nudge=()=>{ if(over||nudgeCD>0||!balls.some(b=>b.st==='play')) return; nudgeCD=.9; tiltN++; balls.forEach(b=>{ if(b.st==='play'){ b.vy-=150; b.vx+=(Math.random()-.5)*180; } }); shake=.7; arcTone(90,.12,'square',.08); sfx('nudge'); if(tiltN>=3.2){ tiltT=2.6; tiltN=0; say('TILT !'); arcTone(70,.5,'sawtooth',.1); sfx('tilt'); } };
   /* secousse : un coup de doigt rapide vers le haut (toucher la table actionne les flippers) */
-  window.__pin={sim,get r3(){return R3;},get balls(){return balls;},get B(){return balls[0]||{x:0,y:0,vx:0,vy:0};},FL,segs,part,get score(){return score;},get ball(){return ball;},get over(){return over;},get st(){return balls[0]?balls[0].st:'none';},get mult(){return mult;},get mode(){return mode;},get radar(){return radar;},get caps(){return caps;},get turbo(){return turbo;},get nballs(){return balls.length;},get tab(){return tabI;},get hole(){return hole;},ramps,dbanks,get rampMax(){return rampMax;},loadTable,switchTable,TBL,bumps,mills,wells,portals,spins,boosts,tgt,
+  window.__pin={sim,posts,sauc,get r3(){return R3;},get balls(){return balls;},get B(){return balls[0]||{x:0,y:0,vx:0,vy:0};},FL,segs,part,get score(){return score;},get ball(){return ball;},get over(){return over;},get st(){return balls[0]?balls[0].st:'none';},get mult(){return mult;},get mode(){return mode;},get radar(){return radar;},get caps(){return caps;},get turbo(){return turbo;},get nballs(){return balls.length;},get tab(){return tabI;},get hole(){return hole;},ramps,dbanks,get rampMax(){return rampMax;},loadTable,switchTable,TBL,bumps,mills,wells,portals,spins,boosts,tgt,
     launch:()=>{ power=.9; launch(); },launchP:p=>{ power=p; launch(); },nudge,get combo(){return combo;},hitC,get tilt(){return tiltT;},flip:(i,on)=>{ FL[i].on=on; },radarAdd,startChasse,capture,mission:k=>mission(balls[0]),setScore:v=>{ score=v; },lose,door,hud,N,NEED};
   return ()=>{ cancelAnimationFrame(raf); if(ro) ro.disconnect(); live.remove(); side.remove(); bar.style.display=''; if(R3){ try{ R3.dispose(); }catch(_){} R3=null; } PM.end(); document.removeEventListener('keydown',kd); document.removeEventListener('keyup',ku); window.__pin=null; };
 };

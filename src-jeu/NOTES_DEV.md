@@ -150,3 +150,9 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - Sons : `PM.sfx(kind,arg)` et `PM.rollSet(vitesse)` (new72), appelés depuis `GAMES.pin` via `sfx()`.
 - Région : `wEngTick` (new72) crée un moteur avec `mkEng(engType(modèle))` et l'alimente avec `engUpdate` (vitesse, gaz, nitro) ; coupé à la sortie, en duel / fiche ouverte il baisse.
 - Test : `tests/t_pin3d.py` complété (plus de boutons, lancer au maintien, pastilles, garage, sons).
+
+## v2.10 : ponts, garage et trous (new23, new71)
+- `layoutTable(T)` (new23) recalcule à la première charge d'une table : embouchures de rampes (`M1`/`M2` pour deux ponts, `M0` au centre pour un seul) au milieu bas, `mr` 23, vitesse mini 210, alignement mini 0,62 ; trajet en courbes de Bézier jusqu'au garage ; garage (`T.sauc`) choisi parmi quelques emplacements libres en haut à gauche en évitant les objets (bumpers mobiles inclus) ; trou de changement de table (`T.hole`) sur un côté, à ≥ 60 px du garage et des embouchures ; clous (`T.posts`) à ≥ 40 px des barres rebondissantes.
+- La fin d'une rampe place la bille dans le garage (`b.st='hold'`, éjection + récompense par `mission`), au lieu de la relancer.
+- 3D : hauteur de rampe 0,5 aux deux bouts, largeur qui s'évase à l'entrée, anneau lumineux = zone de capture ; sol et plateau en dalles (`tileTex`).
+- Mesures : `tests/t_rampes.py` (le bot prend la rampe ; avant : 0 fois sur 6 tables, maintenant 1 à 5 fois par bille) et `tests/t_chaleur.py` (carte de passage de la bille). Vérifications de disposition dans `t_pin3d.py`.
