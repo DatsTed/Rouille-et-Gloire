@@ -6,7 +6,7 @@ const TUTX={
   ['🔨 Fabriquer','Avec la ferraille, tu choisis la <b>rareté</b> puis l’<b>emplacement</b> (moteur, turbo, pneus…). Le modèle exact reste aléatoire.'],
   ['✨ Fusionner','5 modules de même rareté, non montés, donnent <b>1 module de la rareté au-dessus</b>. Les brillants, uniques et modules montés sont protégés.']]},
  equipe:{t:'👥 Ton équipe',p:[
-  ['Des employés qui bossent pour toi','Mécano, jardinier, pilote, vendeur, gardien : ils travaillent même quand tu ne joues pas (jusqu’à 6 h) et touchent un salaire par heure.'],
+  ['Des employés qui bossent pour toi','Mécano, jardinier, pilote, vendeur, gardien : ils travaillent même quand tu ne joues pas (jusqu’à 24 h) et touchent un salaire par heure.'],
   ['Énergie et loyauté','Un employé fatigué rend moins. Offre-lui du <b>repos</b>, une <b>augmentation</b>, et il s’attachera à toi.'],
   ['Les places','Une place légale de plus tous les 3 niveaux. Avec le labo et la majorité, des places <b>clandestines</b> s’ajoutent.']]},
  garage:{t:'🚗 Ton garage',p:[['Voitures et podiums','Touche une voiture pour la réparer, l’équiper ou l’améliorer. Les <b>podiums</b> exposent tes plus belles voitures et rapportent des crédits : utilise « Meilleures » pour les placer d’un coup.']]},

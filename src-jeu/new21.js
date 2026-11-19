@@ -89,7 +89,7 @@ function empRow(e,mode){ const R=ROLES[e.role], T=TRAITS[e.tr];
 function equipSheet(X){
   if(!sheet||sheet.t!=='equipe') return false; const T=team(); refreshCands(); empTick();
   const tot=T.hired.reduce((a,e)=>a+e.wage,0);
-  $('sheet').innerHTML=`<div class="inv equipe">${X}<h2>👥 Équipe</h2><p class="note">${T.hired.length} / ${teamCap()} employé${T.hired.length>1?'s':''} · salaires ${fmt(tot)} cr / h. Ils travaillent même quand tu ne joues pas (jusqu’à 6 h). Plus tu les traites bien, plus ils s’attachent et rendent.</p>
+  $('sheet').innerHTML=`<div class="inv equipe">${X}<h2>👥 Équipe</h2><p class="note">${T.hired.length} / ${teamCap()} employé${T.hired.length>1?'s':''} · salaires ${fmt(tot)} cr / h. Ils travaillent même quand tu ne joues pas (jusqu’à 24 h). Plus tu les traites bien, plus ils s’attachent et rendent.</p>
   ${T.hired.length?T.hired.map(e=>empRow(e,'team')).join(''):'<p class="note">Personne pour l’instant. Recrute ci-dessous.</p>'}
   <h3 class="rh">Candidats <small>(renouvelés toutes les 15 min)</small></h3>${T.cand.map(c=>empRow(c,'hire')).join('')}
   ${T.hired.length<teamCap()?'':`<p class="note">Équipe pleine. Une place de plus tous les 3 niveaux (max 6).</p>`}

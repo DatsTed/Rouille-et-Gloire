@@ -101,7 +101,7 @@ ACT.cbteampick=function(d){ const c=car(+d.id); if(!c) return; openSheet({t:'cbc
 ACT.cbteamtoggle=function(d){ _cbToggle.call(this,d); try{ closeSheet(); }catch(_){} if(view==='arena') render(); };
 { const _sx=sheetExtra; sheetExtra=function(X){ if(sheet&&sheet.t==='cbcard'){ const c=car(sheet.uid); if(!c){ closeSheet(); return true; } const sel=cbTeam(), k=sel.indexOf(c.uid), full=sel.length>=4;
     const body=cbCarHTML(c).replace('<h3>⚔️ Fiche de combat</h3>','');
-    $('sheet').innerHTML=`${X}<h2>⚔️ ${M[c.mid].nom}${c.sh?' ✨':''}</h2>Arène.</p> <div’Arène.</p>${body}
+    $('sheet').innerHTML=`${X}<h2>⚔️ ${M[c.mid].nom}${c.sh?' ✨':''}</h2><p class="note">Vérifie la fiche de combat avant de l’ajouter à ton équipe d’Arène.</p>${body}
       <div class="tu-btns cbcard-b"><button class="btn alt" data-a="close">Annuler</button><button class="btn ${k>=0?'alt':''}" data-a="cbteamtoggle" data-id="${c.uid}" ${k<0&&full?'disabled':''}>${k>=0?'➖ Retirer de l’équipe':full?'Équipe pleine (4)':'➕ Ajouter à l’équipe'}</button></div>`; return true; } return _sx.apply(this,arguments); }; }
 { const _mv=ACT.cbmv; ACT.cbmv=function(d){ if(sheet&&sheet.t==='cbcard') CBFC=+d.id; return _mv.apply(this,arguments); };
   const _bk=ACT.cbback; ACT.cbback=function(d){ if(CBFC&&+d.id===CBFC){ CBFC=0; return openSheet({t:'cbcard',uid:+d.id}); } return _bk.apply(this,arguments); }; }

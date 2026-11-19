@@ -107,3 +107,30 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 ## v2.2 : modèles 3D importés (new65, tools_*.py)
 - `tools_glb2v2.py <id> <fichier.glb> <longueur> [--q 1.0] [--flip]` convertit un .glb en modèle « v2 » (pièces décimées par couleur, roues séparées, carrosserie repeignable) ; `tools_embed.py <id>` l'ajoute à `models_new.html` ; `new65.js` l'associe à une voiture (`glb`). Dépendances Python : numpy, trimesh, fast-simplification, scipy, networkx, pillow.
 - Phantom → `majestic` (5,5 m, ≈ 200 Ko), Tiguan → `steppe` (4,7 m, ≈ 400 Ko, CC BY-NC-SA). Reste 5 voitures en silhouette : piccola, kombi, riva, hauler, fury.
+
+## v2.3 : une cinématique par ultime (new66)
+- `CBFX[id]` (16 effets) : `charge(k,t)` / `fire(u,t)` / `onImpact` / `impact(u,t)` / `post(u,t)`, `camMode` (follow, sky, wide, target, orbit) ou `camFn`, `snd` (famille sonore). Cadre : `cbUlt3d` / `ultTick` / `ultEnd` (0–1,5 s charge, 1,5–2,7 s tir, impact, retour caméra, 4,2 s max). Les objets d'effet ont `renderOrder` 8–10 : sans cela le sol transparent de l'arène les recouvre. Test visuel : lancer `cbUlt3d({id,s:0})` dans un duel puis geler `CB3.U.K=1e9`.
+
+## v2.4 : palier Mythique (new67)
+- `TIERS[7]` « Mythique » (#FF2BD6), poids de tirage `CPW[7]=.4`, réservé à `majestic` et `steppe` (stats au-dessus des Hypercars). Le tier 7 n'est ni en concession ni à la casse (filtres `t<=cl+1`).
+- Piège corrigé : dans `new66`, une `function` déclarée dans le bloc `if(window.THREE){}` devient globale (Annex B) et écrasait `burst()` du jeu. Les fonctions de ce bloc doivent avoir des noms uniques (`ubBurst66`, `ubStep66`) ou être des `const`.
+
+## v2.5 : course sur un seul écran, Région avec l'interface des épreuves (new68 + extra8.css)
+- Épreuves : `body.racing #nav{display:none!important}` (un `!important` plus ancien de extra5 gardait la barre visible), `main` sans défilement (sauf `.race.fin`), l'écran 3D `.rs` prend `clamp(…, 100dvh − 376px, 440px)` et la mini-carte (`.mslot` / `#rmap`, flex 1) remplit le vide sous les boutons. Spa : `#mini` déplacé dans `.mslot` (sauf Piste d'essai, qui garde son coin) et dessiné en 192×300 (rep dans patch5).
+- Région : `wDom` refait avec les classes des épreuves (`.race.wrace`, `.rwrap > .rs`, `.hud`, `.padS.pad49`, rangée `Son / Caméra / Remettre sur la route / Quitter`, carte `#wMap` en radar centré sur le joueur). Les identifiants `wSpd, wKnob, wNit, wNitT, wNitG, wZone, wAct, wTeam, wMap, wSteer, wBrk, wHnd, wGas, wGasP` sont conservés car `wHud`/`wTick` les lisent.
+- `wSpawn` : dos au garage (`T.ga`), décalé latéralement vers l'arche principale si elle est en face. `ACT.wcam` cycle `S.camv` (partagé avec les épreuves) ; `wCam68` règle la caméra après `wTick`. `ACT.wresp` recentre sur la route la plus proche.
+- Grande carte : `W.bv={z,cx,cz}`, pincer / molette / glisser / boutons ; `.hud-bot` a `z-index:7` donc `#wov .wbig` est à 30.
+- Test : `tests/t_ui25.py` (390×844 et 360×640).
+
+## v2.6 : pastille d'équipe, argent sale, équipe du labo (new69)
+- `ACT.cbtmq` : la pastille `.cbtm-n` (zone de toucher élargie en CSS) ajoute / retire la voiture de l'équipe de combat sans ouvrir la fiche ; le reste de la ligne ouvre toujours la fiche de combat.
+- Argent sale : `S.dirty` (`dirtyN()`, `dirtyAdd()`), coefficient `DIRTY_K=1.25`. `ACT.rsell`/`ACT.lsell` (enveloppés par `asDirty`), `illResolve` (livraisons) et les ventes d'employés créditent `S.dirty` au lieu de `S.cr`. Les courses à mise propre et les salaires restent en crédits propres.
+- Blanchiment dans l'onglet Réseau (`washCard`, `LDR`) : filières chronométrées (`F.wash.ops`, fin = horodatage, tirage `r` fait au lancement), nombre de filières `1+⌊niveau labo/3⌋` ; `ACT.illgod` = course à mise sale (`R.dirtyBet`, gérée par `dirtyBetEnd`).
+- Équipe : `empTick` réécrit (remplace new21 + enveloppe de new36), énergie `empDrain` (24 h pour un employé moyen), repos `EMP_REST` 60 min à `EMP_REC` 1,7 %/min, repos automatique `T.auto`, plafond hors-ligne `EMP_CAP` 1 440 min. Journal `T.log` agrégé par heure et par employé (`eLog`), compteurs à vie `e.st`, onglet Registre dans `vEquipe`. Les roles clandestins (`irri/nut/chim/dealer/chauf/avo`) passent par `empIll2`/`empSell2`.
+- Test : `tests/t_lab26.py`.
+
+## v2.7 : labo stable (new70)
+- Le défilement de la fiche du labo sautait après un clic : `ranchSheet` restaurait `scrollTop` avant que d'autres couches (`decor36` barre de niveau, `decor42` boutons de floraison / minuteries, `pkTok27`) n'ajoutent des éléments ; l'ancrage automatique du navigateur déplaçait alors la position. `new70` enveloppe `renderSheet` en dernier : `overflow-anchor:none`, position remise après tout le dessin, retour en haut seulement si l'onglet / la boutique / la plante change.
+- Fiche plante : classe `plantv` sur `#sheet` (CSS extra8) masque `.rhero`, `.rtabs` principal, `.labtools`, `.topsw`.
+- Boutique : `RY.qty` accepte 1/5/10/50 (new27).
+- Test : `tests/t_lab26.py` (section v2.7) ; il échoue si `new70` est retiré.

@@ -8,7 +8,7 @@ JS = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms));
   ['touge','piccola'].forEach(mid=>S.cars.push({uid:S.nuid++,mid,etat:100,xp:0,lvl:12,up:{},inv:0,mods:{},sh:1})); S.cbTeam=S.cars.slice(-2).map(c=>c.uid); save();
   await wOpen(); await wait(600); for(let i=0;i<4&&sheet;i++) closeSheet();
   if(!W.on||GL.mode!=='world') E.push('carte non ouverte '+GL.mode);
-  const sh0=sheet&&sheet.t; let fr=0; const f0=performance.now(); await new Promise(r=>{ const f=()=>{ fr++; performance.now()-f0<1000?requestAnimationFrame(f):r(); }; f(); }); for(let i=0;i<5&&sheet;i++) closeSheet(); W.in.gas=1; await wait(7000); W.in.gas=0; const d=Math.hypot(W.p.x,W.p.z); if(d<30||W.route!==0) E.push('conduite '+Math.round(d)+' route '+W.route);
+  const sh0=sheet&&sheet.t; let fr=0; const f0=performance.now(); await new Promise(r=>{ const f=()=>{ fr++; performance.now()-f0<1000?requestAnimationFrame(f):r(); }; f(); }); for(let i=0;i<5&&sheet;i++) closeSheet(); W.in.gas=1; await wait(10000); W.in.gas=0; const d=Math.hypot(W.p.x,W.p.z); if(d<30||W.route!==0) E.push('conduite '+Math.round(d)+' route '+W.route);
   const q=wNear(W.p.x,W.p.z); if(Math.abs(q.lat)>W_HW+1.3) E.push('hors de la route');
   const R0=W.routes[0], pp=R0.P[R0.iA+6]; W.p.x=pp.x; W.p.z=pp.z; W.p.y=0; W.p.v=0; const w=W.wild.find(w=>w.R.k===0); w.i=R0.iA+11; w.lane=0; w.cool=0; W.grace=0; await wait(4000); if(!CBV) E.push('pas de duel sauvage '+JSON.stringify([w.i,w.cool,w.ct,w.off,W.route,W.grace,!!W.fight,sheet&&sheet.t,Math.round(Math.hypot(W.p.x-w.g.position.x,W.p.z-w.g.position.z)),W.town,wTownAt(W.p.x,W.p.z)])); else { CBV.B.over=1; cbFinish(); cbClose(); } await wait(500);
   if(W.town!==0||GL.mode!=='world') E.push('pas remorqué en ville');

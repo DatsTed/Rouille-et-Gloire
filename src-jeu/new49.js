@@ -12,7 +12,6 @@ function pad49(h){
     </div>
     `;
     h=h.slice(0,a)+pad+h.slice(b);
-    if(!spa) h=h.replace('class="rmap"','class="rmap ov"');
     if(!spa&&h.indexOf('id="hDrift"')<0) h=h.replace('<div class="hud-lights"','<div class="hud-drift" id="hDrift"></div><div class="hud-lights"');
     return h;
   }catch(e){ try{console.warn('pad49',e);}catch(_){} return h; }
@@ -27,8 +26,7 @@ function pad49(h){
 function rmapInit(){
   const c=$('rmap'); if(!c||!RS||!RS.path||!RC||!RC.tk) return;
   const Pa=RS.path, tk=RC.tk, d=Math.min(2,window.devicePixelRatio||1), ov=c.classList.contains('ov'), W=c.clientWidth||(ov?96:360);
-  const vh=Math.min(window.innerHeight||800,(window.visualViewport&&window.visualViewport.height)||9999), H=ov?(c.clientHeight||150):Math.round(clamp(vh-c.getBoundingClientRect().top-18,84,170));
-  if(!ov) c.style.height=H+'px';
+  const vh=Math.min(window.innerHeight||800,(window.visualViewport&&window.visualViewport.height)||9999), H=ov?(c.clientHeight||150):Math.max(56,Math.round(c.clientHeight||clamp(vh-c.getBoundingClientRect().top-18,84,170)));  /* v2.5 : la carte remplit le vide sous les boutons (flex) */
   c.width=Math.round(W*d); c.height=Math.round(H*d);
   const a0=Math.max(0,Math.floor((Pa.PRE-18)/Pa.STEP)), a1=Math.min(Pa.n-1,Math.ceil((Pa.PRE+tk.L+28)/Pa.STEP));
   let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;

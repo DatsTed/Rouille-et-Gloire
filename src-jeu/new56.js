@@ -117,7 +117,7 @@ function cbArenaHTML(X){ const st=cbSt(), t=cbTeam().map(u=>car(u)).filter(Boole
       ${CB_CUPS[sheet.i+1]&&sheet.first?`<p class="note">🔓 Nouvelle coupe : ${CB_CUPS[sheet.i+1].ic} ${CB_CUPS[sheet.i+1].nm}</p>`:''}<button class="btn wide" data-a="arena">Retour à l’Arène</button></div>`; return true; }
   if(sheet&&sheet.t==='cbteam'){ const sel=cbTeam(), cars=S.cars.slice().sort((a,b)=>cbOf(b).lv-cbOf(a).lv);
     el.innerHTML=`${X}<h2>🚗 Équipe de combat</h2><p class="note">Choisis jusqu’à 4 voitures. La première entre en piste en premier.</p>
-      <div class="cbtm">${cars.map(c=>{ const s=cbOf(c), k=sel.indexOf(c.uid); return `<button class="cbtm-r ${k>=0?'on':''}" data-a="cbteampick" data-id="${c.uid}"><span class="cbtm-n">${k>=0?k+1:''}</span><div><b>${M[c.mid].nom}</b><small>Niv. ${s.lv} · ${s.ty.map(x=>CB_TYPES[x].ic+' '+CB_TYPES[x].n).join(' / ')} · ${CB_TAL[s.tal].n}</small></div></button>`; }).join('')}</div>
+      <div class="cbtm">${cars.map(c=>{ const s=cbOf(c), k=sel.indexOf(c.uid); return `<button class="cbtm-r ${k>=0?'on':''}" data-a="cbteampick" data-id="${c.uid}"><span class="cbtm-n" data-a="cbtmq" data-id="${c.uid}" role="button" aria-label="Ajouter ou retirer de l'équipe">${k>=0?k+1:''}</span><span class="cbtm-th">${thArt(c)}</span><div><b>${M[c.mid].nom}</b><small>Niv. ${s.lv} · ${s.ty.map(x=>CB_TYPES[x].ic+' '+CB_TYPES[x].n).join(' / ')} · ${CB_TAL[s.tal].n}</small></div></button>`; }).join('')}</div>
       <button class="btn wide" data-a="arena">✓ Terminé</button>`; return true; }
   if(sheet&&sheet.t==='cbshop'){ const bag=cbBag();
     el.innerHTML=`${X}<h2>🛒 Boutique de combat</h2><p class="note">Tu as <b>${neoT(neoN())}</b>. Objets utilisables pendant les duels (4 par combat).</p>

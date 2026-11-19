@@ -3,7 +3,7 @@ RY.qty=RY.qty||1;
 const _rShop27=rShop;
 rShop=function(){
   let h=_rShop27.apply(this,arguments); if(RY.shop==='gear') return h;
-  const q=RY.qty||1, bar=`<div class="qtybar"><span>Quantité</span>${[1,5,10].map(n=>`<button class="${q===n?'on':''}" data-a="rqty" data-id="${n}">×${n}</button>`).join('')}</div>`;
+  const q=RY.qty||1, bar=`<div class="qtybar"><span>Quantité</span>${[1,5,10,50].map(n=>`<button class="${q===n?'on':''}" data-a="rqty" data-id="${n}">×${n}</button>`).join('')}</div>`;
   const i=h.indexOf('</div>')+6; h=h.slice(0,i)+bar+h.slice(i);
   if(q>1) h=h.replace(/data-id="(seed|chem|lamp):([^"]+)">([^<]*)<br>/g,(m,t,id,px)=>{ let u=t==='seed'?SID[id].sd:t==='chem'?CHEM[id].px:LID[id].px; return `data-id="${t}:${id}">×${q} · ${fmt(u*q)}<br>`; });
   return h;

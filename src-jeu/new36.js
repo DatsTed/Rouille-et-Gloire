@@ -61,7 +61,7 @@ empTick=function(){ const T=team(), now=Date.now(); let dt=Math.min((now-T.last)
   try{ let left=dt; while(left>1e-4){ const d=Math.min(left,5); left-=d; ills.forEach(e=>{ if(S.cr<=0||e.en<=0) return; const did=empIll(e,empEff(e),d); e.out=(e.out||0)+did; T.tot[e.role]=(T.tot[e.role]||0)+did; }); } save(); }catch(err){ console.error(err); } };
 /* ----- décors : niveau du labo et équipe sur l'accueil ----- */
 function labBar(){ const F=labF(), l=F.ll, nx=l<10?labNeed(l):1, pr=l>=10?100:Math.min(100,Math.round(F.lx/nx*100)), nt=l<10?LAB_TIERS[l+1]:'Niveau maximum';
-  return '<div class="lab-lv" id="labLv"><b>🧪 Labo niveau '+l+'</b><div class="lb"><i style="width:'+pr+'%"></i></div><small>'+(l<10?F.lx+' / '+nx+' XP · prochain : '+nt:'Maître cultivateur')+'</small></div>'; }
+  return '<div class="lab-lv" id="labLv"><b>🧪 Labo niveau '+l+'</b><div class="lb"><i style="width:'+pr+'%"></i></div><small>'+(l<10?Math.round(F.lx)+' / '+nx+' XP · prochain : '+nt:'Maître cultivateur')+'</small></div>'; }
 function decor36(){ try{
   if(S&&S.farm&&S.farm.found&&labLv()>=LAB_LVL){ const old=document.getElementById('labLv'), a=document.querySelector('#sheet .rstats, #sheet .rhd'); if(a){ if(old) old.remove(); a.insertAdjacentHTML('afterend',labBar()); }
     document.querySelectorAll('[data-a="rbuy"],[data-a="rbuyslot"],[data-a="rbuyranch"]').forEach(b=>{ let n=1; if(b.dataset.a==='rbuy'){ const [t,a,g]=String(b.dataset.id).split(':'); n=labReq(t,a,g); } else if(b.dataset.a==='rbuyranch') n=4; else { const R=S.farm.rooms[b.dataset.id]; if(R){ const base=b.dataset.id==='ranch'?8:6; n=Math.max(1,Math.ceil((R.slots.length+1-base)/2)+1); } }

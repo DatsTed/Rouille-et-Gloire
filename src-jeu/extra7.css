@@ -338,3 +338,6 @@ body.won{overflow:hidden}body.won #nav,body.won #top,body.won #goal{visibility:h
 .hubw .bagbtn.mapb{left:8px}.hubw .bagbtn.hlp{left:56px}.hubw .bagbtn[data-a="inv"]{left:104px}
 #sheet.nox>button.x{display:none!important}#sheet.nox{padding-top:18px}#sheet.nox .cbtalk,#sheet.nox .wst{margin:0 auto;max-width:560px}#sheet.nox .tu-btns{justify-content:center}
 .pk3{height:clamp(330px,62dvh,640px)!important;margin-top:0!important}
+.cbtm-th{flex:none;width:72px;height:44px;border-radius:9px;overflow:hidden;display:block;background:#0b0a1c;box-shadow:0 0 0 1px rgba(255,255,255,.12)}.cbtm-th img,.cbtm-th .thw{width:100%;height:100%;object-fit:cover;display:block}.cbtm-th .thw{display:grid;place-items:center}.cbtm-r{align-items:center}
+.cbtm-th{width:84px;height:50px}.cbtm-th img,.cbtm-th .thw{transform:scale(1.75);transform-origin:50% 56%}
+.cbu-tint{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .15s}
