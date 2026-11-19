@@ -52,8 +52,9 @@ function dmdMake(S3){
   function frame(dt,H){ st.t+=dt; const t=st.t; st.disp+=(H.score-st.disp)*Math.min(1,dt*7); if(Math.abs(H.score-st.disp)<1) st.disp=H.score;
     g.clearRect(0,0,GW,GH);
     /* bande du haut : bille, score, multiplicateur */
-    txt('B'+Math.min(H.ball,H.N)+'/'+H.N,2,2,7,CYAN,'left');
-    { const s=num(st.disp), px=fit(s,11,66); txt(s,60,0+(px<11?1:0),px,AMB); }
+    if(H.mode!=='chasse') txt('B'+Math.min(H.ball,H.N)+'/'+H.N,2,2,7,CYAN,'left');
+    { const ch=H.mode==='chasse', s=num(st.disp), px=fit(s,11,ch?50:66); txt(s,ch?72:60,0+(px<11?1:0),px,AMB);
+      if(ch){ const sec=Math.max(0,Math.ceil(H.chT)), col=sec>15?GRN:sec>8?AMB:RED, a=sec<=8?.72+.28*Math.sin(t*4):1; g.globalAlpha=a; g.strokeStyle=col; g.lineWidth=1; g.strokeRect(1.5,.5,27,10); g.globalAlpha=1; txt(sec+'s',15,1,9,col,'center',a); } }
     { const m=H.mult, big=m>1; if(m!==st.last.mult){ st.last.mult=m; st.multT=0; } st.multT=(st.multT||9)+dt; const z=big&&st.multT<.5?1+.35*Math.sin(st.multT/.5*Math.PI):1;
       g.save(); g.translate(118,5.5); g.scale(z,z); txt('×'+m,0,-5.5,10,big?WHT:DIM,'right'); g.restore(); }
     rect(0,12,GW,1,AMB,.28);
@@ -64,11 +65,12 @@ function dmdMake(S3){
     if(!st.cur){
       if(H.waiting&&H.power>0){ txt('PUISSANCE',60,0,6,AMB); rect(2,8,116,5,DIM,.5); rect(2+116*.8,8,116*.15,5,GRN,.45); rect(2,8,116*H.power,5,H.power>=.8&&H.power<=.95?GRN:AMB); }
       else{
-        txt('RADAR',19,0,6,CYAN); for(let i=0;i<H.NEED;i++){ const on=i<H.radar; rect(2+i*9,8,8,5,on?CYAN:DIM,on?1:.45); if(!on){ rect(3+i*9,9,6,3,'#000'); } }
+        if(H.mode==='chasse'){ txt('VIES',19,0,6,MAG); const w=Math.max(2,Math.min(7,Math.floor(36/Math.max(1,H.hpMax))-1)); for(let i=0;i<H.hpMax;i++){ const on=i<H.hp; rect(2+i*(w+1),8,w,5,on?MAG:DIM,on?1:.45); } }
+        else{ txt('RADAR',19,0,6,CYAN); for(let i=0;i<H.NEED;i++){ const on=i<H.radar; rect(2+i*9,8,8,5,on?CYAN:DIM,on?1:.45); if(!on){ rect(3+i*9,9,6,3,'#000'); } } }
         txt('TURBO',101,0,6,MAG); for(let i=0;i<5;i++){ const on=H.turbo>0?true:i<Math.min(5,Math.floor(H.turboG/5)); const pul=H.turbo>0?.75+.25*Math.sin(t*5+i):1; rect(83+i*7,8,6,5,on?MAG:DIM,on?pul:.45); if(!on) rect(84+i*7,9,4,3,'#000'); }
         /* centre : l'état le plus important du moment */
         const cx=40, cw=40; let drew=true;
-        if(H.mode==='chasse'){ txt('CHASSE '+Math.ceil(H.chT),60,0,6,GRN); for(let i=0;i<H.hpMax;i++) rect(60-H.hpMax*3+i*6,8,5,5,i<H.hp?MAG:DIM,i<H.hp?1:.5); }
+        if(H.mode==='chasse'){ const sec=Math.ceil(H.chT), col=sec>15?GRN:sec>8?AMB:RED; txt(sec+' s',60,-1,10,col); rect(42,11,36,3,DIM,.5); rect(42,11,36*Math.max(0,Math.min(1,H.chT/40)),3,col); }
         else if(H.turbo>0){ txt('TURBO '+Math.ceil(H.turbo),60,0,7,AMB); txt('BUMPERS ×3',60,8,6,WHT); }
         else if(H.nballs>1){ txt('MULTIBILLE',60,0,fit('MULTIBILLE',7,cw),CYAN); txt('POINTS ×2',60,8,6,WHT); }
         else if(H.combo>=2&&H.comboT>0){ txt('COMBO',60,0,6,WHT); txt('×'+H.combo,60,6,9,AMB); }

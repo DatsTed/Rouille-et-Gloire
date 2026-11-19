@@ -162,3 +162,8 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - `S3.hud` expose l'état lu par l'écran ; `draw3` ne dessine plus que les étincelles, la légende du trou et la jauge du piston. `.pinlive`, `.pinside` et le score de l'en-tête sont masqués en 3D (le repli 2D les garde) ; bouton son `.pinmute`.
 - Ponts (`layoutTable`) : bases `ML`/`MR` (choisies parmi des emplacements libres sur les côtés, y ≈ 256) ; garage en bas au centre (`[180,414]`…) ; trajet en deux Bézier. La sortie éjecte la bille tantôt à gauche tantôt à droite (évite les boucles infinies vues avec le bot).
 - Mesure : `t_rampes` (bot parfait) 1 pont toutes les 5 à 15 s selon la table ; `t_pin3d` vérifie la disposition, l'écran et les 17 types d'événements.
+
+## v2.12 : flipper plein cadre (new71, new73)
+- Caméra : angle fixe 58° + étirement vertical `KY` (1 à 1,7) calculé par `fitAt` pour que les coins du plateau (haut du bac arrière, bas du drain) touchent les bords de l'écran quel que soit le format ; l'écran à points reste lisible (pas de bande vide). Tablier du bas retiré, bac arrière de la largeur du plateau (382), face 1024×463 avec titre au-dessus de l'écran.
+- Chasse : minuteur dans la bande du haut (`H.mode==='chasse'`, remplace B x/y) + décompte central.
+- Mode « vue de dessus » : `R3.setPlan(true)` (caméra à plat, sans bac arrière ni ponts) et `R3.drawPlan` (grille tous les 50 en coordonnées de la table) ; sert à fabriquer des captures annotables pour dessiner les ponts à la main.

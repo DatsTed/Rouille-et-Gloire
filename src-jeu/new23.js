@@ -278,7 +278,7 @@ GAMES.pin=function(api){
     if(save>0&&balls.some(b=>b.st==='play')){ ctx.fillStyle='rgba(255,212,0,.8)'; ctx.font='700 11px system-ui'; ctx.textAlign='center'; ctx.fillText('BALL SAVE '+Math.ceil(save),180,590); }
     if(msgT>0){ ctx.globalAlpha=Math.min(1,msgT*2); ctx.fillStyle='#fff'; ctx.shadowColor='#ff2bd6'; ctx.shadowBlur=18; ctx.font='900 24px system-ui,sans-serif'; ctx.textAlign='center'; ctx.fillText(msg,180,400); ctx.globalAlpha=1; ctx.shadowBlur=0; } };
   /* surcouche 2D au-dessus de la 3D : étincelles, points qui montent, combo, messages, jauge du piston, légende du trou */
-  const draw3=()=>{ R3.render(shake); ctx.setTransform(K,0,0,K,0,0); ctx.clearRect(0,0,OW,OH);
+  const draw3=()=>{ R3.render(shake); ctx.setTransform(K,0,0,K,0,0); ctx.clearRect(0,0,OW,OH); if(R3.plan){ R3.drawPlan(ctx,OW,OH); return; }
     bumps.forEach(b=>{ b.hit=Math.max(0,b.hit-.08); }); [slL,slR].forEach(s=>{ s.hit=Math.max(0,s.hit-.12); }); part.hit=Math.max(0,part.hit-.07); sauc.glow=Math.max(0,sauc.glow-.03); if(shake>0) shake=Math.max(0,shake-.07);
     ctx.textAlign='center'; ctx.lineCap='round';
     fx.forEach(p=>{ const q=R3.proj(p.x,p.y,10); ctx.globalAlpha=Math.max(0,p.l*2); ctx.fillStyle=p.c; ctx.fillRect(q[0]-2,q[1]-2,4,4); }); ctx.globalAlpha=1;

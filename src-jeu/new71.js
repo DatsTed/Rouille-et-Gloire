@@ -38,15 +38,18 @@ function pin3dMake(S3,host,topCv){
   const amb=new T3.AmbientLight(0x6a60a0,.32), sun=new T3.DirectionalLight(0xffffff,.8), fill=new T3.PointLight(0xb08cff,.25,1400,2), ballL=new T3.PointLight(0x9fe9ff,1.5,150,2);
   sun.position.set(-160,420,200); fill.position.set(60,700,-100); ballL.position.set(0,26,100); sc.add(amb,sun,fill,ballL);
   /* ---------- caméra : tout le plateau tient dans le cadre ---------- */
-  const PITCH=54*PI/180; let ASP=.6, CAMZ=0;
-  const corners=[[-8,-6,0],[368,-6,0],[-8,606,0],[368,606,0],[12,40,16],[348,40,16],[-6,-18,172],[366,-18,172],[-6,640,0],[366,640,0]];
+  let pitch=58*PI/180, ASP=.6, CAMZ=0, PLAN=false, KY=1;
+  const cornersTop=[[6,-6,0],[354,-6,0],[6,606,0],[354,606,0],[12,40,16],[348,40,16],[-9,-18,186],[369,-18,186]], cornersPlan=[[-6,-6,0],[366,-6,0],[-6,606,0],[366,606,0]];
   let camD=900;
-  const camFor=(d,tz)=>{ cam.position.set(0,Math.sin(PITCH)*d,tz+Math.cos(PITCH)*d); cam.lookAt(0,0,tz); cam.updateMatrixWorld(); cam.updateProjectionMatrix(); };
+  /* étirement vertical doux (KY) : le plateau remplit l'écran du haut (bac arrière) au bas (drain) quel que soit le format du téléphone */
+  const camFor=(d,tz,pt,ky)=>{ cam.position.set(0,Math.sin(pt)*d,tz+Math.cos(pt)*d); cam.lookAt(0,0,tz); cam.updateMatrixWorld(); cam.updateProjectionMatrix(); cam.projectionMatrix.elements[5]*=ky; cam.projectionMatrixInverse.copy(cam.projectionMatrix).invert(); };
   const ndcOf=p=>new T3.Vector3(X(p[0]),p[2],Z(p[1])).project(cam);
-  function fitCam(){ cam.aspect=ASP; let d=900, tz=40;
-    for(let it=0;it<24;it++){ camFor(d,tz); let mnx=9,mxx=-9,mny=9,mxy=-9; corners.forEach(c=>{ const v=ndcOf(c); mnx=Math.min(mnx,v.x); mxx=Math.max(mxx,v.x); mny=Math.min(mny,v.y); mxy=Math.max(mxy,v.y); });
-      d*=Math.max((mxx-mnx)/2,(mxy-mny)/2)/.985; const cy=(mny+mxy)/2; tz-=cy*d*Math.tan(cam.fov*PI/360)/Math.sin(PITCH)*.8; }
-    camFor(d,tz); CAMZ=tz; camD=d; }
+  function fitAt(pt){ cam.aspect=ASP; const cs=PLAN?cornersPlan:cornersTop; let d=900, tz=40, ky=1;
+    for(let it=0;it<40;it++){ camFor(d,tz,pt,ky); let mnx=9,mxx=-9,mny=9,mxy=-9; cs.forEach(c=>{ const v=ndcOf(c); mnx=Math.min(mnx,v.x); mxx=Math.max(mxx,v.x); mny=Math.min(mny,v.y); mxy=Math.max(mxy,v.y); });
+      const w=(mxx-mnx)/2, h=(mxy-mny)/2; d*=w/.995; if(!PLAN) ky=Math.max(.9,Math.min(1.7,ky*.995/h)); else d*=Math.max(1,h/w);
+      const cy=(mny+mxy)/2; tz-=cy*d*Math.tan(cam.fov*PI/360)/Math.sin(pt)*.5/ky; }
+    camFor(d,tz,pt,ky); return {d,tz,ky}; }
+  function fitCam(){ pitch=(PLAN?89.6:58)*PI/180; const r=fitAt(pitch); CAMZ=r.tz; camD=r.d; KY=r.ky; }
   /* ---------- peinture du plateau (texture 2×, coordonnées de la table) ---------- */
   let fieldMesh=null, fieldTex=null;
   const polyIn=x=>{ x.beginPath(); x.moveTo(12,170); x.arc(180,170,168,PI,2*PI); x.lineTo(348,598); x.lineTo(318,598); x.lineTo(318,455); x.lineTo(222,545); x.lineTo(98,545); x.lineTo(12,455); x.closePath(); };
@@ -94,12 +97,12 @@ function pin3dMake(S3,host,topCv){
     S3.tgt.forEach(q=>{ x.fillStyle='rgba(0,0,0,.35)'; x.beginPath(); x.arc(q.x+2,q.y+4,q.r+3,0,7); x.fill(); });
     /* lueur néon des rails et des rampes, qui bave sur le plateau */
     x.lineCap='round'; x.shadowBlur=16; x.shadowColor=TH.a; x.strokeStyle=TH.a; x.globalAlpha=.55; x.lineWidth=2.5; S3.segs.forEach(s=>{ if(s.door||s.mill||s.dr||s.k) return; x.beginPath(); x.moveTo(s.x1,s.y1); x.lineTo(s.x2,s.y2); x.stroke(); });
-    S3.ramps.forEach(r=>{ x.shadowColor=r.col; x.strokeStyle=r.col; x.globalAlpha=.35; x.lineWidth=14; x.beginPath(); r.p.forEach((q,k)=>{ k?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }); x.stroke(); }); x.shadowBlur=0; x.globalAlpha=1;
+    if(!PLAN) S3.ramps.forEach(r=>{ x.shadowColor=r.col; x.strokeStyle=r.col; x.globalAlpha=.35; x.lineWidth=14; x.beginPath(); r.p.forEach((q,k)=>{ k?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]); }); x.stroke(); }); x.shadowBlur=0; x.globalAlpha=1;
     x.restore();
     /* ombres portées des rails et des rampes, puis le fond du tiroir (la bille tombe dans le trou noir en bas) */
     x.save(); polyIn(x); x.clip(); x.lineCap='round';
     S3.segs.forEach(s=>{ if(s.door||s.mill) return; x.strokeStyle='rgba(0,0,0,.30)'; x.lineWidth=9; x.beginPath(); x.moveTo(s.x1+5,s.y1+9); x.lineTo(s.x2+5,s.y2+9); x.stroke(); x.strokeStyle='rgba(0,0,0,.35)'; x.lineWidth=5; x.beginPath(); x.moveTo(s.x1+3,s.y1+5); x.lineTo(s.x2+3,s.y2+5); x.stroke(); });
-    S3.ramps.forEach(r=>{ x.strokeStyle='rgba(0,0,0,.34)'; x.lineWidth=22; x.beginPath(); r.p.forEach((q,k)=>{ k?x.lineTo(q[0]+9,q[1]+16):x.moveTo(q[0]+9,q[1]+16); }); x.stroke(); });
+    if(!PLAN) S3.ramps.forEach(r=>{ x.strokeStyle='rgba(0,0,0,.34)'; x.lineWidth=22; x.beginPath(); r.p.forEach((q,k)=>{ k?x.lineTo(q[0]+9,q[1]+16):x.moveTo(q[0]+9,q[1]+16); }); x.stroke(); });
     x.restore();
     const vg=x.createLinearGradient(0,540,0,600); vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.95)'); x.fillStyle=vg; x.fillRect(98,540,124,62);
     const gl=x.createLinearGradient(0,0,360,600); gl.addColorStop(0,'rgba(255,255,255,.07)'); gl.addColorStop(.25,'rgba(255,255,255,0)'); gl.addColorStop(.7,'rgba(255,255,255,.03)'); gl.addColorStop(1,'rgba(255,255,255,0)'); x.fillStyle=gl; x.fillRect(-30,-30,420,660);
@@ -108,27 +111,25 @@ function pin3dMake(S3,host,topCv){
   const perm=new T3.Group(), tbl=new T3.Group(); sc.add(perm,tbl);
   const dyn={ bump:[], tgt:[], lane:[], well:[], boost:[], portal:[], spin:[], seg:[], ramp:[], mill:[] }; let sauc3=null, hole3=null;
   /* cabinet : sol quadrillé néon, flancs hauts, bac arrière lumineux, tablier avec la porte à pièces */
-  let backMat=null;
+  let backMat=null; const cab=[]; let roof=null, roofTop=null;
   { sc.fog=new T3.Fog(0x05030b,1200,3000);
     perm.add(flat(new T3.PlaneGeometry(3200,3200),std(0xffffff,.25,.7,{map:tileTex,emissive:0xffffff,emissiveMap:tileTex,emissiveIntensity:.55}),-1.2));
-    const box=(w,h,d,x,y,z,mat)=>{ const m=new T3.Mesh(new T3.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); perm.add(m); return m; };
+    const box=(w,h,d,x,y,z,mat)=>{ const m=new T3.Mesh(new T3.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); perm.add(m); cab.push(m); return m; };
     const wallM=std(0x1a1238,.8,.45,{map:brushTex,envMapIntensity:.3}), darkM=std(0x0b0720,.6,.6);
     [-1,1].forEach(s=>{ box(46,40,700,s*209,19,Z(305),wallM); box(2.4,1.6,700,s*186.5,40.4,Z(305),basic(TH.a)); box(1.6,26,700,s*186,24,Z(305),basic(TH.a,{transparent:true,opacity:.18})); });
     backMat=basic(0xffffff,{map:null});
-    box(470,172,24,0,86,Z(-30),[darkM,darkM,darkM,darkM,backMat,darkM]); box(470,1.6,2,0,172.8,Z(-18),basic(TH.b)); box(470,1.6,2,0,.8,Z(-18),basic(TH.a));
-    box(470,26,56,0,13,Z(636),darkM); box(470,1.6,2.2,0,26.8,Z(609),basic(TH.b));
-    const door=texCanvas(512,96,(x,w,h)=>{ x.fillStyle='#0b0720'; x.fillRect(0,0,w,h); x.strokeStyle=TH.a; x.lineWidth=3; x.strokeRect(4,4,w-8,h-8); x.fillStyle='#ffd400'; x.font='900 30px system-ui,sans-serif'; x.textAlign='center'; x.fillText('HIGH & ROUILLÉ',w/2,44); x.fillStyle='#fff'; x.font='700 17px system-ui'; x.fillText('FLIPPER · 3 BILLES',w/2,72); [60,452].forEach(a=>{ x.fillStyle='#000'; x.fillRect(a-14,26,28,44); x.fillStyle=TH.b; x.fillRect(a-3,32,6,32); }); });
-    const dm=flat(new T3.PlaneGeometry(250,47),basic(0xffffff,{map:door}),27.2); dm.position.set(0,27.2,Z(636)); perm.add(dm); }
+    box(382,172,24,0,100,Z(-30),[darkM,darkM,darkM,darkM,backMat,darkM]); box(382,1.6,2,0,186.8,Z(-18),basic(TH.b)); box(382,14,24,0,7,Z(-30),darkM); box(382,1.6,2,0,14.8,Z(-18),basic(TH.a));
+    roof=box(382,100,24,0,236,Z(-30),std(0x120a2a,.5,.6)); roofTop=box(382,1.6,2,0,287,Z(-18),basic(TH.b)); roof.visible=roofTop.visible=false; }
   /* face du bac arrière = l'écran à matrice de points (new73), mis à jour environ 30 fois par seconde */
-  const faceCv=document.createElement('canvas'); faceCv.width=1024; faceCv.height=373; const fg=faceCv.getContext('2d'), bez=document.createElement('canvas'); bez.width=1024; bez.height=373;
-  const paintBez=()=>{ const T=S3.T, b=bez.getContext('2d'), gr=b.createLinearGradient(0,0,0,373); gr.addColorStop(0,'#1a1036'); gr.addColorStop(1,'#07040f'); b.fillStyle=gr; b.fillRect(0,0,1024,373); b.strokeStyle=TH.a; b.lineWidth=6; b.globalAlpha=.9; b.strokeRect(8,8,1008,357); b.globalAlpha=1; b.strokeStyle=TH.b; b.lineWidth=2; b.strokeRect(20,20,984,333);
-    const rg=b.createRadialGradient(512,64,10,512,64,420); rg.addColorStop(0,mixc(T.bg,'#000000',.2).replace('rgb','rgba').replace(')',',.5)')); rg.addColorStop(1,'rgba(0,0,0,0)'); b.fillStyle=rg; b.fillRect(24,24,976,110);
-    b.textAlign='center'; b.shadowColor=T.bg; b.shadowBlur=24; b.fillStyle='#fff'; b.font='900 70px system-ui,sans-serif'; b.fillText(T.ic+' '+T.n,512,92); b.shadowBlur=0; b.fillStyle=TH.b; b.font='700 24px system-ui'; b.fillText('HIGH & ROUILLÉ · PINBALL',512,126);
-    b.fillStyle='#000'; b.fillRect(30,134,964,229); };
+  const faceCv=document.createElement('canvas'); faceCv.width=1024; faceCv.height=463; const fg=faceCv.getContext('2d'), bez=document.createElement('canvas'); bez.width=1024; bez.height=463;
+  const paintBez=()=>{ const T=S3.T, b=bez.getContext('2d'), gr=b.createLinearGradient(0,0,0,463); gr.addColorStop(0,'#1a1036'); gr.addColorStop(1,'#07040f'); b.fillStyle=gr; b.fillRect(0,0,1024,463); b.strokeStyle=TH.a; b.lineWidth=6; b.globalAlpha=.9; b.strokeRect(8,8,1008,447); b.globalAlpha=1; b.strokeStyle=TH.b; b.lineWidth=2; b.strokeRect(20,20,984,423);
+    const rg=b.createRadialGradient(512,80,10,512,80,460); rg.addColorStop(0,mixc(T.bg,'#000000',.2).replace('rgb','rgba').replace(')',',.5)')); rg.addColorStop(1,'rgba(0,0,0,0)'); b.fillStyle=rg; b.fillRect(24,24,976,134);
+    b.textAlign='center'; b.shadowColor=T.bg; b.shadowBlur=24; b.fillStyle='#fff'; b.font='900 74px system-ui,sans-serif'; b.fillText(T.ic+' '+T.n,512,104); b.shadowBlur=0; b.fillStyle=TH.b; b.font='700 26px system-ui'; b.fillText('HIGH & ROUILLÉ · PINBALL',512,142);
+    b.fillStyle='#000'; b.fillRect(30,160,964,232); };
   const dmdTex=new T3.CanvasTexture(faceCv); dmdTex.encoding=T3.sRGBEncoding; dmdTex.anisotropy=4; own.push(dmdTex);
   const dmd=dmdMake(S3); let dmdIntro=false, dmdAcc=0, dmdPrev=0, dmdFirst=true;
   const paintBack=()=>{ paintBez(); backMat.map=dmdTex; backMat.needsUpdate=true; if(!dmdIntro){ dmdIntro=true; dmd.event('TABLE : '+S3.T.n); } };
-  const dmdTick=()=>{ const now=performance.now(), dt=dmdPrev?Math.min(.1,(now-dmdPrev)/1000):0; dmdPrev=now; dmdAcc+=dt; if(!dmdFirst&&dmdAcc<1/30) return; dmdFirst=false; dmd.frame(dmdAcc,S3.hud); dmdAcc=0; fg.drawImage(bez,0,0); fg.drawImage(dmd.canvas,32,138,960,224); dmdTex.needsUpdate=true; };  /* flippers */
+  const dmdTick=()=>{ const now=performance.now(), dt=dmdPrev?Math.min(.1,(now-dmdPrev)/1000):0; dmdPrev=now; dmdAcc+=dt; if(!dmdFirst&&dmdAcc<1/30) return; dmdFirst=false; dmd.frame(dmdAcc,S3.hud); dmdAcc=0; fg.drawImage(bez,0,0); fg.drawImage(dmd.canvas,32,164,960,224); dmdTex.needsUpdate=true; };  /* flippers */
   const flipMeshes=[]; { const L=56; const gG=()=>{ const s=new T3.Shape(), r0=7.2, r1=4.4; s.moveTo(0,-r0); s.lineTo(L,-r1); s.absarc(L,0,r1,-PI/2,PI/2,false); s.lineTo(0,r0); s.absarc(0,0,r0,PI/2,PI*1.5,false);
       const g=new T3.ExtrudeGeometry(s,{depth:6,bevelEnabled:true,bevelThickness:1.6,bevelSize:1.3,bevelSegments:2,curveSegments:12}); g.rotateX(-PI/2); const p=g.attributes.position, cols=new Float32Array(p.count*3), a=new T3.Color(0xff2d2d), b=new T3.Color(0xffd400), c=new T3.Color(0x1fe06a), q=new T3.Color();
       for(let i=0;i<p.count;i++){ const u=Math.max(0,Math.min(1,p.getX(i)/L)); if(u<.5) q.copy(a).lerp(b,u*2); else q.copy(b).lerp(c,(u-.5)*2); cols[i*3]=q.r; cols[i*3+1]=q.g; cols[i*3+2]=q.b; } g.setAttribute('color',new T3.BufferAttribute(cols,3)); return g; };
@@ -194,7 +195,7 @@ function pin3dMake(S3,host,topCv){
     S3.mills.forEach(m=>{ const g=new T3.Group(), rod=new T3.Mesh(new T3.CylinderGeometry(2.6,2.6,m.L*2,12),std(0xff9a1a,.7,.3,{emissive:0x552200,emissiveIntensity:.5})); rod.rotation.z=PI/2; g.add(rod); const hub=new T3.Mesh(new T3.CylinderGeometry(5,5.5,9,16),std(0xeef0ff,1,.2)); hub.position.y=0; g.add(hub); g.position.set(X(m.x),6,Z(m.y)); tbl.add(g); dyn.mill.push({m,g,rod}); });
     S3.segs.forEach(s=>{ if(!(s.k||s.door||s.dr)) return; const dx=s.x2-s.x1, dy=s.y2-s.y1, L=Math.hypot(dx,dy), col=s.k?TH.b:s.door?0xff2d2d:0xff9a1a, h=s.k?8:s.dr?9:11; const mt=std(col,.25,.4,{emissive:new T3.Color(col),emissiveIntensity:.25}); const m=new T3.Mesh(new T3.BoxGeometry(L,h,s.k?5.5:4),mt); m.geometry.translate(0,h/2,0); m.position.set(X((s.x1+s.x2)/2),0,Z((s.y1+s.y2)/2)); m.rotation.y=-Math.atan2(dy,dx); const sh=blob(L*.5,.6); tbl.add(m); dyn.seg.push({s,m,mt,h}); });
     S3.ramps.forEach(buildRamp);
-    paintBack(); fitCam(); }
+    paintBack(); if(PLAN) dyn.ramp.forEach(o=>{ o.g.visible=false; }); fitCam(); }
   /* ---------- image par image ---------- */
   const tmpC=new T3.Color(); let jx=0, jz=0;
   function render(shake){ const t=S3.t, T=S3.T, tb=S3.turbo>0; dmdTick();
@@ -233,7 +234,7 @@ function pin3dMake(S3,host,topCv){
         if(coinHp!==p.hp){ coinHp=p.hp; if(coinRing){ perm.remove(coinRing); coinRing.geometry.dispose(); } coinRing=flat(new T3.RingGeometry(p.r+3.5,p.r+5.5,40,1,-PI/2,Math.max(.01,2*PI*p.hp/p.max)),basic(0xffffff,{transparent:true,opacity:.9,side:T3.DoubleSide,depthWrite:false}),1); perm.add(coinRing); }
         if(coinRing) coinRing.position.set(X(p.x),1,Z(p.y)); } else { coin.visible=false; if(coinRing){ perm.remove(coinRing); coinRing.geometry.dispose(); coinRing=null; coinHp=-1; } } }
     /* caméra : légère secousse quand ça frappe, et un petit balancement quand la bille monte */
-    const sh=shake||0; jx=(Math.random()-.5)*sh*5; jz=(Math.random()-.5)*sh*5; cam.position.x=jx; cam.position.z=CAMZ+Math.cos(PITCH)*camD+jz; cam.position.y=Math.sin(PITCH)*camD+(Math.random()-.5)*sh*3; cam.lookAt(jx*.3,0,CAMZ);
+    const sh=shake||0; jx=(Math.random()-.5)*sh*5; jz=(Math.random()-.5)*sh*5; cam.position.x=jx; cam.position.z=CAMZ+Math.cos(pitch)*camD+jz; cam.position.y=Math.sin(pitch)*camD+(Math.random()-.5)*sh*3; cam.lookAt(jx*.3,0,CAMZ);
     ren.render(sc,cam); }
   /* ---------- taille et projection ---------- */
   let DPR=1, slow=0, nF=0, tPrev=0, CW=360, CH=600; function resize(w,h,dpr){ w=Math.max(8,Math.round(w)); h=Math.max(8,Math.round(h)); CW=w; CH=h; DPR=Math.min(dpr||1,LOWQ?1.1:1.75); ren.setPixelRatio(DPR); ren.setSize(w,h,false); dom.style.width=w+'px'; dom.style.height=h+'px'; ASP=w/h; if(tbl.children.length) fitCam(); }
@@ -241,5 +242,10 @@ function pin3dMake(S3,host,topCv){
   /* point de la table (x,y,hauteur z) → coordonnées 360×600 de la surcouche 2D ; le 3e nombre = pixels par unité de table à cet endroit */
   function proj(x,y,z){ pv.set(X(x),z||0,Z(y)).project(cam); pv2.set(X(x)+10,z||0,Z(y)).project(cam); const a=(pv.x+1)/2*CW, b=(1-pv.y)/2*CH, a2=(pv2.x+1)/2*CW; return [a,b,Math.abs(a2-a)/10]; }
   function dispose(){ try{ disposeTree(perm); disposeTree(tbl); own.forEach(t=>t.dispose()); if(fieldTex) fieldTex.dispose(); ren.dispose(); try{ ren.forceContextLoss(); }catch(_){} dom.remove(); }catch(e){} }
-  return {resize,setTable,render,proj,dispose,get cam(){ return cam; },get ok(){ return true; },get info(){ return ren.info; },get scene(){ return sc; },dmdEvent:m=>dmd.event(m),dmdPts:p=>dmd.pts(p)};
+  return {resize,setTable,render,proj,dispose,get cam(){ return cam; },get ok(){ return true; },get info(){ return ren.info; },get scene(){ return sc; },get plan(){ return PLAN; },
+    setPlan(on){ PLAN=!!on; cab.forEach(m=>{ m.visible=!on; }); dyn.ramp.forEach(o=>{ o.g.visible=!on; }); if(sc.fog) sc.fog.far=on?1e6:3000; setTable(); },
+    drawPlan(c,OW,OH){ const T=S3.T, p=(x,y)=>proj(x,y,0); c.save(); c.lineWidth=1; c.font='700 11px system-ui'; c.textAlign='center';
+      for(let x=0;x<=360;x+=50){ const a=p(x,0), b=p(x,600); c.strokeStyle=x%100===0?'rgba(255,255,255,.55)':'rgba(255,255,255,.28)'; c.beginPath(); c.moveTo(a[0],a[1]); c.lineTo(b[0],b[1]); c.stroke(); c.fillStyle='#fff'; c.fillText(x,a[0],a[1]-4); }
+      for(let y=0;y<=600;y+=50){ const a=p(0,y), b=p(360,y); c.strokeStyle=y%100===0?'rgba(255,255,255,.55)':'rgba(255,255,255,.28)'; c.beginPath(); c.moveTo(a[0],a[1]); c.lineTo(b[0],b[1]); c.stroke(); c.textAlign='left'; c.fillStyle='#fff'; c.fillText(y,a[0]+3,a[1]-3); c.textAlign='center'; }
+      c.restore(); },dmdEvent:m=>dmd.event(m),dmdPts:p=>dmd.pts(p)};
 }
