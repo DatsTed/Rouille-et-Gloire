@@ -6,7 +6,7 @@ src=open(P('orig.html'),encoding='utf-8').read()
 i=src.rfind('<script>'); e=src.find('</script>',i)
 js=open(P('main.js'),encoding='utf-8').read()
 head=src[:i]
-css=''.join(open(P(n),encoding='utf-8').read() for n in ['extra.css','extra3.css','extra4.css','extra5.css','extra6.css','extra7.css','extra8.css'])
+css=''.join(open(P(n),encoding='utf-8').read() for n in ['extra.css','extra3.css','extra4.css','extra5.css','extra6.css','extra7.css','extra8.css','extra9.css'])
 css=re.sub(r'/\*.*?\*/','',css,flags=re.S); css=re.sub(r'\n\s*','',css)
 k=head.find('</style>'); assert k>0
 head=head[:k]+css+head[k:]

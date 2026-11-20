@@ -7,7 +7,7 @@ async def main():
         await pg.goto('file://'+__import__('os').path.abspath('out.html')); await pg.wait_for_timeout(1000)
         await pg.evaluate("""()=>{ S=fresh(); S.intro=true; S.tuto=true; S.tutoDone=true; S.age18=true; S.charte=1; S.cr=900000; S.lvl=20; view='garage'; render(); }""")
         await pg.evaluate("arcOpen('pin'); ACT.arcstart()"); await pg.wait_for_timeout(500)
-        ti=int(sys.argv[1])
+        ti=int(sys.argv[1]) if len(sys.argv)>1 else 0
         res=await pg.evaluate("""(ti)=>{ const P=__pin, out=[]; const T=P.TBL[ti];
           const far=(x,y)=>{ const pts=[]; (T.bumps||[]).forEach(a=>pts.push([a[0],a[1],a[2]||17])); (T.tgt||[]).forEach(a=>pts.push([a[0],a[1],8])); (T.spins||[]).forEach(a=>pts.push([a[0],a[1],15])); (T.boosts||[]).forEach(a=>pts.push([a[0],a[1],15])); (T.portals||[]).forEach(a=>pts.push([a[0],a[1],13])); (T.wells||[]).forEach(a=>pts.push([a[0],a[1],20])); (T.mills||[]).forEach(a=>pts.push([a[0],a[1],38])); pts.push([T.hole[0],T.hole[1],15]); (T.ramps||[]).forEach(r=>pts.push([r.c[0][0],r.c[0][1],14])); return pts.every(q=>Math.hypot(x-q[0],y-q[1])>q[2]+30); };
           for(const x of [60,100,140,200,250,280]) for(const y of [190,240,290,340]){ if(!far(x,y)) continue; T.sauc=[x,y]; P.loadTable(ti); let hold=0,N=18;

@@ -1,6 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
-STUB=open('t_pt2.py').read().split('STUB="""')[1].split('"""')[0]
+STUB=open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'t_pt2.py'),encoding='utf-8').read().split('STUB="""')[1].split('"""')[0]
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':390,'height':780})
@@ -12,7 +12,7 @@ async def main():
           ACT.tab({id:'atelier'}); await w(2500); o.sheetT=sheet&&sheet.t; o.unl=(sheet&&sheet.it||[]).map(x=>x[1]).join('|'); if(sheet) closeSheet(); await w(2200); o.sheet2=sheet&&sheet.t; if(sheet) closeSheet();
           o.sw=[...document.querySelectorAll('#view .topsw button')].map(b=>b.textContent.trim()).join('|');
           o.html=/labo|clandestin|cannabis|karma/i.test(document.getElementById('view').innerText);
-          for(const v of ['garage','epreuves','marche','missions','base','equipe']){ ACT.tab({id:v}); await w(300); o['t_'+v]=/labo|clandestin|cannabis|karma|ranch/i.test(document.body.innerText)?document.body.innerText.match(/.{20}(labo|clandestin|cannabis|karma|ranch).{20}/i)[0].replace(/\\n/g,' '):'-'; }
+          for(const v of ['garage','epreuves','marche','missions','base','equipe']){ ACT.tab({id:v}); await w(300); o['t_'+v]=/\\b(labo|clandestin|cannabis|karma|ranch)\\b/i.test(document.body.innerText)?document.body.innerText.match(/.{0,30}\\b(labo|clandestin|cannabis|karma|ranch)\\b.{0,30}/i)[0].replace(/\\n/g,' '):'-'; }
           return JSON.stringify(o); }""")
         print(r); print([e for e in errs if 'insertBefore' not in e])
         await b.close()

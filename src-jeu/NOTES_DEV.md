@@ -170,7 +170,7 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 
 ## v2.13 : ponts dessinés à la main (new23, new71)
 - TBL[i].spec (tables 1 à 5) : tracés SP1 (Garage, Turbo Tunnel) et SP2 (Néon Drift, Spa Rush ; Casse Auto = SP2[0]) relevés sur les dessins de Ted ; chaque pont = {c:points, hs:hauteur, pts}, premier point = base (embouchure), dernier point = son garage. Tables 6 à 8 : ancien placement automatique.
-- Deux garages possibles : SA=[sauc,sauc2] (sauc2.on), amp.sa = index du garage d'arrivée, all.sa = garage où la bille est retenue. ampH(u,hs) (new71) : hauteur propre à chaque pont. T.sauc2 / S3.saucs / __pin.saucs.
+- Deux garages possibles : SA=[sauc,sauc2] (sauc2.on), ramp.sa = index du garage d'arrivée, ball.sa = garage où la bille est retenue. rampH(u,hs) (new71) : hauteur propre à chaque pont. T.sauc2 / S3.saucs / __pin.saucs.
 - Turbo Tunnel : bumper du haut déplacé en (206,120) pour dégager la base du pont bleu.
 
 ## v2.14 : ponts retournés, billes en plus, clapets, tour + Rolls-Royce, table 9 (new23, new71, new73)
@@ -181,3 +181,12 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - Table 9 ROLLS ROYCE (`TBL[8]`, niveau pinball 18) : `T.tower` = `sauc2` avec `tower:true` ; `towerEnter()` ×3 → `startChasse(true)` : Rolls (`part.rolls`, r 26, vie 7 + rollsN jusqu'à 10, 55 s, capture = pièce Légendaire d'arcade + 20 000). Rendu : `mkRolls()` (boîtes, calandre, roues), `buildTower`, `rollsUpd`, barre de vie en surcouche 2D (draw3).
 - Clapet de lancement supprimé : le segment `door` n'existe plus (`door` n'est qu'un objet factice) ; remplacé par un toit à sens unique `sg(348,190,306,232).ow=1` (collision seulement si `vy>0`) ; mur du couloir démarre à y=236. Test : `tests/t_porte.py`.
 - Tests : `t_v214.py` (nouveautés), `t_porte.py`, `t_pin3d.py` (nouvelles règles de disposition), `t_rampes.py` (9 tables + billes max / mult fixé / Rolls).
+
+## v2.15 : audit complet (new74, new75, new76, extra9.css) — voir docs/AUDIT.md
+- `new74` : thème sombre forcé (`data-theme="dark"`, identité unique) ; `topFit()` après chaque `render()` (montants compacts `fmtC`, classes `#top.tight` / `#top.nowho`) ; `window.rgBack()` pour le bouton retour d'Android (appelé par `MainActivity.onBackPressed`, sinon `moveTaskToBack`) ; `load` enveloppé (copie `KEY_illisible_<date>` d'une sauvegarde JSON invalide) ; XP du flipper = 8·√score (correction faite dans `api.end` enveloppé de `GAMES.pin`, la note de fin est réécrite), `ARCR.pin` remis à l'échelle.
+- `new56` : `polFix()` différé par `setTimeout` (tournait avant `S=load()`).
+- `new75` : cadre commun des jeux sur canevas `arcCv(api,{step,draw,count})` (décompte, `G.tick/G.paint` pilotables par les tests, `G.burst/G.pop`, `G.end`), `arcBg`, `arcHud`, `arcTxt` ; jeux `GAMES.inv/cosmo/tir/fight` (crochets de test `__inv`, `__cosmo`, `__tir`, `__fight`) ; `ARC.defi` (getter `d`) + `arcDaily()` (clé du jour, borne tirée parmi celles débloquées, objectif = 90 % du 3e rival, 25 tickets) via `arcStart`/`arcEnd`/`arcIntro` enveloppés ; `PRIZES` + `neo`, `pep`, `parc` ; POI des 5 bornes décor dans `WBUILD.arcade`.
+- `new76` : `LIGUE` (5 adversaires `k:'l'`, `rw`), `ligSt()` = `S.rue.lg {s,w,hof}`, `ligFight` (via `cbStartDuel`, IA 3), fiche `sheet.t==='lig'` (`ligSheetHTML`), `ACT.ligo/ligfight`, panneau `ligPanel()` dans Arène › Badges.
+- `new71` : `mkRolls()` utilise `buildCar(M.majestic)` (modèle importé) quand il est chargé, repli sur la version en volumes.
+- `extra9.css` : jetons de couleur, titres Bungee en dégradé + filet néon, cartes `.row` verre fumé, boutons qui s'enfoncent, `#nav` en verre dépoli + indicateur, fiche à ressort, toast néon, cartes d'arcade, Ligue.
+- Tests : `run_all.py` (toute la suite), `t_crawl.py` (robot de clics), `t_arcade.py`, `t_ligue.py`, `t_save.py`, `shots_ui.py` (`--dark`), `shots_v215.py` ; `t_pt2.py` recréé.

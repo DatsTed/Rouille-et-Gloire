@@ -8,7 +8,7 @@ async def main():
         await pg.goto('file://'+__import__('os').path.abspath('out.html')); await pg.wait_for_timeout(1000)
         await pg.evaluate("""()=>{ S=fresh(); S.intro=true; S.tuto=true; S.tutoDone=true; S.age18=true; S.charte=1; S.cr=900000; S.lvl=20; view='garage'; render(); }""")
         await pg.evaluate("arcOpen('pin'); ACT.arcstart()"); await pg.wait_for_timeout(500)
-        TI=sys.argv[1]
+        TI=sys.argv[1] if len(sys.argv)>1 else '0'
         res=await pg.evaluate("""()=>{ const P=__pin, out=[]; for(const ti of ["""+TI+"""]){
             P.loadTable(ti); P.setScore(0);
             const st={t:ti,n:P.TBL[ti].n,steps:0,stuck:0,maxStuck:0,drains:0,ramps:{},drops:0,minSp:1e9};

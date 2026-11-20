@@ -16,7 +16,7 @@ function polFix(){ try{
     S.cr+=cr; S.polRefund=(S.polRefund||0)+extra.length; S.polRefundCr=cr; save(); }
   const p=PACKS.find(x=>x.id==='pcar'); if(p&&!/Patrouille/.test(p.d)) p.d+=' La Brenner Patrouille (police) n’existe que dans ce paquet : ultra rare (0,2 %), une seule par garage.';
 }catch(e){ console.error('polFix',e); } }
-polFix();
+setTimeout(polFix,0); /* v2.15 : après S=load() (avant, S était encore indéfini) */
 setTimeout(()=>{ try{ if(S.veloRefund){ toast('🚲 Le vélo a quitté le jeu : '+S.veloRefund*600+' cr remboursés'); delete S.veloRefund; save(); }
   if(S.polRefund){ toast('🚓 Une seule patrouille par garage : '+fmt(S.polRefundCr||0)+' cr pour les doublons'); delete S.polRefund; delete S.polRefundCr; save(); } }catch(e){} },4000);
 

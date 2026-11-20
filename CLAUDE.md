@@ -1,6 +1,6 @@
 # High & Rouillé (dépôt DatsTed/Rouille-et-Gloire)
 
-Jeu mobile RPG/TCG de voitures, en **un seul fichier HTML** (Three.js r128 depuis cdnjs, ~13 Mo, limite 16 Mo). Emballé en appli Android (APK) et en PWA via GitHub Actions. Version actuelle : **v1.7** (mode Combat, Rue Néon, Région Néon).
+Jeu mobile RPG/TCG de voitures, en **un seul fichier HTML** (Three.js r128 depuis cdnjs, ~13 Mo, limite 16 Mo). Emballé en appli Android (APK) et en PWA via GitHub Actions. Version actuelle : **v2.15** (audit complet : identité « Néon Rouillé », salle d'arcade à 10 bornes, Ligue Néon ; voir `docs/AUDIT.md`).
 
 ## Règles de travail de Ted
 - **Réponds toujours en français.**
@@ -14,7 +14,8 @@ Jeu mobile RPG/TCG de voitures, en **un seul fichier HTML** (Three.js r128 depui
 - `.github/workflows/build.yml` : à chaque push sur `main`, copie `game/index.html` dans l'APK, compile l'APK signé et publie le site sur GitHub Pages (plus de `projet.zip`). Le workflow ne lance pas la chaîne `src-jeu/` : il faut commiter le `game/index.html` produit par `mkgame.py`.
 - `src-jeu/` : **les sources du jeu**. `main.js` et `out.html` sont générés (ignorés par git).
 - `docs/NOTES_DEV.md` : ancienne copie des notes ; la version à jour est `src-jeu/NOTES_DEV.md`.
-- Manque : `src-jeu/tests/t_pt2.py` (lu par `t_v11`, `t_v12`, `t_minor` pour son `STUB`), absent du paquet de reprise.
+- `src-jeu/tests/t_pt2.py` (recréé en v2.15) : `STUB` injecté par `t_v11`, `t_v12`, `t_minor` (sauvegarde vide, pas de WebGL).
+- Couches v2.15 : `new74` (corrections transverses, bouton retour Android `rgBack`), `new75` (bornes d'arcade + Défi du jour), `new76` (Ligue Néon), `extra9.css` (identité visuelle). Toute la suite : `python -X utf8 tests/run_all.py` ; robot de clics : `tests/t_crawl.py`.
 
 ## Chaîne de build du jeu (depuis `src-jeu/`)
 1. `python3 patch5.py` : lit `main_v011.js`, applique les remplacements et concatène `new6.js … new49.js` → `main.js`. (Les remplacements `rep()` échouent par `assert` si le texte cherché apparaît 0 ou 2 fois : écrire les littéraux avec précision.)

@@ -1,6 +1,6 @@
 import asyncio,json
 from playwright.async_api import async_playwright
-STUB=open('t_pt2.py').read().split('STUB="""')[1].split('"""')[0]
+STUB=open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'t_pt2.py'),encoding='utf-8').read().split('STUB="""')[1].split('"""')[0]
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':390,'height':780})
@@ -40,6 +40,6 @@ async def main():
         o=json.loads(r)
         for k,v in o.items(): print(k,':',v)
         print([e for e in errs if 'insertBefore' not in e])
-        await pg.screenshot(path='/tmp/s_v12a.png')
+        await pg.screenshot(path=__import__('os').environ.get('TEMP','.')+'/s_v12a.png')
         await b.close()
 asyncio.run(main())

@@ -147,7 +147,13 @@ function pin3dMake(S3,host,topCv){
   /* pièce de la chasse */
   /* Rolls-Royce stylisée (calandre chromée, double filet or, lampes) : exposée sur la tour, puis en liberté pendant la chasse. Avant du modèle = +x */
   let rollsBody=null;
-  function mkRolls(){ const g=new T3.Group(), body=std(0xeee6cf,.75,.22,{envMapIntensity:1.2}), glass=std(0x2a3556,.5,.15), gold=std(0xe3b94d,1,.2,{emissive:0x4a3200,emissiveIntensity:.3}), chrome=std(0xdfe6ff,1,.12), tyre=std(0x0a0a10,.2,.8);
+  function mkRolls(){
+    /* v2.15 : le vrai modèle 3D de la Rolls-Royce Phantom du jeu (Albion Majestic) quand il est chargé ; sinon la version en volumes ci-dessous */
+    try{ if(typeof buildCar==='function'&&typeof M!=='undefined'&&M.majestic&&M.majestic.glb&&typeof MODELS!=='undefined'&&MODELS[M.majestic.glb]){
+        const q=buildCar(M.majestic,'#E3B94D',{peinture:{r:4,t:'pe3'}}), inner=q.g||q, g=new T3.Group(); const bb=new T3.Box3().setFromObject(inner), sz=new T3.Vector3(); bb.getSize(sz);
+        if(sz.z>sz.x) inner.rotation.y=PI/2; inner.scale.multiplyScalar(54/(Math.max(sz.x,sz.z)||1)); inner.updateMatrixWorld(true); const b2=new T3.Box3().setFromObject(inner); inner.position.y-=b2.min.y;
+        g.add(inner); g.userData.glb=1; return g; } }catch(e){ console.warn('Rolls 3D',e); }
+    const g=new T3.Group(), body=std(0xeee6cf,.75,.22,{envMapIntensity:1.2}), glass=std(0x2a3556,.5,.15), gold=std(0xe3b94d,1,.2,{emissive:0x4a3200,emissiveIntensity:.3}), chrome=std(0xdfe6ff,1,.12), tyre=std(0x0a0a10,.2,.8);
     if(!rollsBody) rollsBody=body;
     const bx=(w,h,d,x,y,z,m)=>{ const o=new T3.Mesh(new T3.BoxGeometry(w,h,d),m); o.position.set(x,y,z); g.add(o); return o; };
     bx(46,6,18,0,6.2,0,body); bx(17,5,17,-8,11.7,0,body); bx(15,4.4,15.4,-8,16,0,glass); bx(16,2.2,17.4,-8,18.6,0,body); bx(13,3.2,16.4,14,9.6,0,body);

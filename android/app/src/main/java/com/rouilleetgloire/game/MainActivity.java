@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -167,6 +168,21 @@ public class MainActivity extends Activity {
                     | View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
+    }
+
+    /** Bouton retour : le jeu ferme d'abord la fenêtre ouverte (window.rgBack, v2.15) ; s'il n'y a rien à fermer, l'appli passe en arrière-plan sans être tuée. */
+    @Override
+    public void onBackPressed() {
+        if (web == null) {
+            super.onBackPressed();
+            return;
+        }
+        web.evaluateJavascript("(window.rgBack&&window.rgBack())?1:0", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String v) {
+                if (!"1".equals(v)) moveTaskToBack(true);
+            }
+        });
     }
 
     @Override

@@ -1,6 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
-STUB=open('t_pt2.py').read().split('STUB="""')[1].split('"""')[0]
+STUB=open(__import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)),'t_pt2.py'),encoding='utf-8').read().split('STUB="""')[1].split('"""')[0]
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':390,'height':780})
