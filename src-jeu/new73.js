@@ -23,7 +23,7 @@ function dmdMake(S3){
     if(/SKILL/.test(m)){ k='skill'; dur=2.1; } else if(/MULTIBILLE/.test(m)){ k='multi'; dur=2.3; } else if(/JACKPOT/.test(m)){ k='jack'; dur=2.3; } else if(/TURBO !!/.test(m)){ k='turbo'; dur=2; }
     else if(/BALL SAVE/.test(m)){ k='save'; dur=1.9; } else if(/TILT/.test(m)){ k='tilt'; dur=2; } else if(/COMBO/.test(m)){ k='combo'; dur=1.5; } else if(/S.ENFUIT/.test(m)){ k='lost'; dur=1.7; }
     else if(/CHASSE/.test(m)){ k='chasse'; dur=1.9; } else if(/CAPTUR|AMÉLIORÉE/.test(m)){ k='capture'; dur=2.5; } else if(/TABLE :/.test(m)){ k='table'; dur=2.3; } else if(/RADAR/.test(m)){ k='radar'; dur=1.4; }
-    else if(/BANQUE/.test(m)){ k='bank'; dur=1.8; } else if(/MULTI ×/.test(m)){ k='mult'; dur=1.7; } else if(/DÉPASSÉ/.test(m)){ k='rank'; dur=1.9; } else if(/^BILLE \d/.test(m)){ k='ball'; dur=1.5; }
+    else if(/CLAPET/.test(m)){ k='mult'; dur=1.9; } else if(/BANQUE/.test(m)){ k='bank'; dur=1.8; } else if(/MULTI ×/.test(m)){ k='mult'; dur=1.7; } else if(/DÉPASSÉ/.test(m)){ k='rank'; dur=1.9; } else if(/^BILLE \d/.test(m)){ k='ball'; dur=1.5; }
     else if(/BONUS/.test(m)){ k='bonus'; dur=1.7; } else if(/Turbo terminé/i.test(m)){ k='text'; dur=1.2; } else if(/ENCHAÎNEMENT|\+\s?[\d  ]+$/.test(m)){ k='ramp'; dur=1.6; }
     const l=st.q[st.q.length-1]; if(l&&l.txt===m&&l.t<.3) return; st.q.push({k,txt:m,t:0,dur}); if(st.q.length>4) st.q.splice(0,st.q.length-4); }
   const evDraw={
@@ -41,7 +41,7 @@ function dmdMake(S3){
     table(e,p,t){ const nm=e.txt.replace(/^.*TABLE :\s*/,''), x=60+(1-ease(p/.3))*130-(p>.8?ease((p-.8)/.2)*130:0); txt('TABLE',x,0,6,CYAN); txt(nm,x,6,fit(nm,10,108),AMB); },
     radar(e,p,t){ txt(e.txt.replace(/\s+/,' '),60,1,11,CYAN); },
     bank(e,p,t){ txt('BANQUE ABATTUE',60,0,fit('BANQUE ABATTUE',9,112),AMB); g.save(); g.beginPath(); g.rect(-20+((p*2)%1)*160,0,20,GH); g.clip(); txt('+1 500',60,8,7,WHT); g.restore(); txt('+1 500',60,8,7,DIM); },
-    mult(e,p,t){ const z=1+.07*Math.sin(t*8); g.save(); g.translate(60,7.5); g.scale(z,z); txt(e.txt.replace(/\s*!/,''),0,-6,13,AMB); g.restore(); },
+    mult(e,p,t){ const z=1+.07*Math.sin(t*8); g.save(); g.translate(60,7.5); g.scale(z,z); const s0=e.txt.replace(/\s*!/,''); txt(s0,0,-6,fit(s0,13,112),AMB); g.restore(); },
     rank(e,p,t){ const y=13-((t*12)%14); g.fillStyle=GRN; g.beginPath(); g.moveTo(12,y); g.lineTo(8,y+5); g.lineTo(16,y+5); g.closePath(); g.fill(); marq(e.txt.replace(/\s*!$/,''),24,92,3,9,GRN,t); },
     ball(e,p,t){ const z=.5+.5*ease(p/.25); g.save(); g.translate(60,7.5); g.scale(z,z); txt(e.txt,0,-6.5,13,WHT); g.restore(); },
     bonus(e,p,t){ txt(e.txt,60,2,fit(e.txt,11,112),AMB); },
@@ -77,6 +77,8 @@ function dmdMake(S3){
         else if(H.save>0){ txt('BALL SAVE',60,0,6,CYAN); rect(42,8,36*Math.min(1,H.save/12),5,CYAN); }
         else if(st.pts&&st.pts.t<1.3){ st.pts.t+=dt; txt(st.pts.s,60,3,9,WHT,'center',Math.max(0,1-st.pts.t/1.3)); }
         else if(H.waiting){ marq('MAINTIENS À DROITE POUR LANCER',cx,cw,3,7,WHT,t); }
+        else if(H.tw>0){ txt('TOUR',60,0,6,AMB); for(let i=0;i<3;i++) rect(46+i*10,8,8,5,i<H.tw?AMB:DIM,i<H.tw?1:.45); }
+        else if(H.br>0){ txt('PONT',60,0,6,GRN); for(let i=0;i<3;i++) rect(46+i*10,8,8,5,i<H.br?GRN:DIM,i<H.br?1:.45); }
         else drew=false;
         if(!drew){ st.rot+=dt; const k=Math.floor(st.rot/3.6)%3, s=k===0?(H.rankUp?'DEVANT : '+H.rankUp:'TU ES 1ER !'):k===1?H.tab:'RAMPES · BUMPERS · CHASSE'; marq(s,cx,cw,3,7,k===0?GRN:AMB,t); }
       }

@@ -1,4 +1,4 @@
-# v2.8 : flipper en 3D (new71) — 8 tables, bille sur rampe, chasse, projection, nettoyage du contexte WebGL, repli 2D.
+﻿# v2.8 : flipper en 3D (new71) — 8 tables, bille sur rampe, chasse, projection, nettoyage du contexte WebGL, repli 2D.
 # Nécessite Three.js (cdnjs autorisé) ; sans réseau le test vérifie seulement le repli 2D.
 # Usage (depuis src-jeu/) : python -X utf8 tests/t_pin3d.py [fichier.html]
 import asyncio, os, sys
@@ -29,13 +29,13 @@ JS3 = r"""async ()=>{ const E=[], wait=ms=>new Promise(r=>setTimeout(r,ms)), P=_
   /* v2.10 : disposition des tables */
   { const sl=[[50,392,98,462],[268,392,222,462]], ds=(x,y,a,b,c,d)=>{ const dx=c-a, dy=d-b, l2=dx*dx+dy*dy||1, tt=Math.max(0,Math.min(1,((x-a)*dx+(y-b)*dy)/l2)); return Math.hypot(x-(a+dx*tt),y-(b+dy*tt)); };
     for(let i=0;i<P.TBL.length;i++){ P.loadTable(i); const nm=P.TBL[i].n, sa=P.sauc, ho=P.hole;
-      P.ramps.forEach(r=>{ const q=r.p[r.p.length-1], sg=P.saucs[r.sa||0]; if(Math.hypot(q[0]-sg.x,q[1]-sg.y)>3) E.push(nm+' : la rampe '+r.nm+' ne finit pas dans le garage'); if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my>320||(!P.TBL[i].spec&&sa.y<r.my+80)) E.push(nm+' : base trop basse ou sortie pas assez basse'); });
+      P.ramps.forEach(r=>{ if(r.to!=='tower'){ if(Math.hypot(r.ex-sa.x,r.ey-sa.y)<45) E.push(nm+' : garage collé à la sortie du pont '+r.nm); if(Math.hypot(r.ex-ho.x,r.ey-ho.y)<45) E.push(nm+' : trou collé à la sortie du pont '+r.nm); } if(r.mr<20) E.push(nm+' : embouchure trop étroite '+r.mr); if(r.my<230||r.my>360||r.ey>r.my-20) E.push(nm+' : '+r.nm+' : entrée trop haute/basse ou sortie pas plus haute que l’entrée ('+Math.round(r.my)+' → '+Math.round(r.ey)+')'); if(Math.hypot(r.mx-sa.x,r.my-sa.y)<45) E.push(nm+' : garage collé à l’entrée du pont '+r.nm); });
       { const pts=[]; P.saucs.forEach(s=>{ if(s.on) pts.push(['garage',s.x,s.y]); }); P.ramps.forEach(r=>pts.push(['base '+r.nm,r.mx,r.my]));
         pts.forEach(([k,x,y])=>{ P.bumps.forEach(bu=>{ const d=Math.hypot(bu.x-x,bu.y-y)-(bu.r||14); if(d<14) E.push(nm+' : '+k+' collé à un bumper ('+Math.round(d)+')'); }); (P.mills||[]).forEach(m=>{ const d=Math.hypot(m.x-x,m.y-y)-(m.r||30); if(d<8) E.push(nm+' : '+k+' dans un moulin ('+Math.round(d)+')'); }); (P.tgt||[]).forEach(g=>{ const d=Math.hypot((g.x||0)-x,(g.y||0)-y); if(d<18) E.push(nm+' : '+k+' sur une cible ('+Math.round(d)+')'); }); }); }
       P.posts.filter(p=>!p.q).forEach(p=>{ const d=Math.min(...sl.map(s=>ds(p.x,p.y,s[0],s[1],s[2],s[3]))); if(d<32) E.push(nm+' : clou à '+Math.round(d)+' px d’une barre rebondissante'); });
       if(Math.hypot(ho.x-180,ho.y-300)<80) E.push(nm+' : le trou de table est au milieu'); if(Math.hypot(ho.x-sa.x,ho.y-sa.y)<50) E.push(nm+' : trou et garage collés'); }
     const b=P.balls[0]; P.loadTable(0); }
-  { P.loadTable(0); const r=P.ramps[0], b=P.balls[0]; b.st='play'; b.x=r.mx; b.y=r.my+14; b.vx=r.ux*400; b.vy=r.uy*400; b.la=false; b.trail=[]; let hold=false; for(let k=0;k<60*8&&!hold;k++){ P.sim(1/60); if(P.balls[0].st==='hold') hold=true; } if(!hold) E.push('la bille lancée dans l’embouchure ne finit pas dans le garage'); P.balls.forEach(q=>{ if(q.st==='hold'){ q.st='play'; q.x=180; q.y=100; q.vx=q.vy=0; } }); }
+  { P.loadTable(0); const r=P.ramps[0], b=P.balls[0]; b.st='play'; b.x=r.mx; b.y=r.my+14; b.vx=r.ux*400; b.vy=r.uy*400; b.la=false; b.trail=[]; let hold=false; for(let k=0;k<60*8&&!hold;k++){ P.sim(1/60); if(P.ramps[0].n>0) hold=true; } if(!P.ramps[0].n) E.push('la bille lancée dans l’embouchure ne fait pas le pont'); P.balls.forEach(q=>{ if(q.st==='hold'){ q.st='play'; q.x=180; q.y=100; q.vx=q.vy=0; } }); }
   P.loadTable(0); P.launch(); for(let k=0;k<120;k++) P.sim(1/60); await wait(120);
   /* bille sur une rampe, en warp, en saucer */
   { const b=P.balls[0]; b.st='ramp'; b.rp=0; b.rs=P.ramps[0].len*.5; b.rsp=0; b.trail=[[100,200],[104,195]]; await wait(150); b.st='warp'; b.wt=.5; await wait(120); b.st='play'; b.x=180; b.y=330; b.vx=b.vy=0; }
