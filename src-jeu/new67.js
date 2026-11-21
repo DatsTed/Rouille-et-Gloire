@@ -1,4 +1,4 @@
-/* ===== v2.4 : palier MYTHIQUE (au-dessus d'Hypercar) pour les deux voitures aux modèles 3D réels : Rolls-Royce Phantom et VW Tiguan ===== */
+/* ===== v2.4 : palier MYTHIQUE (au-dessus d'Hypercar) pour les deux voitures aux modèles 3D réels : Rolls-Royce Phantom et Marova Steppe (modèle original depuis v2.16) ===== */
 TIERS[7]={n:'Mythique',c:'#FF2BD6'};
 CPW[7]=.4;   /* chance de tirage : ≈ 0,2 % par voiture (la patrouille est à 0,2 %) */
 { const MYTH={

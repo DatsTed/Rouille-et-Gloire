@@ -1,6 +1,6 @@
 # High & Rouillé (dépôt DatsTed/Rouille-et-Gloire)
 
-Jeu mobile RPG/TCG de voitures, en **un seul fichier HTML** (Three.js r128 depuis cdnjs, ~13 Mo, limite 16 Mo). Emballé en appli Android (APK) et en PWA via GitHub Actions. Version actuelle : **v2.15** (audit complet : identité « Néon Rouillé », salle d'arcade à 10 bornes, Ligue Néon ; voir `docs/AUDIT.md`).
+Jeu mobile RPG/TCG de voitures, en **un seul fichier HTML** (Three.js r128 depuis cdnjs, ~13 Mo, limite 16 Mo). Emballé en appli Android (APK) et en PWA via GitHub Actions. Version actuelle : **v2.16** (v2.15 = audit complet : identité « Néon Rouillé », salle d'arcade à 10 bornes, Ligue Néon, voir `docs/AUDIT.md` ; v2.16 = Marova Steppe en modèle 3D original généré par `src-jeu/tools_mkmarova.py`).
 
 ## Règles de travail de Ted
 - **Réponds toujours en français.**

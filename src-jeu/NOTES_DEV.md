@@ -190,3 +190,9 @@ Tout le combat est cloisonné : données dans `S.cmb[uid]`, `S.cbBag`, `S.cbTeam
 - `new71` : `mkRolls()` utilise `buildCar(M.majestic)` (modèle importé) quand il est chargé, repli sur la version en volumes.
 - `extra9.css` : jetons de couleur, titres Bungee en dégradé + filet néon, cartes `.row` verre fumé, boutons qui s'enfoncent, `#nav` en verre dépoli + indicateur, fiche à ressort, toast néon, cartes d'arcade, Ligue.
 - Tests : `run_all.py` (toute la suite), `t_crawl.py` (robot de clics), `t_arcade.py`, `t_ligue.py`, `t_save.py`, `shots_ui.py` (`--dark`), `shots_v215.py` ; `t_pt2.py` recréé.
+
+## v2.16 : Marova Steppe en modèle 3D original
+- `tools_mkmarova.py` génère `model_marova.json/.bin` (format v2 du jeu) sans aucun fichier externe : caisse par lissage de 9 points de demi-section le long de x (`sec(x)`, courbes `YTOP/BELT/HW/ROOF/WT/YB0`), passages de roue creusés dans le bas de section (`arch`), matière choisie par bande et par zone (`zone(j,x)` : vitres, montants noirs, bas de caisse noir), ombrage lissé dans la longueur et arêtes nettes entre bandes ; détails en boîtes (calandre, phares, barre LED, feu intégral `lightR`, diffuseur, échappements, becquet, barres de toit, rétros, filets néon émissifs) ; roues par révolution (pneu à crampons alternés, 5 doubles branches gunmetal, lèvre chromée, liseré néon).
+- Pour modifier : changer les courbes ou les détails dans le script, puis `python tools_mkmarova.py` et `python tools_embed.py marova`, puis la chaîne de build.
+- `models_new.html` : `mdl-tiguan`/`bin-tiguan` retirés (licence CC BY-NC-SA) ; `new65` branche `steppe` → `marova` ; crédit mis à jour.
+- Test : `tests/t_marova.py` (chargement, 4 roues, `buildCar` avec peintures, jantes, châssis, suspension, nitro, feux stop ; captures `%TEMP%/marova_*.png`).
