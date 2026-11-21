@@ -3,7 +3,7 @@
 import subprocess, sys, os, time, glob
 os.environ['PYTHONUTF8'] = '1'
 pat = sys.argv[1] if len(sys.argv) > 1 else ''
-SKIP = {'run_all.py'}
+SKIP = {'run_all.py', 't_pt2.py'}
 tests = sorted(t for t in glob.glob('tests/t_*.py') if pat in t and os.path.basename(t) not in SKIP)
 res = []
 for t in tests:

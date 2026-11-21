@@ -18,7 +18,7 @@ html{background:var(--bg)}
 body{background:
   radial-gradient(120% 50% at 50% -8%,rgba(0,229,255,.13),transparent 60%),
   radial-gradient(110% 45% at 50% 108%,rgba(255,43,214,.12),transparent 60%),
-  linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 28px,linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/28px 100%,var(--bg)!important;background-attachment:fixed!important}
+  linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 28px,linear-gradient(90deg,var(--grid) 1px,transparent 1px) 0 0/28px 100%,var(--bg)!important}
 ::selection{background:rgba(255,43,214,.45)}
 *{scrollbar-width:thin;scrollbar-color:#2a2f66 transparent}
 
@@ -51,11 +51,11 @@ button.row:active,.row[data-a]:active{transform:scale(.985);box-shadow:0 0 0 1px
 #goal .gb{border-radius:10px!important;box-shadow:0 0 14px rgba(255,212,0,.35)}
 
 /* ---------- barre du haut ---------- */
-#top{background:linear-gradient(180deg,rgba(18,20,56,.96),rgba(10,11,34,.92))!important;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+#top{background:linear-gradient(180deg,rgba(18,20,56,.96),rgba(10,11,34,.92))!important;}
 #top .lv{background:linear-gradient(135deg,#ffe75a,#ffb800)!important;box-shadow:0 0 16px rgba(255,212,0,.45)!important}
 #top .money{color:var(--yel)!important;text-shadow:0 0 12px rgba(255,212,0,.35)!important}
 #top .money small{text-shadow:none}
-#top .xp{display:block!important;height:3px;grid-column:1/-1;margin:7px -14px 0;background:rgba(255,255,255,.06)}
+#top .xp{display:block!important;height:3px;grid-column:1/-1;margin:7px 0 0!important;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
 #top .xp i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--mag));box-shadow:0 0 8px rgba(0,229,255,.6);transition:width .5s}
 #top.nowho .who{display:none!important}
 #top.tight{gap:4px 6px!important}
@@ -63,7 +63,7 @@ button.row:active,.row[data-a]:active{transform:scale(.985);box-shadow:0 0 0 1px
 #top.tight .money small{margin-left:5px!important;font-size:11.5px!important}
 
 /* ---------- barre d'onglets ---------- */
-#nav{background:linear-gradient(180deg,rgba(12,14,40,.86),rgba(6,7,26,.96))!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(0,229,255,.18)!important}
+#nav{background:linear-gradient(180deg,rgba(12,14,40,.86),rgba(6,7,26,.96))!important;border-top:1px solid rgba(0,229,255,.18)!important}
 #nav button{transition:color .2s,transform .15s}
 #nav button b{display:block;transition:transform .2s var(--ease,ease),filter .2s}
 #nav button[aria-current="page"]{color:var(--accent)!important;text-shadow:0 0 10px rgba(0,229,255,.55)}
@@ -76,7 +76,7 @@ button.row:active,.row[data-a]:active{transform:scale(.985);box-shadow:0 0 0 1px
 #sheet::before{content:"";position:sticky;display:block;top:-14px;margin:-14px -14px 10px;height:3px;background:var(--nr-edge);border-radius:22px 22px 0 0;z-index:3}
 body.open #sheet{animation:nrSheet .34s cubic-bezier(.2,.95,.25,1.08)}
 @keyframes nrSheet{from{transform:translateY(42px);opacity:.4}to{transform:none;opacity:1}}
-#veil{background:rgba(3,3,12,.62)!important;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#veil{background:rgba(3,3,12,.62)!important;}
 
 /* ---------- toasts ---------- */
 #toast{background:linear-gradient(100deg,#141a44,#1c1240)!important;color:#fff!important;border:1px solid rgba(0,229,255,.5);border-radius:999px;box-shadow:0 0 22px rgba(0,229,255,.28),0 8px 24px rgba(0,0,0,.5);padding:10px 18px!important;transform:translate(-50%,8px);transition:opacity .25s,transform .3s cubic-bezier(.2,.95,.25,1.2)!important}
@@ -121,6 +121,9 @@ body.open #sheet{animation:nrSheet .34s cubic-bezier(.2,.95,.25,1.08)}
 
 /* ---------- corrections de débordement relevées par l'audit (t_crawl) ---------- */
 .tu-btns .btn{white-space:normal;padding-left:10px;padding-right:10px}
+/* titre long (ex. « Spa : La Source et Eau Rouge ») : il passe à la ligne au lieu d'écraser le bouton Retour et d'être coupé */
+#view .head h2{min-width:0;flex:1 1 auto;overflow-wrap:anywhere}
+#view .head>.btn,#view .head>.hq,#view .head>button{flex:none}
 .labtools .btn,.lab .btn{white-space:normal}
 
 @media (prefers-reduced-motion:reduce){#view.enter,body.open #sheet,#arcov .arc-card,#arcov .arc-big,.lig-c.next{animation:none!important}}

@@ -42,6 +42,6 @@ window.rgBack=function(){ try{
     const api2=Object.assign({},api,{end:(score,note)=>{ try{ const lin=Math.floor(Math.max(0,score)/25), soft=Math.floor(8*Math.sqrt(Math.max(0,score)));
         if(soft<lin){ /* refait la montée de niveau avec le gain adouci */ const caps=Math.max(0,(P.xp-xp0)+[...Array(Math.max(0,P.lv-lv0))].reduce((a,_,i)=>a+pbNeed(lv0+i),0)-lin);
           let xp=xp0+soft+caps, lv=lv0; while(lv<PB_MAXLV&&xp>=pbNeed(lv)){ xp-=pbNeed(lv); lv++; } P.lv=lv; P.xp=xp;
-          if(typeof note==='string') note=note.replace(/<b>\+[\d   ]+ XP<\/b> · niveau \d+[^<]*/,`<b>+${fmt(soft+caps)} XP</b> · niveau ${P.lv}${P.lv>=PB_MAXLV?' (max)':` · ${fmt(P.xp)}/${fmt(pbNeed(P.lv))}`}`).replace(/<span class="pbup">⬆ NIVEAU \d+ !<\/span>/,P.lv>lv0?`<span class="pbup">⬆ NIVEAU ${P.lv} !</span>`:'');
+          if(typeof note==='string') note=note.replace(/<b>\+[\d\s  ]+ XP<\/b> · niveau \d+[^<]*/,`<b>+${fmt(soft+caps)} XP</b> · niveau ${P.lv}${P.lv>=PB_MAXLV?' (max)':` · ${fmt(P.xp)}/${fmt(pbNeed(P.lv))}`}`).replace(/<span class="pbup">⬆ NIVEAU \d+ !<\/span>/,P.lv>lv0?`<span class="pbup">⬆ NIVEAU ${P.lv} !</span>`:'');
           try{ save(); }catch(_){} } }catch(_){} return end0(score,note); }});
     return _pin74.call(this,api2); }; }

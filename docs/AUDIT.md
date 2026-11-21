@@ -53,6 +53,9 @@ Légende des états : ✅ OK · 🔧 corrigé · ✨ terminé / ajouté · ⚠�
 | 12 | Basse | Flipper | Rolls-Royce de la table 9 en volumes | vrai modèle 3D de la Phantom (Albion Majestic), peinture champagne | 🔧 |
 | 13 | Basse | Tests | `t_pt2.py` absent (t_v11/t_v12/t_minor), faux positif « ranch » dans « franchis », `t_pinbot`/`t_scan` sans argument par défaut | recréé / corrigé | 🔧 |
 | 14 | Basse | Notes | caractères abîmés dans `NOTES_DEV.md` (v2.13) | corrigés | 🔧 |
+| 15 | Moyenne | Épreuves | titre long (« Spa : La Source et Eau Rouge ») coupé et bouton « Retour » écrasé à 26 px | le titre passe à la ligne, le bouton garde sa largeur | 🔧 |
+| 16 | Basse | Tests | `t_monde` plantait quand la voiture sortait de la route sous charge CPU (instable, 1 fois sur 3) | le test tolère une sortie de route ; vérifié sur 4 passages | 🔧 |
+| 17 | Basse | Flipper | (trouvé pendant l'audit de ma propre correction) la note de fin affichait l'ancien gain d'XP à cause de l'espace fine des nombres | expression corrigée, `tests/t_pinxp.py` | 🔧 |
 
 ## 4. Ajouts (inachevé terminé)
 - **Salle d'arcade** : 👾 Néon Invaders (niv. 8), 🚀 Cosmo Nitro (niv. 9), 🎯 Tir aux Jantes (niv. 11), 🥊 Choc des Pare-chocs (niv. 12), 🎱 Défi du jour (niv. 3, une borne + un score par jour, 25 tickets bonus). Cadre commun : décompte, fond néon, record / rang / plafond de tickets sur la carte d'intro. Comptoir : jetons Néo, pièce Épique, pièce d'arcade Légendaire.
